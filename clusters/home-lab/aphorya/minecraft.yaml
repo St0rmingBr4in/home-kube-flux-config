@@ -1,0 +1,17 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: minecraft
+  namespace: flux-system
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      sourceRef:
+        kind: HelmRepository
+        name: itzg
+      version: 3.4.2
+  interval: 1h0m0s
+  releaseName: minecraft
+  targetNamespace: preprod-aphorya
