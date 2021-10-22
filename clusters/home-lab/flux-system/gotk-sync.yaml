@@ -10,9 +10,9 @@ spec:
     branch: master
   secretRef:
     name: flux-system
-  url: ssh://git@github.com/st0rmingbr4in/home-kube-flux-config
+  url: ssh://git@github.com/St0rmingBr4in/home-kube-flux-config
 ---
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
   name: flux-system
@@ -24,4 +24,3 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  validation: client
