@@ -1,3 +1,26 @@
 ---
 minecraftServer:
   eula: true
+  version: "1.17.1"
+  motd: "Aphorya"
+  pvp: true
+  memory: 5G
+  ops: "juldoc"
+  whitelist: "juldoc"
+  externalTrafficPolicy: Cluster
+readinessProbe:
+  initialDelaySeconds: 120
+  failureThreshold: 100
+livenessProbe:
+  initialDelaySeconds: 120
+  failureThreshold: 100
+resources:
+  limits:
+    cpu: "7"
+    memory: 5Gi
+  requests:
+    cpu: "1"
+    memory: 4600Mi
+persistence:
+  dataDir:
+    enabled: true
