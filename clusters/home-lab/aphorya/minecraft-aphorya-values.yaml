@@ -8,6 +8,11 @@ minecraftServer:
   ops: "juldoc"
   whitelist: "juldoc"
   externalTrafficPolicy: Cluster
+  serviceType: LoadBalancer
+  serviceAnnotations:
+    metallb.universe.tf/allow-shared-ip: prod
+  loadBalancerIP: 192.168.1.250
+  servicePort: 25555
 readinessProbe:
   initialDelaySeconds: 120
   failureThreshold: 100
