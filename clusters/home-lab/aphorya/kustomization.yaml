@@ -8,5 +8,6 @@ configMapGenerator:
   - name: minecraft-aphorya-values
     files:
       - values.yaml=minecraft-aphorya-values.yaml
+    namespace: prod-aphorya
 configurations:
   - kustomizeconfig.yaml
