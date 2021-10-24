@@ -5,8 +5,9 @@ minecraftServer:
   motd: "Aphorya"
   pvp: true
   memory: 5G
-  ops: "juldoc"
-  whitelist: "juldoc"
+  ops: "juldoc,RaKk0o"
+  whitelist: "juldoc,RaKk0o"
+  type: "SPIGOT"
   externalTrafficPolicy: Cluster
   serviceType: LoadBalancer
   serviceAnnotations:
@@ -24,7 +25,7 @@ resources:
     cpu: "7"
     memory: 6Gi
   requests:
-    cpu: "1"
+    cpu: "500m"
     memory: 5500Mi
 persistence:
   dataDir:
