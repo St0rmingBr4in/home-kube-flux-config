@@ -22,10 +22,10 @@ livenessProbe:
 resources:
   limits:
     cpu: "7"
-    memory: 5Gi
+    memory: 6Gi
   requests:
     cpu: "1"
-    memory: 4600Mi
+    memory: 5500Mi
 persistence:
   dataDir:
     enabled: true
