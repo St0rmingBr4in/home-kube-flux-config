@@ -5,7 +5,7 @@ configuration:
   backupStorageLocation:
     bucket: kube-backup
     config:
-      s3Url: ENC[AES256_GCM,data:aTTitr+zR4QUdr7ztZRoGBnjEzw5Kz6luO0w,iv:k1IqHUMVx1o1bzuq/GCOYwG2qrw16OLd7LtE+jyiPco=,tag:adGOZY0x8yiNMTZi3mh+ig==,type:str]
+      s3Url: https://minio.ilovecara.ml/
       region: minio
       s3ForcePathStyle: true
   volumeSnapshotLocation:
@@ -24,34 +24,3 @@ initContainers:
 deployRestic: true
 snapshotsEnabled: true
 schedules: {}
-sops:
-  kms: []
-  gcp_kms: []
-  azure_kv: []
-  hc_vault: []
-  age: []
-  lastmodified: '2021-11-05T14:33:33Z'
-  mac: ENC[AES256_GCM,data:IhRzai0z7vMNyRvXUSu4gBYfMs37JkAMct2bPK7p+NgW/WVeGIddrjEC4vA7Ivt2suXjaf0KGNNisSBKEt3kpDBpglwBuIYKQPYDaBDnu66lkf+L16oUVdZu9I8PI1f/ln2ksbJ5YO6hr2yS2N+VBhq1sDAq4JB2OZgziG2/eu8=,iv:BP2ZqIaLl3liebm4A6dnpz7+3W3baRaE9z6LTvjbKr8=,tag:WrpBJO9VfdS3gg4SVOWgLQ==,type:str]
-  pgp:
-  - created_at: '2021-11-05T14:33:32Z'
-    enc: |
-      -----BEGIN PGP MESSAGE-----
-
-      hQIMA6U2wmTOeuydAQ//d+sSfPNHuvWf/ltH3g1oHU1PNCr9n13QcBxaES4dI6po
-      3Nv/Oe+1zhG4FYF17HPPmtfpL5rgBs7vhK5BXDqa1tkPwepGfvTaUEEq8ERyJXY1
-      B1Bqh3qnCBEQq2c2j3lszzB+x41C/+lAg6/VmWsXZfyoaTdFgXlmDArbUOWPiBrl
-      aoaaCZNDogjSiei7Sf1pyaXwiJKLB2nNE1rkDq6O5R4wzA2uvhdys1+XQwzVm7Ww
-      f2u0ejCBmiaN/+n81f1hxcGr9McvRn3Yd8uInLLrYNvD/iI51QW6SzrsQzNc0m1J
-      aFPqPb3XS559JVli6pIqWZjiD6nLgzQUj2/CogkPm6oewxXc8PoceBq6clFYY9Bf
-      7rkMiPsaNSmutdWBYDdyK4Vd39gRdU2rFZNcVY+0c8O+B6EJvf8E6KJrGaU/Ni60
-      inzmpQbX0f+By+KbSlLVO8FQWGe2AwxVFy2ZMmXpvbaypoA/Ck3ochaxLa6yq+3z
-      Zh+JC7WdQHl5XS4qNd15WBXCYgmzBxulqtC5qcEY1wiIiVYo7tKgG27xoQ5FyF/k
-      Ofxv8TCqtoyhXFsOORApu/pNbtMWXM4pCHYQg8wz3xdsntH5Hg+Q6LLgtx/YKZOm
-      xg7QyJacSsiim63LUSPRETIrZk0Q01vCkCD9Z0c7JHqOAi3WpEJvOeIZVuxPmB7S
-      XgFsPidDctcUl75hXRM7YxvPfB7JBT0PnPH5ldvbH1Pidhb+7l2KheSzzkKw4M7+
-      4ZgRC9NyHa4liR9kHrjxWEW/rLpSWX+5qaT40EfIAKPFWso20yRJpLrfiQ2reMs=
-      =kJMM
-      -----END PGP MESSAGE-----
-    fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-  encrypted_regex: s3Url
-  version: 3.7.1
