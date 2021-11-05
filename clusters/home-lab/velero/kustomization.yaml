@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - velero.yaml
+  - velero-secret.yaml
+configMapGenerator:
+  - name: velero-values
+    files:
+      - values.yaml=velero-values.yaml
+    namespace: velero
+configurations:
+  - kustomizeconfig.yaml
