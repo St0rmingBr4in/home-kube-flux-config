@@ -6,3 +6,4 @@ resources:
 - aphorya
 - helmrepos
 - infra
+- velero
