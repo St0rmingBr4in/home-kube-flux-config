@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
 - mojo2600.yaml
 - itzg.yaml
+- vmware-tanzu.yaml
