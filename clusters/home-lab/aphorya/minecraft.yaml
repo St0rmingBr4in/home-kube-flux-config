@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: itzg
         namespace: flux-system
-      version: 3.4.2
+      version: 3.6.2
   interval: 1h0m0s
   releaseName: minecraft
   targetNamespace: prod-aphorya
