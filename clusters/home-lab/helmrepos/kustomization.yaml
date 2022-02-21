@@ -2,6 +2,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- mojo2600.yaml
 - itzg.yaml
+- mojo2600.yaml
+- mongoose.yaml
 - vmware-tanzu.yaml
