@@ -4,10 +4,15 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - minecraft.yaml
+  - xmpp-server.yaml
 configMapGenerator:
   - name: minecraft-aphorya-values
     files:
       - values.yaml=minecraft-aphorya-values.yaml
+    namespace: prod-aphorya
+  - name: xmpp-server-values
+    files:
+      - values.yaml=xmpp-server-values.yaml
     namespace: prod-aphorya
 configurations:
   - kustomizeconfig.yaml
