@@ -4,11 +4,16 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - minecraft.yaml
+  - openldap-stack-ha.yaml
   - xmpp-server.yaml
 configMapGenerator:
   - name: minecraft-aphorya-values
     files:
       - values.yaml=minecraft-aphorya-values.yaml
+    namespace: prod-aphorya
+  - name: openldap-stack-ha-values
+    files:
+      - values.yaml=openldap-stack-ha-values.yaml
     namespace: prod-aphorya
   - name: xmpp-server-values
     files:
