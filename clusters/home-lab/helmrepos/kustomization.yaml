@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - helm-openldap.yaml
 - itzg.yaml
+- kube-vip.yaml
 - mojo2600.yaml
 - mongoose.yaml
 - vmware-tanzu.yaml

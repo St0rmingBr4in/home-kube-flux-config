@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - pihole.yaml
+- kube-vip.yaml
