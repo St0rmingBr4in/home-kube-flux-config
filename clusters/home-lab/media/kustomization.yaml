@@ -1,0 +1,13 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - flaresolverr.yaml
+configMapGenerator:
+  - name: flaresolverr-values
+    files:
+      - values.yaml=flaresolverr-values.yaml
+    namespace: prod-media
+configurations:
+  - kustomizeconfig.yaml

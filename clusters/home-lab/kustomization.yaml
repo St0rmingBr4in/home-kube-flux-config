@@ -6,4 +6,5 @@ resources:
 - aphorya
 - helmrepos
 - infra
+- media
 - velero
