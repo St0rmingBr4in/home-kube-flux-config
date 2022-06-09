@@ -11,3 +11,5 @@ configMapGenerator:
     files:
       - values.yaml=netdata-values.yaml
     namespace: prod-aphorya
+configurations:
+  - kustomizeconfig.yaml
