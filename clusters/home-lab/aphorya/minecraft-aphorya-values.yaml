@@ -1,7 +1,7 @@
 ---
 minecraftServer:
   eula: true
-  version: "1.17.1"
+  version: "1.19"
   motd: "Aphorya"
   pvp: true
   memory: 5G
