@@ -18,4 +18,4 @@ spec:
   targetNamespace: prod-infra
   valuesFrom:
     - kind: ConfigMap
-        name: netdata-values
+      name: netdata-values
