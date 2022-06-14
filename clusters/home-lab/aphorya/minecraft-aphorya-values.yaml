@@ -4,7 +4,7 @@ minecraftServer:
   version: "1.19"
   motd: "Aphorya"
   pvp: true
-  memory: 7.5G
+  memory: 8G
   ops: "juldoc,RaKk0o"
   whitelist: "juldoc,RaKk0o"
   type: "SPIGOT"
@@ -23,10 +23,14 @@ livenessProbe:
 resources:
   limits:
     cpu: "7"
-    memory: 9Gi
+    memory: 9G
   requests:
     cpu: "100m"
     memory: 9G
+tolerations:
+  - key: ram
+    operator: Exists
+    effect: NoSchedule
 persistence:
   dataDir:
     enabled: true
