@@ -23,6 +23,23 @@ configMapGenerator:
 - files:
   - values.yaml=xmpp-server-values.yaml
   name: xmpp-server-values
+- files:
+  - minecraft-config/plugins/MyCommand/blockdatabase.yml
+  - minecraft-config/plugins/MyCommand/config.yml
+  - minecraft-config/plugins/MyCommand/hologram_database.yml
+  - minecraft-config/plugins/MyCommand/itemset.yml
+  - minecraft-config/plugins/MyCommand/language.yml
+  - minecraft-config/plugins/MyCommand/npcsdatabase.yml
+  - minecraft-config/plugins/MyCommand/othersdb.yml
+  - minecraft-config/plugins/MyCommand/playerdata.yml
+  - minecraft-config/plugins/MyCommand/playerevents.yml
+  - minecraft-config/plugins/MyCommand/scheduler.yml
+  - minecraft-config/plugins/MyCommand/signsdatabase.yml
+  - minecraft-config/plugins/MyCommand/tabsuggestionblocker.yml
+  name: minecraft-aphorya-mycommand
+- files:
+  - minecraft-config/plugins/MyCommand/commands/examples.yml
+  name: minecraft-aphorya-mycommand-commands
 configurations:
 - kustomizeconfig.yaml
 namespace: prod-aphorya
