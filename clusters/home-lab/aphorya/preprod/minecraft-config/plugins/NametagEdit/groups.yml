@@ -1,0 +1,31 @@
+Groups:
+  Admin:
+    Permission: nte.admin
+    Prefix: '&c[Administrateur] &f'
+    Suffix: ''
+    SortPriority: 2
+  Moderator:
+    Permission: nte.moderator
+    Prefix: '&1[Moderateur] &f'
+    Suffix: ''
+    SortPriority: 3
+  builder:
+    Permission: nte.builder
+    Prefix: '&b[Builder] &f'
+    Suffix: ''
+    SortPriority: 4
+  beta-testeur:
+    Permission: nte.beta_testeur
+    Prefix: '&d[Beta-testeur] &f'
+    Suffix: ''
+    SortPriority: 5
+  vip:
+    Permission: nte.vip
+    Prefix: '&6[VIP] &f'
+    Suffix: ''
+    SortPriority: 6
+  membre:
+    Permission: nte.membre
+    Prefix: '&a[Membre] &f'
+    Suffix: ''
+    SortPriority: 7
