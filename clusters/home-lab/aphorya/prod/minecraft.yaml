@@ -24,7 +24,13 @@ spec:
           - name: nametagedit
             mountPath: /data/plugins/NametagEdit/
             readOnly: true
+          - name: worldedit
+            mountPath: /etc/minecraft-config/plugins/WorldEdit/
+            readOnly: true
         volumes:
+          - name: worldedit
+            configMap:
+              name: minecraft-aphorya-worldedit
           - name: nametagedit
             configMap:
               name: minecraft-aphorya-nametagedit
