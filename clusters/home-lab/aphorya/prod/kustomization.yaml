@@ -15,6 +15,9 @@ configMapGenerator:
   - minecraft-config/plugins/NametagEdit/players.yml
   name: minecraft-aphorya-nametagedit
 - files:
+  - minecraft-config/plugins/WorldEdit/config.yml
+  name: minecraft-aphorya-worldedit
+- files:
   - values.yaml=openldap-stack-ha-values.yaml
   name: openldap-stack-ha-values
 - files:
