@@ -36,28 +36,26 @@ persistence:
     enabled: true
 extraVolumes:
   - volumeMounts:
-      - name: NametagEdit_config.yml
+      - name: NametagEdit
         mountPath: /data/plugins/NametagEdit/config.yml
+        subPath: config.yml
         readOnly: true
-      - name: NametagEdit_groups.yml
+      - name: NametagEdit
         mountPath: /data/plugins/NametagEdit/groups.yml
+        subPath: groups.yml
         readOnly: true
-      - name: NametagEdit_players.yml
-        mountPath: /data/plugins/NametagEdit/groups.yml
+      - name: NametagEdit
+        mountPath: /data/plugins/NametagEdit/players.yml
+        subPath: players.yml
         readOnly: true
     volumes:
-      - name: NametagEdit_config.yml
+      - name: NametagEdit
         configMap:
           items:
-          - key: config.yml
-          name: minecraft-aphorya-nametagedit
-      - name: NametagEdit_groups.yml
-        configMap:
-          items:
-          - key: groups.yml
-          name: minecraft-aphorya-nametagedit
-      - name: NametagEdit_players.yml
-        configMap:
-          items:
-          - key: players.yml
+            - key: config.yml
+              path: config.yml
+            - key: groups.yml
+              path: groups.yml
+            - key: players.yml
+              path: players.yml
           name: minecraft-aphorya-nametagedit
