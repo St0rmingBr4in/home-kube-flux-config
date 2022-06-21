@@ -36,20 +36,20 @@ persistence:
     enabled: true
 extraVolumes:
   - volumeMounts:
-      - name: NametagEdit
+      - name: nametagedit
         mountPath: /data/plugins/NametagEdit/config.yml
         subPath: config.yml
         readOnly: true
-      - name: NametagEdit
+      - name: nametagedit
         mountPath: /data/plugins/NametagEdit/groups.yml
         subPath: groups.yml
         readOnly: true
-      - name: NametagEdit
+      - name: nametagedit
         mountPath: /data/plugins/NametagEdit/players.yml
         subPath: players.yml
         readOnly: true
     volumes:
-      - name: NametagEdit
+      - name: nametagedit
         configMap:
           items:
             - key: config.yml
