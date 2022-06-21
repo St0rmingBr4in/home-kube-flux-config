@@ -50,14 +50,14 @@ extraVolumes:
         configMap:
           items:
           - key: config.yml
-          name: minecraft-aphorya-NametagEdit
+          name: minecraft-aphorya-nametagedit
       - name: NametagEdit_groups.yml
         configMap:
           items:
           - key: groups.yml
-          name: minecraft-aphorya-NametagEdit
+          name: minecraft-aphorya-nametagedit
       - name: NametagEdit_players.yml
         configMap:
           items:
           - key: players.yml
-          name: minecraft-aphorya-NametagEdit
+          name: minecraft-aphorya-nametagedit

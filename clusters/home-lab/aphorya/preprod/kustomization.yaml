@@ -11,7 +11,7 @@ configMapGenerator:
   - minecraft-config/plugins/NametagEdit/config.yml
   - minecraft-config/plugins/NametagEdit/groups.yml
   - minecraft-config/plugins/NametagEdit/players.yml
-  name: minecraft-aphorya-NametagEdit
+  name: minecraft-aphorya-nametagedit
 configurations:
 - kustomizeconfig.yaml
 namespace: preprod-aphorya
