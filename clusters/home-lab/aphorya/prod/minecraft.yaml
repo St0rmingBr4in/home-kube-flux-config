@@ -27,10 +27,22 @@ spec:
           - name: worldedit
             mountPath: /etc/minecraft-config/plugins/WorldEdit/
             readOnly: true
+          - name: mycommand
+            mountPath: /etc/minecraft-config/plugins/MyCommand/
+            readOnly: true
+          - name: mycommand-commands
+            mountPath: /etc/minecraft-config/plugins/MyCommand/commands/
+            readOnly: true
         volumes:
           - name: worldedit
             configMap:
               name: minecraft-aphorya-worldedit
+          - name: mycommand-commands
+            configMap:
+              name: minecraft-aphorya-mycommand-commands
+          - name: mycommand
+            configMap:
+              name: minecraft-aphorya-mycommand
           - name: nametagedit
             configMap:
               name: minecraft-aphorya-nametagedit
