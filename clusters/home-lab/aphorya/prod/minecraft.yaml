@@ -22,25 +22,9 @@ spec:
     extraVolumes:
       - volumeMounts:
           - name: nametagedit
-            mountPath: /data/plugins/NametagEdit/config.yml
-            subPath: config.yml
-            readOnly: true
-          - name: nametagedit
-            mountPath: /data/plugins/NametagEdit/groups.yml
-            subPath: groups.yml
-            readOnly: true
-          - name: nametagedit
-            mountPath: /data/plugins/NametagEdit/players.yml
-            subPath: players.yml
+            mountPath: /data/plugins/NametagEdit/
             readOnly: true
         volumes:
           - name: nametagedit
             configMap:
-              items:
-                - key: config.yml
-                  path: config.yml
-                - key: groups.yml
-                  path: groups.yml
-                - key: players.yml
-                  path: players.yml
               name: minecraft-aphorya-nametagedit
