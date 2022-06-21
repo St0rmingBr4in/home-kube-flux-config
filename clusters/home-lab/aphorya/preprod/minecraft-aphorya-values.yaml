@@ -1,0 +1,63 @@
+---
+minecraftServer:
+  eula: true
+  version: "1.19"
+  motd: "Aphorya - preprod"
+  pvp: true
+  memory: 1G
+  ops: "juldoc,RaKk0o"
+  whitelist: "juldoc,RaKk0o"
+  type: "SPIGOT"
+  externalTrafficPolicy: Cluster
+  serviceType: LoadBalancer
+  loadBalancerIP: 192.168.1.251
+  servicePort: 25565
+serviceAnnotations:
+  metallb.universe.tf/allow-shared-ip: preprod
+readinessProbe:
+  initialDelaySeconds: 120
+  failureThreshold: 100
+livenessProbe:
+  initialDelaySeconds: 120
+  failureThreshold: 100
+resources:
+  limits:
+    cpu: "2"
+    memory: 4G
+  requests:
+    cpu: "100m"
+    memory: 4G
+tolerations:
+  - key: ram
+    operator: Exists
+    effect: NoSchedule
+persistence:
+  dataDir:
+    enabled: true
+extraVolumes:
+  - volumeMounts:
+      - name: NametagEdit_config.yml
+        mountPath: /data/plugins/NametagEdit/config.yml
+        readOnly: true
+      - name: NametagEdit_groups.yml
+        mountPath: /data/plugins/NametagEdit/groups.yml
+        readOnly: true
+      - name: NametagEdit_players.yml
+        mountPath: /data/plugins/NametagEdit/groups.yml
+        readOnly: true
+    volumes:
+      - name: NametagEdit_config.yml
+        configMap:
+          items:
+          - key: config.yml
+          name: minecraft-aphorya-NametagEdit
+      - name: NametagEdit_groups.yml
+        configMap:
+          items:
+          - key: groups.yml
+          name: minecraft-aphorya-NametagEdit
+      - name: NametagEdit_players.yml
+        configMap:
+          items:
+          - key: players.yml
+          name: minecraft-aphorya-NametagEdit

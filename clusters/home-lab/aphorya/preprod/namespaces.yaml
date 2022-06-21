@@ -3,8 +3,3 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: preprod-aphorya
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: prod-aphorya

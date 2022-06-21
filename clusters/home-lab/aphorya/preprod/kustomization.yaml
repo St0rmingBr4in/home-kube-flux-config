@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- namespaces.yaml
+- minecraft.yaml
+configMapGenerator:
+- files:
+  - values.yaml=minecraft-aphorya-values.yaml
+  name: minecraft-aphorya-values
+- files:
+  - minecraft-config/plugins/NametagEdit/config.yml
+  - minecraft-config/plugins/NametagEdit/groups.yml
+  - minecraft-config/plugins/NametagEdit/players.yml
+  name: minecraft-aphorya-NametagEdit
+configurations:
+- kustomizeconfig.yaml
+namespace: preprod-aphorya
