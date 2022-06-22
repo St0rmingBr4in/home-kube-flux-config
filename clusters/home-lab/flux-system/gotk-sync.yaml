@@ -10,7 +10,7 @@ spec:
     branch: master
   secretRef:
     name: flux-system
-  url: ssh://git@github.com/St0rmingBr4in/home-kube-flux-config
+  url: https://github.com/St0rmingBr4in/home-kube-flux-config
   recurseSubmodules: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
