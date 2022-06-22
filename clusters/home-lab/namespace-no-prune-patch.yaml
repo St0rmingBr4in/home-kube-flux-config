@@ -1,0 +1,5 @@
+kind: Namespace
+metadata:
+  name: namespace
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled

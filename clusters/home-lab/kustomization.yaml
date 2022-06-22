@@ -10,3 +10,10 @@ resources:
 - velero
 - system-upgrade
 - longhorn
+patches:
+- path: namespace-no-prune-patch.yaml
+  target:
+    kind: Namespace
+- path: pvc-no-prune-patch.yaml
+  target:
+    kind: PersistentVolumeClaim
