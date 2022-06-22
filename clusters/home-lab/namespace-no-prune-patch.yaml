@@ -1,5 +1,5 @@
 kind: Namespace
 metadata:
   name: namespace
-  annotations:
+  labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
