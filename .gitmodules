@@ -1,3 +1,6 @@
 [submodule "clusters/home-lab/infra/system-upgrade-controller"]
 	path = clusters/home-lab/system-upgrade/system-upgrade-controller
 	url = https://github.com/rancher/system-upgrade-controller.git
+[submodule "clusters/home-lab/flux-system/flux2"]
+	path = clusters/home-lab/flux-system/flux2
+	url = https://github.com/fluxcd/flux2.git
