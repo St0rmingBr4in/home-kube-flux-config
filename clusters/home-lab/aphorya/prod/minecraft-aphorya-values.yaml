@@ -22,10 +22,10 @@ livenessProbe:
   failureThreshold: 100
 resources:
   limits:
-    cpu: "7"
+    cpu: "12"
     memory: 9G
   requests:
-    cpu: "100m"
+    cpu: "4"
     memory: 9G
 tolerations:
   - key: ram
