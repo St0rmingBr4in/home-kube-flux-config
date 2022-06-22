@@ -8,8 +8,6 @@ spec:
   interval: 1m0s
   ref:
     branch: master
-  secretRef:
-    name: flux-system
   url: https://github.com/St0rmingBr4in/home-kube-flux-config
   recurseSubmodules: true
 ---
