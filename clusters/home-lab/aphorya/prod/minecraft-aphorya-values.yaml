@@ -34,4 +34,4 @@ tolerations:
 persistence:
   dataDir:
     enabled: true
-    Size: 10Gi
+    existingClaim: minecraft-aphorya-datadir
