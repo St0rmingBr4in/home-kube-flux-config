@@ -8,3 +8,4 @@ resources:
 - infra
 - media
 - velero
+- system-upgrade

@@ -13,3 +13,4 @@ configMapGenerator:
     namespace: prod-aphorya
 configurations:
   - kustomizeconfig.yaml
+namespace: prod-infra
