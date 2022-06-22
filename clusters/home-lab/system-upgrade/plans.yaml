@@ -22,10 +22,13 @@ apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
   name: agent-plan
-  namespace: system-upgrade
 spec:
   concurrency: 1
   cordon: true
+  tolerations:
+    - key: ram
+      operator: Exists
+      effect: NoSchedule
   nodeSelector:
     matchExpressions:
     - key: node-role.kubernetes.io/master
