@@ -9,3 +9,4 @@ resources:
 - media
 - velero
 - system-upgrade
+- longhorn
