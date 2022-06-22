@@ -1,0 +1,3 @@
+[submodule "clusters/home-lab/infra/system-upgrade-controller"]
+	path = clusters/home-lab/system-upgrade/system-upgrade-controller
+	url = https://github.com/rancher/system-upgrade-controller.git
