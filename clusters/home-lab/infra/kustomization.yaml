@@ -6,6 +6,7 @@ resources:
   - kube-vip.yaml
   - netdata.yaml
   - pihole.yaml
+  - amd-gpu-device-plugin.yaml
 configMapGenerator:
   - name: netdata-values
     files:

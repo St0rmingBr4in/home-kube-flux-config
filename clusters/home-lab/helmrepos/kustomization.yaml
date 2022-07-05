@@ -10,3 +10,4 @@ resources:
   - mongoose.yaml
   - netdata.yaml
   - vmware-tanzu.yaml
+  - amd-gpu-helm.yaml
