@@ -1,0 +1,7 @@
+---
+labeller:
+  enabled: true
+tolerations:
+  - effect: NoSchedule
+    key: ram
+    operator: Exists
