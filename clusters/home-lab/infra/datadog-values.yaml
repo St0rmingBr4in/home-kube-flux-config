@@ -7,8 +7,30 @@ datadog:
   processAgent:
     enabled: true
     processCollection: true
+    processDiscovery: true
+  systemProbe:
+    bpfDebug: true
+    enableTCPQueueLength: true
+    enableOOMKill: true
+    enableRuntimeCompiler: true
+    enableKernelHeaderDownload: true
+  helmCheck:
+    enabled: true
+    collectEvents: true
   networkMonitoring:
     enabled: true
+  serviceMonitoring:
+    enabled: true
+  securityAgent:
+    enabled: true
+    runtime:
+      enabled: true
+      fimEnabled: true
+    network:
+      enabled: true
+  prometheusScrape:
+    enabled: true
+    serviceEndpoints: true
   leaderElection: true
   collectEvents: true
   criSocketPath: /run/k3s/containerd/containerd.sock
