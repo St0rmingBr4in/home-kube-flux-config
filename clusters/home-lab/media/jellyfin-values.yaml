@@ -8,6 +8,21 @@ ingress:
       - host: jellyfin.ilovecara.ml
         paths:
           - path: /
+resources:
+  limits:
+    cpu: 7
+    memory: 500Mi
+    amd.com/gpu: "1"
+  requests:
+    cpu: 500m
+    memory: 500Mi
+    amd.com/gpu: "1"
+
+podSecurityContext:
+  supplementalGroups:
+    - 107  # render
+    - 44  # video
+
 persistence:
   config:
     enabled: true
