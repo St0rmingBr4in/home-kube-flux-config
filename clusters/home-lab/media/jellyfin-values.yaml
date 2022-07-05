@@ -1,0 +1,15 @@
+---
+image:
+  tag: latest
+ingress:
+  main:
+    enabled: true
+    hosts:
+      - host: jellyfin.ilovecara.ml
+persistence:
+  config:
+    enabled: true
+    existingClaim: jellyfin-config
+  media:
+    enabled: true
+    existingClaim: media-library
