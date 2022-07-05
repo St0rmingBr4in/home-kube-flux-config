@@ -1,0 +1,21 @@
+---
+datadog:
+  apiKeyExistingSecret: datadog-api-key
+  logs:
+    enabled: true
+    containerCollectAll: true
+  processAgent:
+    enabled: true
+    processCollection: true
+  networkMonitoring:
+    enabled: true
+  leaderElection: true
+  collectEvents: true
+  criSocketPath: /run/k3s/containerd/containerd.sock
+  apm:
+    enabled: true
+rbac:
+  create: true
+podLabelsAsTags:
+  app: kube_app
+  release: helm_release
