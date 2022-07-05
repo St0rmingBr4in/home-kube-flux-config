@@ -15,3 +15,6 @@ spec:
   interval: 1h0m0s
   releaseName: amd-gpu-device-plugin
   targetNamespace: kube-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: amd-gpu-device-plugin-values
