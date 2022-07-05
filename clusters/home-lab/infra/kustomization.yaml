@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - kube-vip.yaml
-  - netdata.yaml
   - pihole.yaml
   - datadog.yaml
   - datadog-secret.yaml
@@ -13,9 +12,6 @@ configMapGenerator:
   - name: datadog-values
     files:
       - values.yaml=datadog-values.yaml
-  - name: netdata-values
-    files:
-      - values.yaml=netdata-values.yaml
   - name: amd-gpu-device-plugin-values
     files:
       - values.yaml=amd-gpu-device-plugin-values.yaml

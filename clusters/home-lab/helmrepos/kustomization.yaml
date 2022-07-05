@@ -8,7 +8,6 @@ resources:
   - kube-vip.yaml
   - mojo2600.yaml
   - mongoose.yaml
-  - netdata.yaml
   - datadog.yaml
   - vmware-tanzu.yaml
   - amd-gpu-helm.yaml
