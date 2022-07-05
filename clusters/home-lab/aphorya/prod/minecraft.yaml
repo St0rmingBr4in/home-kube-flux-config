@@ -33,6 +33,9 @@ spec:
           - name: mycommand-commands
             mountPath: /etc/minecraft-config/plugins/MyCommand/commands/
             readOnly: true
+          - name: prometheusexporter
+            mountPath: /etc/minecraft-config/plugins/PrometheusExporter
+            readOnly: true
         volumes:
           - name: worldedit
             configMap:
@@ -46,3 +49,6 @@ spec:
           - name: nametagedit
             configMap:
               name: minecraft-aphorya-nametagedit
+          - name: prometheusexporter
+            configMap:
+              name: minecraft-aphorya-prometheusexporter
