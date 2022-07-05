@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: datadog
         namespace: flux-system
-      version: 3.7.18
+      version: 2.36.1
   interval: 1h0m0s
   releaseName: datadog
   targetNamespace: prod-infra
