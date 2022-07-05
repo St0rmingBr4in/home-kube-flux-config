@@ -16,6 +16,8 @@ minecraftServer:
     - name: metrics
       containerPort: 9940
       protocol: TCP
+      service:
+        enabled: false
 podAnnotations:
   prometheus.io/port: '9940'
 serviceAnnotations:
