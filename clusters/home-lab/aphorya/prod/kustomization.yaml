@@ -16,6 +16,9 @@ configMapGenerator:
   - minecraft-config/plugins/NametagEdit/players.yml
   name: minecraft-aphorya-nametagedit
 - files:
+  - minecraft-config/plugins/PrometheusExporter/config.yml
+  name: minecraft-aphorya-prometheusexporter
+- files:
   - minecraft-config/plugins/WorldEdit/config.yml
   name: minecraft-aphorya-worldedit
 - files:
