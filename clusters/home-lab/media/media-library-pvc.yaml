@@ -6,4 +6,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Ti
   volumeName: nfs-share-media
