@@ -5,3 +5,5 @@ resources:
   - system-upgrade-controller
   - plans.yaml
 namespace: system-upgrade
+patchesStrategicMerge:
+  - set-resources.yaml
