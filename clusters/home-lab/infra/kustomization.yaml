@@ -11,7 +11,9 @@ configMapGenerator:
   - name: netdata-values
     files:
       - values.yaml=netdata-values.yaml
-    namespace: prod-aphorya
+  - name: amd-gpu-device-plugin-values
+    files:
+      - values.yaml=amd-gpu-device-plugin-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-infra
