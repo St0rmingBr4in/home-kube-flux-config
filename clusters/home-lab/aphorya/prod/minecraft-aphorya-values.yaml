@@ -16,6 +16,8 @@ minecraftServer:
     - name: metrics
       containerPort: 9940
       protocol: TCP
+      ingress:
+        enabled: false
       service:
         enabled: false
 podAnnotations:
