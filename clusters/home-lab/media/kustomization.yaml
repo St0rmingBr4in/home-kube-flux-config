@@ -4,10 +4,17 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - flaresolverr.yaml
+  - jellyfin.yaml
+  - media-downloads-pvc.yaml
+  - media-library-pvc.yaml
+  - jellyfin-config-pvc.yaml
 configMapGenerator:
+  - name: jellyfin-values
+    files:
+      - values.yaml=jellyfin-values.yaml
   - name: flaresolverr-values
     files:
       - values.yaml=flaresolverr-values.yaml
-    namespace: prod-media
 configurations:
   - kustomizeconfig.yaml
+namespace: prod-media
