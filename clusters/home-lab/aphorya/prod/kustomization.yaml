@@ -4,8 +4,8 @@ resources:
 - namespaces.yaml
 - minecraft.yaml
 - minecraft-aphorya-datadir-pvc.yaml
-- openldap-stack-ha.yaml
-- xmpp-server.yaml
+# - openldap-stack-ha.yaml
+# - xmpp-server.yaml
 configMapGenerator:
 - files:
   - values.yaml=minecraft-aphorya-values.yaml
