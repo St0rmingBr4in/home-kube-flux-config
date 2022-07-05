@@ -42,3 +42,13 @@ rbac:
 podLabelsAsTags:
   app: kube_app
   release: helm_release
+agents:
+  tolerations:
+    - effect: NoSchedule
+      key: ram
+      operator: Exists
+clusterAgent:
+  tolerations:
+    - effect: NoSchedule
+      key: ram
+      operator: Exists
