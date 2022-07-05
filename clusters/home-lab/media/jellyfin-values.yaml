@@ -6,6 +6,8 @@ ingress:
     enabled: true
     hosts:
       - host: jellyfin.ilovecara.ml
+        paths:
+          - path: /
 persistence:
   config:
     enabled: true
