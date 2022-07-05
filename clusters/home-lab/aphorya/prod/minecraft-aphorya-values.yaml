@@ -12,6 +12,12 @@ minecraftServer:
   serviceType: LoadBalancer
   loadBalancerIP: 192.168.1.250
   servicePort: 25555
+  extraPorts:
+    - name: metrics
+      containerPort: 9940
+      protocol: TCP
+podAnnotations:
+  prometheus.io/port: '9940'
 serviceAnnotations:
   metallb.universe.tf/allow-shared-ip: prod
 readinessProbe:
