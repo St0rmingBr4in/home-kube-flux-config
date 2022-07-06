@@ -11,3 +11,4 @@ resources:
   - datadog.yaml
   - vmware-tanzu.yaml
   - amd-gpu-helm.yaml
+  - prometheus-community.yaml

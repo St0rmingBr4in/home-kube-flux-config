@@ -8,6 +8,7 @@ resources:
   - datadog.yaml
   - datadog-secret.yaml
   - amd-gpu-device-plugin.yaml
+  - kube-prometheus-stack.yaml
 configMapGenerator:
   - name: datadog-values
     files:
@@ -15,6 +16,9 @@ configMapGenerator:
   - name: amd-gpu-device-plugin-values
     files:
       - values.yaml=amd-gpu-device-plugin-values.yaml
+  - name: kube-prometheus-stack-values
+    files:
+      - values.yaml=kube-prometheus-stack-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-infra
