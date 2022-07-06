@@ -10,6 +10,7 @@ resources:
   - jellyfin-config-pvc.yaml
   - qbittorrent.yaml
   - qbittorrent-config-pvc.yaml
+  - basicauth-traefik-secret.yaml
 configMapGenerator:
   - name: jellyfin-values
     files:
