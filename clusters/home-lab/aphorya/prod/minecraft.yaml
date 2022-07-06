@@ -34,7 +34,7 @@ spec:
             mountPath: /etc/minecraft-config/plugins/MyCommand/commands/
             readOnly: true
           - name: prometheusexporter
-            mountPath: /etc/minecraft-config/plugins/PrometheusExporter
+            mountPath: /data/plugins/PrometheusExporter
             readOnly: true
         volumes:
           - name: worldedit
