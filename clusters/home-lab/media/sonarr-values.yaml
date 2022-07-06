@@ -1,0 +1,34 @@
+---
+image:
+  tag: latest
+
+ingress:
+  main:
+    enabled: true
+    hosts:
+      - host: sonarr.ilovecara.ml
+        paths:
+          - path: /
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
+
+securityContext:
+  runAsUser: 1031
+  runAsGroup: 100
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: sonarr-config
+  media:
+    enabled: true
+    existingClaim: media-library
+  downloads:
+    enabled: true
+    existingClaim: media-downloads
