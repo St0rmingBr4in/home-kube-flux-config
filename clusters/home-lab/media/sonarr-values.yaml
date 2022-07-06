@@ -5,6 +5,9 @@ image:
 ingress:
   main:
     enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/auth-type: "basic"
+      traefik.ingress.kubernetes.io/auth-secret: "basicauth"
     hosts:
       - host: sonarr.ilovecara.ml
         paths:
@@ -12,11 +15,11 @@ ingress:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 100Mi
+    cpu: 200m
+    memory: 200Mi
   requests:
-    cpu: 100m
-    memory: 100Mi
+    cpu: 200m
+    memory: 200Mi
 
 securityContext:
   runAsUser: 1031
