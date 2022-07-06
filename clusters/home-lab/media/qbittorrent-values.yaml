@@ -31,5 +31,7 @@ persistence:
 
 env:
   TZ: Europe/Paris
-  PUID: 1031
-  PGID: 100
+
+securityContext:
+  runAsUser: 1031
+  runAsGroup: 100
