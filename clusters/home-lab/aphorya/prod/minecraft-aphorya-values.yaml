@@ -24,6 +24,7 @@ minecraftServer:
         port: 9940
 podAnnotations:
   prometheus.io/port: '9940'
+  prometheus.io/scrape: true
 serviceAnnotations:
   metallb.universe.tf/allow-shared-ip: prod
 readinessProbe:
