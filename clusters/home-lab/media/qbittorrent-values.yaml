@@ -1,0 +1,35 @@
+---
+ingress:
+  main:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/auth-type: "basic"
+      traefik.ingress.kubernetes.io/auth-secret: "basicauth"
+    hosts:
+      - host: qbittorrent.ilovecara.ml
+        paths:
+          - path: /
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 500Mi
+  requests:
+    cpu: 100m
+    memory: 500Mi
+
+metrics:
+  enabled: true
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: qbittorrent-config
+  downloads:
+    enabled: true
+    existingClaim: media-downloads
+
+env:
+  TZ: Europe/Paris
+  PUID: 1031
+  PGID: 100

@@ -8,8 +8,13 @@ resources:
   - media-downloads-pvc.yaml
   - media-library-pvc.yaml
   - jellyfin-config-pvc.yaml
+  - qbittorrent.yaml
+  - qbittorrent-config-pvc.yaml
 configMapGenerator:
   - name: jellyfin-values
+    files:
+      - values.yaml=jellyfin-values.yaml
+  - name: qbittorrent-values
     files:
       - values.yaml=jellyfin-values.yaml
   - name: flaresolverr-values
