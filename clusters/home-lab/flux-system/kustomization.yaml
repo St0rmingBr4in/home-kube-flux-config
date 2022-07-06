@@ -4,4 +4,6 @@ resources:
 - flux2/manifests/install
 - gotk-sync.yaml
 - ../common/
+patchesStrategicMerge:
+- set-resources.yaml
 namespace: flux-system
