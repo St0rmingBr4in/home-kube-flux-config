@@ -19,7 +19,7 @@ resources:
     memory: 500Mi
 
 metrics:
-  enabled: true
+  enabled: false
 
 persistence:
   config:
