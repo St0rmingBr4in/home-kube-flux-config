@@ -16,7 +16,7 @@ configMapGenerator:
       - values.yaml=jellyfin-values.yaml
   - name: qbittorrent-values
     files:
-      - values.yaml=jellyfin-values.yaml
+      - values.yaml=qbittorrent-values.yaml
   - name: flaresolverr-values
     files:
       - values.yaml=flaresolverr-values.yaml
