@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - system-upgrade-controller
   - plans.yaml
+  - ../common/
 namespace: system-upgrade
 patchesStrategicMerge:
   - set-resources.yaml
