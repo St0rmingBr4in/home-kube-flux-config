@@ -5,3 +5,22 @@ resources:
 # - daily-recurring-backup-job.yaml # Need to upgrade longhorn first
   - ../common/
 namespace: longhorn-system
+
+patchesJson6902:
+  - target:
+      version: v1
+      kind: LimitRange
+      name: limit-range
+    patch: |-
+      - op: add
+        path: /spec/limits/1/default/cpu
+        value: 500m
+      - op: add
+        path: /spec/limits/1/default/memory
+        value: 400Mi
+      - op: add
+        path: /spec/limits/1/defaultRequest/cpu
+        value: 50m
+      - op: add
+        path: /spec/limits/1/defaultRequest/memory
+        value: 400Mi
