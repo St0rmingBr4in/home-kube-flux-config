@@ -37,6 +37,8 @@ datadog:
   apm:
     enabled: true
   site: datadoghq.eu
+  kubeStateMetricsCore:
+    collectVpaMetrics: true
 
 rbac:
   create: true
@@ -50,51 +52,51 @@ agents:
     agent:
       resources:
         requests:
-          cpu: 20m
-          memory: 256Mi
+          cpu: 40m
+          memory: 200Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 400m
+          memory: 200Mi
     processAgent:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 100Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 100Mi
     traceAgent:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 70Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 70Mi
     systemProbe:
       resources:
         requests:
           cpu: 10m
-          memory: 220Mi
+          memory: 200Mi
         limits:
           cpu: 100m
-          memory: 220Mi
+          memory: 200Mi
     securityAgent:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 100Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 100Mi
     initContainers:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 150Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 150Mi
   tolerations:
     - effect: NoSchedule
       key: ram
@@ -113,3 +115,12 @@ clusterAgent:
     - effect: NoSchedule
       key: ram
       operator: Exists
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 50Mi

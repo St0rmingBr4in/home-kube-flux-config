@@ -14,7 +14,7 @@ resources:
     memory: 500Mi
     amd.com/gpu: "1"
   requests:
-    cpu: 500m
+    cpu: 700m
     memory: 500Mi
     amd.com/gpu: "1"
 
