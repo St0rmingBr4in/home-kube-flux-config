@@ -75,10 +75,10 @@ agents:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 220Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 220Mi
     securityAgent:
       resources:
         requests:
@@ -104,11 +104,11 @@ clusterAgent:
   enabled: true
   resources:
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 10m
+      memory: 150Mi
     limits:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 100m
+      memory: 150Mi
   tolerations:
     - effect: NoSchedule
       key: ram
