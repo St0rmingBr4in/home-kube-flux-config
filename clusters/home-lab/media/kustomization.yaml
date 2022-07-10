@@ -14,6 +14,8 @@ resources:
   - qbittorrent.yaml
   - sonarr-config-pvc.yaml
   - sonarr.yaml
+  - radarr-config-pvc.yaml
+  - radarr.yaml
 configMapGenerator:
   - name: flaresolverr-values
     files:
@@ -27,6 +29,9 @@ configMapGenerator:
   - name: sonarr-values
     files:
       - values.yaml=sonarr-values.yaml
+  - name: radarr-values
+    files:
+      - values.yaml=radarr-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-media
