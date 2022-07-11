@@ -77,10 +77,10 @@ agents:
       resources:
         requests:
           cpu: 10m
-          memory: 200Mi
+          memory: 220Mi
         limits:
           cpu: 100m
-          memory: 200Mi
+          memory: 220Mi
     securityAgent:
       resources:
         requests:
