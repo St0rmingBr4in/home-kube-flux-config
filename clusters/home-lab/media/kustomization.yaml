@@ -16,6 +16,8 @@ resources:
   - sonarr.yaml
   - radarr-config-pvc.yaml
   - radarr.yaml
+  - jackett-config-pvc.yaml
+  - jackett.yaml
 configMapGenerator:
   - name: flaresolverr-values
     files:
@@ -32,6 +34,9 @@ configMapGenerator:
   - name: radarr-values
     files:
       - values.yaml=radarr-values.yaml
+  - name: jackett-values
+    files:
+      - values.yaml=jackett-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-media
