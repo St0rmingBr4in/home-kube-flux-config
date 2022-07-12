@@ -1,0 +1,35 @@
+---
+image:
+  tag: latest
+
+ingress:
+  main:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/auth-type: "basic"
+      traefik.ingress.kubernetes.io/auth-secret: "basicauth"
+    hosts:
+      - host: jackett.ilovecara.ml
+        paths:
+          - path: /
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 200Mi
+  requests:
+    cpu: 20m
+    memory: 200Mi
+
+securityContext:
+  runAsUser: 1031
+  runAsGroup: 100
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: jackett-config
+  torrentblackhole:
+    enabled: true
+    existingClaim: media-downloads
+    subPath: torrent-blackhole
