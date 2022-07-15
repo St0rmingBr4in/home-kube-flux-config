@@ -5,3 +5,19 @@ tolerations:
   - effect: NoSchedule
     key: ram
     operator: Exists
+dp:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 40Mi
+    limits:
+      cpu: 10m
+      memory: 40Mi
+lbl:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 50Mi
+    limits:
+      cpu: 10m
+      memory: 50Mi
