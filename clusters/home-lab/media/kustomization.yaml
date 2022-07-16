@@ -5,38 +5,43 @@ resources:
   - namespace.yaml
   - ../common/
   - basicauth-traefik-secret.yaml
+  - bazarr-config-pvc.yaml
+  - bazarr.yaml
   - flaresolverr.yaml
+  - jackett-config-pvc.yaml
+  - jackett.yaml
   - jellyfin-config-pvc.yaml
   - jellyfin.yaml
   - media-downloads-pvc.yaml
   - media-library-pvc.yaml
   - qbittorrent-config-pvc.yaml
   - qbittorrent.yaml
-  - sonarr-config-pvc.yaml
-  - sonarr.yaml
   - radarr-config-pvc.yaml
   - radarr.yaml
-  - jackett-config-pvc.yaml
-  - jackett.yaml
+  - sonarr-config-pvc.yaml
+  - sonarr.yaml
 configMapGenerator:
+  - name: bazarr-values
+    files:
+      - values.yaml=bazarr-values.yaml
   - name: flaresolverr-values
     files:
       - values.yaml=flaresolverr-values.yaml
+  - name: jackett-values
+    files:
+      - values.yaml=jackett-values.yaml
   - name: jellyfin-values
     files:
       - values.yaml=jellyfin-values.yaml
   - name: qbittorrent-values
     files:
       - values.yaml=qbittorrent-values.yaml
-  - name: sonarr-values
-    files:
-      - values.yaml=sonarr-values.yaml
   - name: radarr-values
     files:
       - values.yaml=radarr-values.yaml
-  - name: jackett-values
+  - name: sonarr-values
     files:
-      - values.yaml=jackett-values.yaml
+      - values.yaml=sonarr-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-media
