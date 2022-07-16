@@ -4,19 +4,23 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
+  - amd-gpu-device-plugin.yaml
+  - datadog-secret.yaml
+  - datadog.yaml
+  - external-services.yaml
+  - kube-prometheus-stack.yaml
   - kube-vip.yaml
   - pihole.yaml
-  - datadog.yaml
-  - datadog-secret.yaml
-  - amd-gpu-device-plugin.yaml
-  - kube-prometheus-stack.yaml
 configMapGenerator:
-  - name: datadog-values
-    files:
-      - values.yaml=datadog-values.yaml
   - name: amd-gpu-device-plugin-values
     files:
       - values.yaml=amd-gpu-device-plugin-values.yaml
+  - name: datadog-values
+    files:
+      - values.yaml=datadog-values.yaml
+  - name: external-services-values
+    files:
+      - values.yaml=external-services-values.yaml
   - name: kube-prometheus-stack-values
     files:
       - values.yaml=kube-prometheus-stack-values.yaml
