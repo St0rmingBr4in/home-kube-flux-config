@@ -21,10 +21,6 @@ resources:
     cpu: 20m
     memory: 200Mi
 
-securityContext:
-  runAsUser: 1031
-  runAsGroup: 100
-
 persistence:
   config:
     enabled: true
