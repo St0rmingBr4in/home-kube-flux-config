@@ -1,0 +1,27 @@
+---
+ingress:
+  enabled: true
+addresses:
+  - ip: 192.168.69.42
+ports:
+  - port: 80
+    name: nas-photos
+    ingress:
+      hosts:
+        - host: nas-ui.ilovecara.ml
+          paths:
+            - '/photo'
+  - port: 5000
+    name: nas-ui
+    ingress:
+      hosts:
+        - host: nas-ui.ilovecara.ml
+          paths:
+            - '/'
+  - port: 9001
+    name: minio
+    ingress:
+      hosts:
+        - host: minio.ilovecara.ml
+          paths:
+            - '/'
