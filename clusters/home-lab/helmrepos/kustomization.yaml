@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - amd-gpu-helm.yaml
   - datadog.yaml
+  - hashicorp.yaml
   - helm-openldap.yaml
   - itzg.yaml
   - k8s-at-home.yaml

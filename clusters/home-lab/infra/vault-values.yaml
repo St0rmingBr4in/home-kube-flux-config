@@ -1,0 +1,11 @@
+---
+server:
+  ingress:
+    enabled: true
+    hosts:
+      - host: vault.ilovecara.ml
+        paths: ["/"]
+ui:
+  enabled: true
+injector:
+  enabled: false
