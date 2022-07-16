@@ -18,7 +18,7 @@ configMapGenerator:
   - name: datadog-values
     files:
       - values.yaml=datadog-values.yaml
-  - name: external-services-values
+  - name: external-service-values
     files:
       - values.yaml=external-services-values.yaml
   - name: kube-prometheus-stack-values
