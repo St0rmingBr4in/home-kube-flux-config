@@ -2,13 +2,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - amd-gpu-helm.yaml
+  - datadog.yaml
   - helm-openldap.yaml
   - itzg.yaml
   - k8s-at-home.yaml
   - kube-vip.yaml
   - mojo2600.yaml
   - mongoose.yaml
-  - datadog.yaml
-  - vmware-tanzu.yaml
-  - amd-gpu-helm.yaml
   - prometheus-community.yaml
+  - t3n.yaml
+  - vmware-tanzu.yaml
