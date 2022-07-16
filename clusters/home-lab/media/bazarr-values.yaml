@@ -13,6 +13,9 @@ ingress:
         paths:
           - path: /
 
+securityContext:
+  runAsUser: 1025
+
 resources:
   limits:
     cpu: 200m
