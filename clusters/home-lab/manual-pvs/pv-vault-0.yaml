@@ -12,8 +12,8 @@ spec:
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: vault-0
-    namespace: prod-media
+    name: data-vault-0
+    namespace: prod-infra
   csi:
     driver: driver.longhorn.io
     fsType: ext4
