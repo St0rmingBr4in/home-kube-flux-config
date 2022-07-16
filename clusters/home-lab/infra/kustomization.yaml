@@ -11,6 +11,7 @@ resources:
   - kube-prometheus-stack.yaml
   - kube-vip.yaml
   - pihole.yaml
+  - vault-pvc-0.yaml
   - vault.yaml
 configMapGenerator:
   - name: amd-gpu-device-plugin-values
