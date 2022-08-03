@@ -12,11 +12,9 @@ resources:
   limits:
     cpu: 7
     memory: 1Gi
-    amd.com/gpu: "1"
   requests:
     cpu: 1400m
     memory: 1Gi
-    amd.com/gpu: "1"
 
 podSecurityContext:
   supplementalGroups:
