@@ -52,7 +52,7 @@ agents:
     agent:
       resources:
         requests:
-          cpu: 40m
+          cpu: 80m
           memory: 250Mi
         limits:
           cpu: 400m
@@ -60,7 +60,7 @@ agents:
     processAgent:
       resources:
         requests:
-          cpu: 10m
+          cpu: 20m
           memory: 100Mi
         limits:
           cpu: 100m
@@ -68,7 +68,7 @@ agents:
     traceAgent:
       resources:
         requests:
-          cpu: 10m
+          cpu: 20m
           memory: 70Mi
         limits:
           cpu: 100m
@@ -76,7 +76,7 @@ agents:
     systemProbe:
       resources:
         requests:
-          cpu: 10m
+          cpu: 20m
           memory: 256Mi
         limits:
           cpu: 100m
@@ -84,7 +84,7 @@ agents:
     securityAgent:
       resources:
         requests:
-          cpu: 10m
+          cpu: 20m
           memory: 100Mi
         limits:
           cpu: 100m
@@ -92,7 +92,7 @@ agents:
     initContainers:
       resources:
         requests:
-          cpu: 10m
+          cpu: 20m
           memory: 150Mi
         limits:
           cpu: 100m
@@ -106,7 +106,7 @@ clusterAgent:
   enabled: true
   resources:
     requests:
-      cpu: 10m
+      cpu: 20m
       memory: 150Mi
     limits:
       cpu: 100m
@@ -119,7 +119,7 @@ clusterAgent:
 kube-state-metrics:
   resources:
     requests:
-      cpu: 10m
+      cpu: 20m
       memory: 100Mi
     limits:
       cpu: 100m
