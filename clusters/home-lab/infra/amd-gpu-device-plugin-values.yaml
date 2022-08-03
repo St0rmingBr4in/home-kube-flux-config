@@ -8,7 +8,7 @@ tolerations:
 dp:
   resources:
     requests:
-      cpu: 1m
+      cpu: 2m
       memory: 40Mi
     limits:
       cpu: 10m
@@ -16,7 +16,7 @@ dp:
 lbl:
   resources:
     requests:
-      cpu: 1m
+      cpu: 2m
       memory: 50Mi
     limits:
       cpu: 10m

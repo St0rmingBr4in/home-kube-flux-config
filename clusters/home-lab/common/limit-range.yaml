@@ -7,21 +7,21 @@ spec:
   limits:
     - type: Pod
       min:
-        cpu: 1m
+        cpu: 2m
         memory: 10Mi
       maxLimitRequestRatio:
-        cpu: "10"
+        cpu: "5"
         memory: "1"
     - type: Container
       default:
         cpu: 100m
         memory: 100Mi
       defaultRequest:
-        cpu: 10m
+        cpu: 20m
         memory: 100Mi
       min:
         cpu: 1m
         memory: 10Mi
       maxLimitRequestRatio:
-        cpu: "10"
+        cpu: "5"
         memory: "1"
