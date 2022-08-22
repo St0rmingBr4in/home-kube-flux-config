@@ -16,10 +16,10 @@ ingress:
 resources:
   limits:
     cpu: 200m
-    memory: 200Mi
+    memory: 300Mi
   requests:
     cpu: 40m
-    memory: 200Mi
+    memory: 300Mi
 
 securityContext:
   runAsUser: 1031
