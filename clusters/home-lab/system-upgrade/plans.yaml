@@ -13,6 +13,8 @@ spec:
       values:
       - "true"
   serviceAccountName: system-upgrade
+  drain:
+    force: true
   upgrade:
     image: rancher/k3s-upgrade
   version: v1.20.15+k3s1
@@ -39,6 +41,8 @@ spec:
     - server-plan
     image: rancher/k3s-upgrade
   serviceAccountName: system-upgrade
+  drain:
+    force: true
   upgrade:
     image: rancher/k3s-upgrade
   version: v1.20.15+k3s1
