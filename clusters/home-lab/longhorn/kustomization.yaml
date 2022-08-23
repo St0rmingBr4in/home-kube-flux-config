@@ -23,7 +23,7 @@ patchesJson6902:
         value: 100m
       - op: add
         path: /spec/limits/1/defaultRequest/memory
-        value: 500Mi
+        value: 400Mi
       - op: add
         path: /spec/limits/0/maxLimitRequestRatio/cpu
         value: "500"
