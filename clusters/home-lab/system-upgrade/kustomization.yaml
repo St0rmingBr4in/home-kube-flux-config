@@ -8,3 +8,17 @@ resources:
 namespace: system-upgrade
 patchesStrategicMerge:
   - set-resources.yaml
+patchesJson6902:
+  - target:
+      version: v1
+      kind: LimitRange
+      name: limit-range
+    patch: |-
+      - op: remove
+        path: /spec/limits/1/default
+      - op: remove
+        path: /spec/limits/1/defaultRequest
+      - op: remove
+        path: /spec/limits/0/maxLimitRequestRatio
+      - op: remove
+        path: /spec/limits/1/maxLimitRequestRatio
