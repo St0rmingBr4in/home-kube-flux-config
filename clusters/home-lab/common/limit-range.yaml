@@ -7,7 +7,7 @@ spec:
   limits:
     - type: Pod
       min:
-        cpu: 2m
+        cpu: 1m
         memory: 10Mi
       maxLimitRequestRatio:
         cpu: "5"
