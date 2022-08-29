@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+  name: traefik-v2-acme
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 128Mi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: traefik-v2-acme
+    namespace: prod-traefik
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeAttributes:
+      numberOfReplicas: "3"
+      staleReplicaTimeout: "30"
+    volumeHandle: traefik-v2-acme
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  volumeMode: Filesystem
