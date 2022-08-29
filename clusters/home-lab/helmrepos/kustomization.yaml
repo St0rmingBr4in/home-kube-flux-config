@@ -13,4 +13,5 @@ resources:
   - mongoose.yaml
   - prometheus-community.yaml
   - t3n.yaml
+  - traefik.yaml
   - vmware-tanzu.yaml

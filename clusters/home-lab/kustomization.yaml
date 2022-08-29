@@ -8,6 +8,7 @@ resources:
 - infra
 - media
 - velero
+- traefik
 - system-upgrade
 - longhorn
 patches:

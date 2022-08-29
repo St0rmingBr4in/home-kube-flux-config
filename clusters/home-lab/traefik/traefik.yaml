@@ -1,0 +1,20 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: traefik
+spec:
+  chart:
+    spec:
+      chart: traefik
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+      version: 10.24.0
+  interval: 1h0m0s
+  releaseName: traefik
+  targetNamespace: prod-traefik
+  valuesFrom:
+    - kind: ConfigMap
+      name: traefik-values
