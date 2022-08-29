@@ -10,4 +10,4 @@ spec:
     requests:
       storage: 128Mi
   storageClassName: longhorn
-  volumeName: traefik-v2-acme
+  volumeName: traefik-acme
