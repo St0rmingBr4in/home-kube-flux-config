@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   annotations:
-  name: traefik-v2-acme
+  name: traefik-acme
 spec:
   accessModes:
     - ReadWriteOnce
@@ -12,7 +12,7 @@ spec:
   claimRef:
     apiVersion: v1
     kind: PersistentVolumeClaim
-    name: traefik-v2-acme
+    name: traefik-acme
     namespace: prod-traefik
   csi:
     driver: driver.longhorn.io
@@ -20,7 +20,7 @@ spec:
     volumeAttributes:
       numberOfReplicas: "3"
       staleReplicaTimeout: "30"
-    volumeHandle: traefik-v2-acme
+    volumeHandle: traefik-acme
   persistentVolumeReclaimPolicy: Retain
   storageClassName: longhorn
   volumeMode: Filesystem
