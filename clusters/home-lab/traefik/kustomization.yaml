@@ -4,9 +4,11 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
-  - traefik.yaml
-  - traefik-dnsprovider-config-secret.yaml
+  - basic-auth.yaml
+  - middleware.yaml
   - traefik-acme-pvc.yaml
+  - traefik-dnsprovider-config-secret.yaml
+  - traefik.yaml
 configMapGenerator:
   - name: traefik-values
     files:
