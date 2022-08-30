@@ -25,6 +25,12 @@ ports:
       domains:
         - main: "*.ilovecara.ml"
 
+service:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: prod
+  spec:
+    loadBalancerIP: 192.168.1.250
+
 persistence:
   enabled: true
   existingClaim: "traefik-acme"
