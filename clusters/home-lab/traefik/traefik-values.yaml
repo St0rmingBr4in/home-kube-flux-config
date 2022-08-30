@@ -35,6 +35,9 @@ persistence:
   enabled: true
   existingClaim: "traefik-acme"
 
+additionalArguments:
+  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+
 resources:
   requests:
     cpu: 500m
