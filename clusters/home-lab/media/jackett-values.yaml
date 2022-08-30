@@ -6,8 +6,7 @@ ingress:
   main:
     enabled: true
     annotations:
-      traefik.ingress.kubernetes.io/auth-type: "basic"
-      traefik.ingress.kubernetes.io/auth-secret: "basicauth"
+      traefik.ingress.kubernetes.io/router.middlewares: prod-traefik-basic-auth@kubernetescrd
     hosts:
       - host: jackett.ilovecara.ml
         paths:
