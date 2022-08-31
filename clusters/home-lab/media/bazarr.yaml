@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: k8s-at-home
         namespace: flux-system
-      version: 10.5.2
+      version: 10.6.2
   interval: 1h0m0s
   releaseName: bazarr
   targetNamespace: prod-media
