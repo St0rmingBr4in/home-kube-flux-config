@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: k8s-at-home
         namespace: flux-system
-      version: 11.5.2
+      version: 11.7.2
   interval: 1h0m0s
   releaseName: jackett
   targetNamespace: prod-media
