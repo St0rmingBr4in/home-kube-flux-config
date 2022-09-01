@@ -24,7 +24,9 @@ ports:
       storage: /data/acme.json
       certResolver: letsencrypt
       domains:
-        - main: "*.ilovecara.ml"
+        - main: "ilovecara.ml"
+          sans:
+            - "*.ilovecara.ml"
 
 service:
   annotations:
