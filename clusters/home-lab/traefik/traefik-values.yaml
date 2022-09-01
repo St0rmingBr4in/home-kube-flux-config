@@ -21,6 +21,7 @@ ports:
   websecure:
     tls:
       enabled: true
+      storage: /data/acme.json
       certResolver: letsencrypt
       domains:
         - main: "*.ilovecara.ml"
