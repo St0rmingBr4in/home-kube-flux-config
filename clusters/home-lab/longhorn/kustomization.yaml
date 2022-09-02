@@ -5,6 +5,8 @@ resources:
 # - daily-recurring-backup-job.yaml # Need to upgrade longhorn first
   - ../common/
   - https://raw.githubusercontent.com/longhorn/longhorn/v1.2.4/deploy/longhorn.yaml
+patchesStrategicMerge:
+  - set-resources.yaml
 namespace: longhorn-system
 
 patchesJson6902:
