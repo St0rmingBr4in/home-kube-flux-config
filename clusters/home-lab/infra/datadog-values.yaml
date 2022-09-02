@@ -1,5 +1,6 @@
 ---
 datadog:
+  clusterName: home-lab
   apiKeyExistingSecret: datadog-api-key
   logs:
     enabled: true
