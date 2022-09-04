@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: mojo2600
         namespace: flux-system
-      version: 2.9.2
+      version: 2.9.3
   interval: 1h0m0s
   releaseName: pihole
   targetNamespace: prod-infra
