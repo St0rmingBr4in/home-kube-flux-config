@@ -7,6 +7,7 @@ resources:
   - amd-gpu-device-plugin.yaml
   - datadog-secret.yaml
   - datadog.yaml
+  - cert-manager.yaml
   - external-services.yaml
   - kube-prometheus-stack.yaml
   - kube-vip.yaml
@@ -17,6 +18,9 @@ configMapGenerator:
   - name: amd-gpu-device-plugin-values
     files:
       - values.yaml=amd-gpu-device-plugin-values.yaml
+  - name: cert-manager-values
+    files:
+      - values.yaml=cert-manager-values.yaml
   - name: datadog-values
     files:
       - values.yaml=datadog-values.yaml
