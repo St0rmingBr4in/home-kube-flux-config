@@ -8,6 +8,8 @@ resources:
   - datadog-secret.yaml
   - datadog.yaml
   - cert-manager.yaml
+  - digitalocean-token.yaml
+  - cert-manager-issuer.yaml
   - external-services.yaml
   - kube-prometheus-stack.yaml
   - kube-vip.yaml
