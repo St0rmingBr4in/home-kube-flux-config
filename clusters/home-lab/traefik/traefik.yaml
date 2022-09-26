@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: traefik
         namespace: flux-system
-      version: 10.24.1
+      version: 10.24.4
   interval: 1h0m0s
   releaseName: traefik
   targetNamespace: prod-traefik
