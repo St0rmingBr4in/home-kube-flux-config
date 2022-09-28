@@ -1,5 +1,7 @@
 ---
 datadog:
+  clusterChecks:
+    enabled: true
   confd:
     systemd.yaml: |-
       init_config:
@@ -19,6 +21,12 @@ datadog:
             - k3s.service
             - k3s-node.service
             - sshd.service
+    etcd.yaml: |-
+      init_config:
+
+      instances:
+        - prometheus_url: "http://%%env_DD_KUBERNETES_KUBELET_HOST%%:2381/metrics"
+
   clusterName: home-lab
   apiKeyExistingSecret: datadog-api-key
   logs:
