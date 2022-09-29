@@ -10,9 +10,9 @@ spec:
       chart: flaresolverr
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: truecharts
         namespace: flux-system
-      version: 5.4.2
+      version: 6.0.38
   interval: 1h0m0s
   releaseName: flaresolverr
   targetNamespace: prod-media
