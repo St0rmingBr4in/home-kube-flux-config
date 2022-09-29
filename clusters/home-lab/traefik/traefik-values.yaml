@@ -41,6 +41,16 @@ persistence:
 additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
 
+experimental:
+  kubernetesGateway:
+    enabled: true
+    gateway:
+      enabled: true
+      # certificate:
+      #   group: "core"
+      #   kind: "Secret"
+      #   name: "mysecret"
+
 resources:
   requests:
     cpu: 500m
