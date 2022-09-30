@@ -11,6 +11,9 @@ ports:
           sans:
             - "*.ilovecara.ml"
 
+rbac:
+  enabled: true
+
 service:
   annotations:
     metallb.universe.tf/allow-shared-ip: prod
