@@ -16,6 +16,13 @@ resources:
   - pihole.yaml
   - vault-pvc-0.yaml
   - vault.yaml
+  - ilovecara-ml-certificate.yaml
+  - basic-auth.yaml
+  - middleware.yaml
+  - traefik-acme-pvc.yaml
+  - traefik-dnsprovider-config-secret.yaml
+  - traefik.yaml
+
 configMapGenerator:
   - name: amd-gpu-device-plugin-values
     files:
@@ -35,6 +42,9 @@ configMapGenerator:
   - name: vault-values
     files:
       - values.yaml=vault-values.yaml
+  - name: traefik-values
+    files:
+      - values.yaml=traefik-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-infra
