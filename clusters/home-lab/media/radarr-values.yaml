@@ -6,7 +6,7 @@ ingress:
   main:
     enabled: true
     annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: prod-traefik-basic-auth@kubernetescrd
+      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
       - host: radarr.ilovecara.ml
         paths:
