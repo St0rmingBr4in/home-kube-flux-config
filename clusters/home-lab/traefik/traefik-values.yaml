@@ -1,20 +1,4 @@
 ---
-certResolvers:
-  letsencrypt:
-    email: julien.doche@gmail.com
-    dnsChallenge:
-      provider: digitalocean
-      delayBeforeCheck: 30
-      resolvers:
-        - ns1.digitalocean.com
-        - ns2.digitalocean.com
-        - ns3.digitalocean.com
-env:
-  - name: DO_AUTH_TOKEN
-    valueFrom:
-      secretKeyRef:
-        key: DO_AUTH_TOKEN
-        name: traefik-dnsprovider-config
 ports:
   web:
     redirectTo: websecure
@@ -22,7 +6,6 @@ ports:
     tls:
       enabled: true
       storage: /data/acme.json
-      certResolver: letsencrypt
       domains:
         - main: "ilovecara.ml"
           sans:
@@ -34,10 +17,6 @@ service:
   spec:
     loadBalancerIP: 192.168.1.250
 
-persistence:
-  enabled: true
-  existingClaim: "traefik-acme"
-
 additionalArguments:
   - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
 
@@ -46,10 +25,10 @@ experimental:
     enabled: true
     gateway:
       enabled: true
-      # certificate:
-      #   group: "core"
-      #   kind: "Secret"
-      #   name: "mysecret"
+      certificate:
+        group: core
+        kind: Secret
+        name: ilovecara.ml-cert
 
 resources:
   requests:

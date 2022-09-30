@@ -2,13 +2,13 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: letsencrypt-issuer
+  name: letsencrypt
 spec:
   acme:
     email: julien.doche@gmail.com
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
-      name: example-issuer-account-key
+      name: letsencrypt-issuer-account-key
     solvers:
     - dns01:
         digitalocean:
