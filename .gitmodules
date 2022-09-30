@@ -4,3 +4,6 @@
 [submodule "clusters/home-lab/flux-system/flux2"]
 	path = clusters/home-lab/flux-system/flux2
 	url = https://github.com/fluxcd/flux2.git
+[submodule "clusters/home-lab/gateway-api/gateway-api"]
+	path = clusters/home-lab/gateway-api/gateway-api
+	url = https://github.com/kubernetes-sigs/gateway-api.git
