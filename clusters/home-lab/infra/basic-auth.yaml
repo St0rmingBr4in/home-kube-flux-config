@@ -4,7 +4,6 @@ data:
 kind: Secret
 metadata:
     name: basic-auth
-    namespace: prod-traefik
 type: Opaque
 sops:
     kms: []
