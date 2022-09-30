@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
+  - ilovecara-ml-certificate.yaml
   - basic-auth.yaml
   - middleware.yaml
   - traefik-acme-pvc.yaml

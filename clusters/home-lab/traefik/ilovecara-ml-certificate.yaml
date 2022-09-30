@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ilovecara.ml
+spec:
+  commonName: "*.ilovecara.ml"
+  dnsNames:
+    - "*.ilovecara.ml"
+  secretName: ilovecara.ml-cert
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
