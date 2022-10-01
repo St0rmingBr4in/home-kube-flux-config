@@ -1,4 +1,15 @@
 ---
+ports:
+  web:
+    redirectTo: websecure
+  websecure:
+    tls:
+      enabled: true
+      domains:
+        - main: "ilovecara.ml"
+          sans:
+            - "*.ilovecara.ml"
+
 rbac:
   enabled: true
 
