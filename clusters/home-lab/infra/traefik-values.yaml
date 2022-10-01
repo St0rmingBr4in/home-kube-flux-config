@@ -2,7 +2,9 @@
 ports:
   web:
     redirectTo: websecure
+    port: 80
   websecure:
+    port: 443
     tls:
       enabled: true
       domains:
@@ -24,10 +26,10 @@ experimental:
     enabled: true
     gateway:
       enabled: true
-      certificate:
-        group: core
-        kind: Secret
-        name: ilovecara.ml-cert
+    certificate:
+      group: core
+      kind: Secret
+      name: ilovecara.ml-cert
 
 resources:
   requests:

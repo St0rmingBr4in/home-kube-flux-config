@@ -19,6 +19,7 @@ resources:
   - ilovecara-ml-certificate.yaml
   - basic-auth.yaml
   - middleware.yaml
+  - traefik-customchart.yaml
   - traefik.yaml
 
 configMapGenerator:
