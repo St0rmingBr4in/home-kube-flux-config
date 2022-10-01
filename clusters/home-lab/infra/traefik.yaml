@@ -6,12 +6,12 @@ metadata:
 spec:
   chart:
     spec:
-      chart: traefik
+      chart: ./traefik
       sourceRef:
-        kind: HelmRepository
-        name: traefik
+        kind: GitRepository
+        name: traefik-custom-helm-chart
         namespace: flux-system
-      version: 10.26.1
+      version: 10.31.0
   interval: 1h0m0s
   releaseName: traefik
   targetNamespace: prod-infra
