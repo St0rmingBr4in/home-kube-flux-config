@@ -10,7 +10,7 @@ spec:
       sourceRef:
         kind: GitRepository
         name: traefik-custom-helm-chart
-        namespace: flux-system
+        namespace: prod-infra
       version: 10.31.0
   interval: 1h0m0s
   releaseName: traefik
