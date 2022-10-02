@@ -24,6 +24,11 @@ service:
   spec:
     loadBalancerIP: 192.168.1.250
 
+metrics:
+  datadog:
+    address: datadog-cluster-agent:5005
+  prometheus: null
+
 experimental:
   kubernetesGateway:
     enabled: true
