@@ -34,3 +34,33 @@ tolerations:
 persistence:
   dataDir:
     enabled: true
+initContainers:
+  - name: download-multiverse-core-plugin-updates
+    image: appropriate/curl
+    args:
+      - "-L"
+      - "-o"
+      - "/data/plugins/update/multiverse-core.jar"
+      - "https://dev.bukkit.org/projects/multiverse-core/files/3462546/download"
+    volumesMounts:
+      - name: plugin-updates
+        mountPath: /data/plugins/update
+        readOnly: true
+  - name: download-nametag-edit-plugin-updates
+    image: appropriate/curl
+    args:
+      - "-L"
+      - "-o"
+      - "/data/plugins/update/NametagEdit.jar"
+      - "https://www.spigotmc.org/resources/nametagedit.3836/download?version=464805"
+    volumesMounts:
+      - name: plugin-updates
+        mountPath: /data/plugins/update
+        readOnly: true
+extraVolumes:
+  - volumeMounts:
+      - name: plugin-updates
+        mountPath: /data/plugins/update
+    volumes:
+      - name: plugin-updates
+        emptyDir: {}

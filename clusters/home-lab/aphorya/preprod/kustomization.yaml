@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - ../../common/
-# - minecraft.yaml
+- minecraft.yaml
 configMapGenerator:
 - files:
   - values.yaml=minecraft-aphorya-values.yaml
