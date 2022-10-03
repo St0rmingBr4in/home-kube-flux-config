@@ -11,7 +11,7 @@ resources:
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
   - external-services.yaml
-  # - kube-prometheus-stack.yaml
+  - kube-prometheus-stack.yaml
   - kube-vip.yaml
   - pihole.yaml
   - vault-pvc-0.yaml
