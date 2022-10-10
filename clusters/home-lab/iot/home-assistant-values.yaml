@@ -1,0 +1,24 @@
+---
+hostNetwork: true
+dnsPolicy: ClusterFirstWithHostNet
+
+persistence:
+  config:
+    existingClaim: home-assistant
+
+ingress:
+  main:
+    enabled: true
+    hosts:
+      - host: home-assistant.ilovecara.ml
+        paths:
+          - path: /
+            pathType: Prefix
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 300Mi
+  requests:
+    cpu: 40m
+    memory: 300Mi
