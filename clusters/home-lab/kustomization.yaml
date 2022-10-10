@@ -11,6 +11,7 @@ resources:
 - velero
 - system-upgrade
 - longhorn
+- iot
 patches:
 - path: namespace-no-prune-patch.yaml
   target:
