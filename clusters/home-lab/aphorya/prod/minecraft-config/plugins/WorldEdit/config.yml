@@ -16,6 +16,7 @@
 # - If you want to allow blocks, make sure to change "disallowed-blocks" to []
 #
 
+
 limits:
     max-blocks-changed:
         default: -1
