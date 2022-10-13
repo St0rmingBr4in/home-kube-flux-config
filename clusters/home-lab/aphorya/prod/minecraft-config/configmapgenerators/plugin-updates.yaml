@@ -2,8 +2,8 @@
 apiVersion: builtin
 kind: ConfigMapGenerator
 metadata:
-  name: minecraft-aphorya-mycommand-commands
+  name: minecraft-aphorya-plugin-updates
 files:
-  - data/plugins/MyCommand/commands/examples.yml
+  - data/plugins/update/multiverse-core.jar
 options:
   disableNameSuffixHash: true

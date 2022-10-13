@@ -51,6 +51,9 @@ persistence:
     existingClaim: minecraft-aphorya-datadir
 extraVolumes:
   - volumeMounts:
+      - name: plugin-updates
+        mountPath: /data/plugins/update/
+        readOnly: true
       - name: nametagedit
         mountPath: /data/plugins/NametagEdit/
         readOnly: true
@@ -82,3 +85,6 @@ extraVolumes:
       - name: prometheusexporter
         configMap:
           name: minecraft-aphorya-prometheusexporter
+      - name: plugin-updates
+        configMap:
+          name: minecraft-aphorya-plugin-updates
