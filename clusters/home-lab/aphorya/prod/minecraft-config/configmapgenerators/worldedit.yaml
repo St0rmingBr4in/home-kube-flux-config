@@ -1,0 +1,9 @@
+---
+apiVersion: builtin
+kind: ConfigMapGenerator
+metadata:
+  name: minecraft-aphorya-prometheusexporter
+files:
+  - data/plugins/PrometheusExporter/config.yml
+options:
+  disableNameSuffixHash: true

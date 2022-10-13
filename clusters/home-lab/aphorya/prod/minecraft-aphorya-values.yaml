@@ -25,6 +25,7 @@ minecraftServer:
 podAnnotations:
   prometheus.io/port: '9940'
   prometheus.io/scrape: true
+
 serviceAnnotations:
   metallb.universe.tf/allow-shared-ip: prod
 readinessProbe:
@@ -48,3 +49,36 @@ persistence:
   dataDir:
     enabled: true
     existingClaim: minecraft-aphorya-datadir
+extraVolumes:
+  - volumeMounts:
+      - name: nametagedit
+        mountPath: /data/plugins/NametagEdit/
+        readOnly: true
+      - name: worldedit
+        mountPath: /etc/minecraft-config/plugins/WorldEdit/
+        readOnly: true
+      - name: mycommand
+        mountPath: /etc/minecraft-config/plugins/MyCommand/
+        readOnly: true
+      - name: mycommand-commands
+        mountPath: /etc/minecraft-config/plugins/MyCommand/commands/
+        readOnly: true
+      - name: prometheusexporter
+        mountPath: /data/plugins/PrometheusExporter
+        readOnly: true
+    volumes:
+      - name: worldedit
+        configMap:
+          name: minecraft-aphorya-worldedit
+      - name: mycommand-commands
+        configMap:
+          name: minecraft-aphorya-mycommand-commands
+      - name: mycommand
+        configMap:
+          name: minecraft-aphorya-mycommand
+      - name: nametagedit
+        configMap:
+          name: minecraft-aphorya-nametagedit
+      - name: prometheusexporter
+        configMap:
+          name: minecraft-aphorya-prometheusexporter

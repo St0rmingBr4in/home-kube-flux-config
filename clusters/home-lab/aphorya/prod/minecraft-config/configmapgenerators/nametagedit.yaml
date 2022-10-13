@@ -1,0 +1,11 @@
+---
+apiVersion: builtin
+kind: ConfigMapGenerator
+metadata:
+  name: minecraft-aphorya-nametagedit
+files:
+  - data/plugins/NametagEdit/config.yml
+  - data/plugins/NametagEdit/groups.yml
+  - data/plugins/NametagEdit/players.yml
+options:
+  disableNameSuffixHash: true

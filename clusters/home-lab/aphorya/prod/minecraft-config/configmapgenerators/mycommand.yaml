@@ -1,0 +1,20 @@
+---
+apiVersion: builtin
+kind: ConfigMapGenerator
+metadata:
+  name: minecraft-aphorya-mycommand
+files:
+  - data/plugins/MyCommand/blockdatabase.yml
+  - data/plugins/MyCommand/config.yml
+  - data/plugins/MyCommand/hologram_database.yml
+  - data/plugins/MyCommand/itemset.yml
+  - data/plugins/MyCommand/language.yml
+  - data/plugins/MyCommand/npcsdatabase.yml
+  - data/plugins/MyCommand/othersdb.yml
+  - data/plugins/MyCommand/playerdata.yml
+  - data/plugins/MyCommand/playerevents.yml
+  - data/plugins/MyCommand/scheduler.yml
+  - data/plugins/MyCommand/signsdatabase.yml
+  - data/plugins/MyCommand/tabsuggestionblocker.yml
+options:
+  disableNameSuffixHash: true

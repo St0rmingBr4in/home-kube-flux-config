@@ -1,0 +1,9 @@
+---
+apiVersion: builtin
+kind: ConfigMapGenerator
+metadata:
+  name: minecraft-aphorya-mycommand-commands
+files:
+  - data/plugins/MyCommand/commands/examples.yml
+options:
+  disableNameSuffixHash: true
