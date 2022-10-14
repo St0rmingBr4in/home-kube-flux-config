@@ -7,4 +7,3 @@ generators:
   - configmapgenerators/nametagedit.yaml
   - configmapgenerators/prometheusexporter.yaml
   - configmapgenerators/worldedit.yaml
-  - configmapgenerators/plugin-updates.yaml
