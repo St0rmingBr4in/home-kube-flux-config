@@ -20,5 +20,14 @@ resources:
     cpu: 200m
     memory: 300Mi
   requests:
-    cpu: 40m
+    cpu: 100m
     memory: 300Mi
+
+postgresql:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 300Mi
+    requests:
+      cpu: 100m
+      memory: 300Mi
