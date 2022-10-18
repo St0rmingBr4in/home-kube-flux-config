@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
 # - daily-recurring-backup-job.yaml # Need to upgrade longhorn first
   - ../common/
-  - https://raw.githubusercontent.com/longhorn/longhorn/v1.2.4/deploy/longhorn.yaml
+  - https://raw.githubusercontent.com/longhorn/longhorn/v1.3.2/deploy/longhorn.yaml
   - longhorn-ingress.yaml
 patchesStrategicMerge:
   - set-resources.yaml
