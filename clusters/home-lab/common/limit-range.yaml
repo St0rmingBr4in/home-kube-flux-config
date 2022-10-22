@@ -10,7 +10,7 @@ spec:
         cpu: 1m
         memory: 10Mi
       maxLimitRequestRatio:
-        cpu: "2"
+        cpu: "5"
         memory: "1"
     - type: Container
       default:
