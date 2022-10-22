@@ -8,7 +8,7 @@ resources:
     cpu: 100m
     memory: 100Mi
   requests:
-    cpu: 20m
+    cpu: 100m
     memory: 100Mi
 webhook:
   resources:
@@ -16,7 +16,7 @@ webhook:
       cpu: 100m
       memory: 100Mi
     requests:
-      cpu: 20m
+      cpu: 100m
       memory: 100Mi
 cainjector:
   resources:
@@ -24,5 +24,5 @@ cainjector:
       cpu: 100m
       memory: 130Mi
     requests:
-      cpu: 20m
+      cpu: 100m
       memory: 130Mi

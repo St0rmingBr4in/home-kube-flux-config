@@ -14,10 +14,10 @@ ingress:
 
 resources:
   limits:
-    cpu: 200m
+    cpu: 100m
     memory: 250Mi
   requests:
-    cpu: 40m
+    cpu: 100m
     memory: 250Mi
 
 securityContext:

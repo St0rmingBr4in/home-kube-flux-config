@@ -41,7 +41,7 @@ experimental:
 
 resources:
   requests:
-    cpu: 100m
+    cpu: 500m
     memory: 110Mi
   limits:
     cpu: 500m
