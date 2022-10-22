@@ -9,4 +9,4 @@ spec:
     requests:
       storage: 10Gi
   storageClassName: longhorn
-  volumeName: recover-aphorya-minecraft
+  volumeName: minecraft-aphorya-datadir
