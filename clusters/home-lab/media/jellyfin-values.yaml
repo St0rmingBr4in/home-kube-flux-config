@@ -13,7 +13,7 @@ resources:
     cpu: 7
     memory: 2Gi
   requests:
-    cpu: 1400m
+    cpu: 3500m
     memory: 2Gi
 
 podSecurityContext:
