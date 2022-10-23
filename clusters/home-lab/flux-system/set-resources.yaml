@@ -78,10 +78,10 @@ spec:
         - name: manager
           resources:
             requests:
-              memory: 350Mi
+              memory: 450Mi
               cpu: 250m
             limits:
-              memory: 350Mi
+              memory: 450Mi
               cpu: 250m
 ---
 apiVersion: apps/v1
