@@ -20,7 +20,7 @@ resources:
     cpu: 200m
     memory: 300Mi
   requests:
-    cpu: 100m
+    cpu: 200m
     memory: 300Mi
 
 postgresql:
@@ -29,5 +29,5 @@ postgresql:
       cpu: 200m
       memory: 300Mi
     requests:
-      cpu: 100m
+      cpu: 200m
       memory: 300Mi
