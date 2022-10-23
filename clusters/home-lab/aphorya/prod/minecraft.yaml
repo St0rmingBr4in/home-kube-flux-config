@@ -6,12 +6,12 @@ metadata:
 spec:
   chart:
     spec:
-      chart: minecraft
+      chart: ./charts/minecraft
       sourceRef:
-        kind: HelmRepository
-        name: itzg
-        namespace: flux-system
-      version: 4.3.0
+        kind: GitRepository
+        name: minecraft-custom-helm-chart
+        namespace: prod-aphorya
+      version: 4.4.0
   interval: 1h0m0s
   releaseName: minecraft
   targetNamespace: prod-aphorya
