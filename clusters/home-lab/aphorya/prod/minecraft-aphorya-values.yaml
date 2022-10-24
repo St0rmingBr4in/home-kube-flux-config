@@ -58,6 +58,9 @@ extraVolumes:
       - name: plugin-updates
         mountPath: /data/plugins/update/
         readOnly: true
+      - name: worldedit-schematics
+        mountPath: /data/plugins/WorldEdit/schematics
+        readOnly: false
       - name: nametagedit
         mountPath: /data/plugins/NametagEdit/
         readOnly: true
@@ -93,3 +96,7 @@ extraVolumes:
         nfs:
           server: 192.168.69.42
           path: /volume1/kubernetes_storage/minecraft-plugins
+      - name: worldedit-schematics
+        nfs:
+          server: 192.168.69.42
+          path: /volume1/kubernetes_storage/worldedit-schematics
