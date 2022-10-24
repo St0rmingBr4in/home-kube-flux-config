@@ -4,7 +4,6 @@ resources:
 - namespace.yaml
 - ../../common/
 - minecraft-config
-- minecraft-customchart.yaml
 - minecraft.yaml
 - minecraft-aphorya-datadir-pvc.yaml
 # - openldap-stack-ha.yaml
