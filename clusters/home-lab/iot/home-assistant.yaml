@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: truecharts
         namespace: flux-system
-      version: 15.0.59
+      version: 15.0.71
   interval: 1h0m0s
   releaseName: home-assistant
   targetNamespace: prod-iot
