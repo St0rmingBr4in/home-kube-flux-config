@@ -5,7 +5,7 @@ ingress:
     annotations:
       traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
-      - host: qbittorrent.ilovecara.ml
+      - host: qbittorrent.st0rmingbr4in.com
         paths:
           - path: /
 

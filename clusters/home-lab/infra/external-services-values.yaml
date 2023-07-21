@@ -8,20 +8,20 @@ ports:
     name: nas-photos
     ingress:
       hosts:
-        - host: nas-ui.ilovecara.ml
+        - host: nas-ui.st0rmingbr4in.com
           paths:
             - '/photo'
   - port: 5000
     name: nas-ui
     ingress:
       hosts:
-        - host: nas-ui.ilovecara.ml
+        - host: nas-ui.st0rmingbr4in.com
           paths:
             - '/'
   - port: 9001
     name: minio
     ingress:
       hosts:
-        - host: minio.ilovecara.ml
+        - host: minio.st0rmingbr4in.com
           paths:
             - '/'

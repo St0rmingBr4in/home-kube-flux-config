@@ -8,9 +8,9 @@ ports:
     tls:
       enabled: true
       domains:
-        - main: "ilovecara.ml"
+        - main: "st0rmingbr4in.com"
           sans:
-            - "*.ilovecara.ml"
+            - "*.st0rmingbr4in.com"
 
 rbac:
   enabled: true
@@ -37,7 +37,7 @@ experimental:
     certificate:
       group: core
       kind: Secret
-      name: ilovecara.ml-cert
+      name: st0rmingbr4in.com-cert
 
 resources:
   requests:

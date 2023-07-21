@@ -10,7 +10,7 @@ ingress:
   main:
     enabled: true
     hosts:
-      - host: home-assistant.ilovecara.ml
+      - host: home-assistant.st0rmingbr4in.com
         paths:
           - path: /
             pathType: Prefix

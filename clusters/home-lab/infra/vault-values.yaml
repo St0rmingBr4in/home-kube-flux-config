@@ -10,7 +10,7 @@ server:
   ingress:
     enabled: true
     hosts:
-      - host: vault.ilovecara.ml
+      - host: vault.st0rmingbr4in.com
         paths: ["/"]
 ui:
   enabled: true
