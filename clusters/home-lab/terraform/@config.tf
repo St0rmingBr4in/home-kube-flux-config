@@ -4,7 +4,7 @@ terraform {
   required_providers {
     flux = {
       source = "fluxcd/flux"
-      version = "=0.25.3"
+      version = "=1.0.1"
     }
     kind = {
       source  = "tehcyx/kind"
