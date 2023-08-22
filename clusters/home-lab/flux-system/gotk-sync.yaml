@@ -9,9 +9,8 @@ spec:
   interval: 1m0s
   ref:
     branch: master
-  secretRef:
-    name: flux-system
-  url: ssh://git@github.com/st0rmingbr4in/home-kube-flux-config.git
+  url: https://github.com/St0rmingBr4in/home-kube-flux-config
+  recurseSubmodules: true
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -22,6 +21,10 @@ spec:
   interval: 10m0s
   path: ./clusters/home-lab
   prune: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
   sourceRef:
     kind: GitRepository
     name: flux-system
