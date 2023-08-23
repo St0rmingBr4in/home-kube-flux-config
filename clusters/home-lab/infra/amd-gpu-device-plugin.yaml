@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: amd-gpu-helm
         namespace: flux-system
-      version: 0.3.0
+      version: 0.9.0
   interval: 1h0m0s
   releaseName: amd-gpu-device-plugin
   targetNamespace: prod-infra
