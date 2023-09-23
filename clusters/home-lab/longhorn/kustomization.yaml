@@ -49,4 +49,6 @@ patches:
     kind: LimitRange
     name: limit-range
     version: v1
-- path: longhorn-patches.yaml
+- path: longhorn-ui-patches.yaml
+- path: longhorn-default-settings-patches.yaml
+- path: longhorn-driver-deployer-patches.yaml
