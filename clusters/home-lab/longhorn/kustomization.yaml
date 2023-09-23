@@ -1,54 +1,52 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../common/
-  - https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-  - longhorn-ingress.yaml
-  - weekly-recurring-backup-job.yaml
-patchesStrategicMerge:
-  - set-resources.yaml
+- ../common/
+- https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
+- longhorn-ingress.yaml
+- weekly-recurring-backup-job.yaml
 namespace: longhorn-system
 
-patchesJson6902:
-  - target:
-      version: v1
-      kind: LimitRange
-      name: limit-range
-    patch: |-
-      - op: add
-        path: /spec/limits/1/default/cpu
-        value: 300m
-      - op: add
-        path: /spec/limits/1/default/memory
-        value: 500Mi
-      - op: add
-        path: /spec/limits/1/defaultRequest/cpu
-        value: 200m
-      - op: add
-        path: /spec/limits/1/defaultRequest/memory
-        value: 100Mi
-      - op: add
-        path: /spec/limits/0/maxLimitRequestRatio/cpu
-        value: "500"
-      - op: add
-        path: /spec/limits/0/maxLimitRequestRatio/memory
-        value: "100"
-      - op: add
-        path: /spec/limits/1/maxLimitRequestRatio/cpu
-        value: "500"
-      - op: add
-        path: /spec/limits/1/maxLimitRequestRatio/memory
-        value: "100"
-      - op: add
-        path: /spec/limits/0/min/cpu
-        value: 1m
-      - op: add
-        path: /spec/limits/0/min/memory
-        value: 5Mi
-      - op: add
-        path: /spec/limits/1/min/cpu
-        value: 1m
-      - op: add
-        path: /spec/limits/1/min/memory
-        value: 5Mi
+patches:
+- patch: |-
+    - op: add
+      path: /spec/limits/1/default/cpu
+      value: 300m
+    - op: add
+      path: /spec/limits/1/default/memory
+      value: 500Mi
+    - op: add
+      path: /spec/limits/1/defaultRequest/cpu
+      value: 200m
+    - op: add
+      path: /spec/limits/1/defaultRequest/memory
+      value: 100Mi
+    - op: add
+      path: /spec/limits/0/maxLimitRequestRatio/cpu
+      value: "500"
+    - op: add
+      path: /spec/limits/0/maxLimitRequestRatio/memory
+      value: "100"
+    - op: add
+      path: /spec/limits/1/maxLimitRequestRatio/cpu
+      value: "500"
+    - op: add
+      path: /spec/limits/1/maxLimitRequestRatio/memory
+      value: "100"
+    - op: add
+      path: /spec/limits/0/min/cpu
+      value: 1m
+    - op: add
+      path: /spec/limits/0/min/memory
+      value: 5Mi
+    - op: add
+      path: /spec/limits/1/min/cpu
+      value: 1m
+    - op: add
+      path: /spec/limits/1/min/memory
+      value: 5Mi
+  target:
+    kind: LimitRange
+    name: limit-range
+    version: v1
+- path: longhorn-patches.yaml
