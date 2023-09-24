@@ -1,15 +1,16 @@
 ---
 configuration:
   defaultVolumesToRestic: true
-  provider: aws
   backupStorageLocation:
   - bucket: kube-backup
+    provider: aws
     config:
       s3Url: https://minio.st0rmingbr4in.com/
       region: minio
       s3ForcePathStyle: true
   volumeSnapshotLocation:
   - name: default
+    provider: aws
     config:
       region: minio
 credentials:
@@ -18,7 +19,7 @@ resources:
   requests:
     cpu: 50m
     memory: 64Mi
-restic:
+nodeAgent:
   resources:
     requests:
       cpu: 50m
@@ -30,6 +31,6 @@ initContainers:
   volumeMounts:
   - mountPath: /target
     name: plugins
-deployRestic: true
+deployNodeAgent: true
 snapshotsEnabled: true
 schedules: {}
