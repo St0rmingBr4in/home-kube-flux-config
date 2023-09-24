@@ -3,13 +3,13 @@ configuration:
   defaultVolumesToRestic: true
   provider: aws
   backupStorageLocation:
-    bucket: kube-backup
+  - bucket: kube-backup
     config:
       s3Url: https://minio.st0rmingbr4in.com/
       region: minio
       s3ForcePathStyle: true
   volumeSnapshotLocation:
-    name: default
+  - name: default
     config:
       region: minio
 credentials:
