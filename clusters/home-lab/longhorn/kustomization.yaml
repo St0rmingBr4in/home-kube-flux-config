@@ -3,8 +3,8 @@ kind: Kustomization
 resources:
 - ../common/
 - https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-- https://github.com/kubernetes-csi/external-snapshotter//client/config/crd?ref=v6.2.1&timeout=90s
-- https://github.com/kubernetes-csi/external-snapshotter//deploy/kubernetes/snapshot-controller?ref=v6.2.1&timeout=90s
+- https://github.com/kubernetes-csi/external-snapshotter//client/config/crd?ref=v6.3.0
+- https://github.com/kubernetes-csi/external-snapshotter//deploy/kubernetes/snapshot-controller?ref=v6.3.0
 - longhorn-ingress.yaml
 - weekly-recurring-backup-job.yaml
 namespace: longhorn-system
