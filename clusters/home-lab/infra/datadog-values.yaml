@@ -85,6 +85,7 @@ podLabelsAsTags:
 agents:
   image:
     repository: registry.vms.st0rmingbr4in.lan/datadoghq/agent-with-integrations
+    tag: 7.44.0
   containers:
     agent:
       resources:
