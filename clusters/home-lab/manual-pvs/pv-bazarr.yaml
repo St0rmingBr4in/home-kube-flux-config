@@ -14,13 +14,11 @@ spec:
     kind: PersistentVolumeClaim
     name: bazarr-config
     namespace: prod-media
-  csi:
-    driver: driver.longhorn.io
+  iscsi:
+    targetPortal: nasse.hard.st0rmingbr4in.lan
+    portals: ['nasse.hard.st0rmingbr4in.lan']
+    iqn: iqn.2000-01.com.synology:NASSE.Target-1.2825c7e9683
+    #lun: 0
     fsType: ext4
-    volumeAttributes:
-      numberOfReplicas: "3"
-      staleReplicaTimeout: "30"
-    volumeHandle: bazarr-config
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: longhorn
   volumeMode: Filesystem
