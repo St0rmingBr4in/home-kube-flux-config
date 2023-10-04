@@ -11,7 +11,7 @@ spec:
         kind: GitRepository
         name: traefik-custom-helm-chart
         namespace: prod-infra
-      version: 10.31.0
+      version: 24.1.0
   interval: 1h0m0s
   releaseName: traefik
   targetNamespace: prod-infra
