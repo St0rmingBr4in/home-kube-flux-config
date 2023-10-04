@@ -27,6 +27,8 @@ persistence:
   config:
     enabled: true
     existingClaim: bazarr-config
+#     mountPath: /config
   media:
     enabled: true
     existingClaim: media-library
+    mountPath: /media
