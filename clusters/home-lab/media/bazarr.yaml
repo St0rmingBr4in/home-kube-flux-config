@@ -10,9 +10,9 @@ spec:
       chart: bazarr
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: truecharts
         namespace: flux-system
-      version: 10.6.2
+      version: 15.0.2
   interval: 1h0m0s
   releaseName: bazarr
   targetNamespace: prod-media
