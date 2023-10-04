@@ -1,4 +1,7 @@
 ---
+operator:
+  verify:
+    enabled: false
 ingress:
   main:
     enabled: true
