@@ -5,7 +5,7 @@ ingress:
   main:
     enabled: true
     hosts:
-      - host: jellyfin.ilovecara.ml
+      - host: jellyfin.st0rmingbr4in.com
         paths:
           - path: /
 resources:
