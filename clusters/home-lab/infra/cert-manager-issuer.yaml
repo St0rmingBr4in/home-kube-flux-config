@@ -13,5 +13,5 @@ spec:
     - dns01:
         digitalocean:
           tokenSecretRef:
-            name: ovh-token
+            name: digitalocean-token
             key: access-token
