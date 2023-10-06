@@ -16,7 +16,7 @@ resources:
   - pihole.yaml
   - vault-pvc-0.yaml
   - vault.yaml
-  # - st0rmingbr4in-com-certificate.yaml
+  - st0rmingbr4in-com-certificate.yaml
   - basic-auth.yaml
   - middleware.yaml
   - traefik-customchart.yaml
