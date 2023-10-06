@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
+  - https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy/?ref=vertical-pod-autoscaler-0.14.0&timeout=90s
   - amd-gpu-device-plugin.yaml
   - datadog-secret.yaml
   - datadog.yaml
