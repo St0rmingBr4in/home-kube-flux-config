@@ -2,9 +2,11 @@
 installCRDs: true
 extraArgs:
   - "--feature-gates=ExperimentalGatewayAPISupport=true"
+  - "--dns01-recursive-nameservers-only=true"
+  - "--dns01-recursive-nameservers=ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
 
-dns01RecursiveNameservers: "ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
-dns01RecursiveNameserversOnly: true
+# dns01RecursiveNameservers: "ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
+# dns01RecursiveNameserversOnly: true
 
 resources:
   limits:
