@@ -31,3 +31,4 @@ persistence:
     enabled: true
     existingClaim: media-downloads
     subPath: torrent-blackhole
+    mountPath: /downloads
