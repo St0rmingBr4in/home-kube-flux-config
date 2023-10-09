@@ -1,4 +1,8 @@
 ---
+operator:
+  verify:
+    enabled: false
+
 hostNetwork: true
 dnsPolicy: ClusterFirstWithHostNet
 
