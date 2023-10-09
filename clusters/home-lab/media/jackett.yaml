@@ -10,9 +10,9 @@ spec:
       chart: jackett
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: truecharts
         namespace: flux-system
-      version: 11.7.2
+      version: 15.0.10
   interval: 1h0m0s
   releaseName: jackett
   targetNamespace: prod-media
