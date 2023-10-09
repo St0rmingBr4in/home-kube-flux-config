@@ -19,7 +19,8 @@ resources:
   - vault.yaml
   - st0rmingbr4in-com-certificate.yaml
   - basic-auth.yaml
-  - middleware.yaml
+  - basic-auth-middleware.yaml
+  - metrics-redirect-middleware.yaml
   - traefik-customchart.yaml
   - traefik.yaml
 

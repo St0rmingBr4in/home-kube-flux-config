@@ -4,6 +4,8 @@ image:
 ingress:
   main:
     enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-metrics-redirect@kubernetescrd
     hosts:
       - host: jellyfin.st0rmingbr4in.com
         paths:
