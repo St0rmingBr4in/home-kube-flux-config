@@ -31,7 +31,8 @@ persistence:
   media:
     enabled: true
     existingClaim: media-library
+    mountPath: /media
   downloads:
     enabled: true
     existingClaim: media-downloads
-    mountPath: /media
+    mountPath: /downloads

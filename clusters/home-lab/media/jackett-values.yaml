@@ -5,12 +5,13 @@ operator:
 ingress:
   main:
     enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
       - host: jackett.st0rmingbr4in.com
         paths:
           - path: /
+
+middlewares:
+  traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
 
 resources:
   limits:
