@@ -2,6 +2,9 @@
 operator:
   verify:
     enabled: false
+  traefik:
+    namespace: prod-infra
+
 ingress:
   main:
     enabled: true
@@ -9,9 +12,9 @@ ingress:
       - host: jackett.st0rmingbr4in.com
         paths:
           - path: /
-
-middlewares:
-  traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    enableFixedMiddlewares: true
+    fixedMiddlewares:
+      - basic-auth
 
 resources:
   limits:

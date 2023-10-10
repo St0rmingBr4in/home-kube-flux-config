@@ -10,9 +10,9 @@ spec:
       chart: jellyfin
       sourceRef:
         kind: HelmRepository
-        name: k8s-at-home
+        name: truecharts
         namespace: flux-system
-      version: 9.5.3
+      version: 15.0.12
   interval: 1h0m0s
   releaseName: jellyfin
   targetNamespace: prod-media

@@ -1,15 +1,20 @@
 ---
-image:
-  tag: latest
+operator:
+  verify:
+    enabled: false
+  traefik:
+    namespace: prod-infra
+
 ingress:
   main:
     enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-metrics-redirect@kubernetescrd
     hosts:
       - host: jellyfin.st0rmingbr4in.com
         paths:
           - path: /
+    enableFixedMiddlewares: true
+    fixedMiddlewares:
+
 resources:
   limits:
     cpu: 7
@@ -30,3 +35,4 @@ persistence:
   media:
     enabled: true
     existingClaim: media-library
+    mountPath: /media

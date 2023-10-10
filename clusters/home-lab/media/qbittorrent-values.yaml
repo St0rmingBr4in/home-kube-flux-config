@@ -1,13 +1,20 @@
 ---
+operator:
+  verify:
+    enabled: false
+  traefik:
+    namespace: prod-infra
+
 ingress:
   main:
     enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
       - host: qbittorrent.st0rmingbr4in.com
         paths:
           - path: /
+    enableFixedMiddlewares: true
+    fixedMiddlewares:
+      - basic-auth
 
 resources:
   limits:
