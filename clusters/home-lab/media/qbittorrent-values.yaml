@@ -24,9 +24,6 @@ resources:
     cpu: 100m
     memory: 500Mi
 
-metrics:
-  enabled: false
-
 persistence:
   config:
     enabled: true
