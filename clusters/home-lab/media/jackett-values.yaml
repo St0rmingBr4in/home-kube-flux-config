@@ -5,6 +5,10 @@ operator:
   traefik:
     namespace: prod-infra
 
+image:
+  repository: lscr.io/linuxserver/jackett
+  tag: 0.21.1011
+
 ingress:
   main:
     enabled: true
@@ -25,7 +29,8 @@ resources:
     memory: 200Mi
 
 securityContext:
-  runAsUser: 1025
+  container:
+    runAsUser: 1025
 
 persistence:
   config:
