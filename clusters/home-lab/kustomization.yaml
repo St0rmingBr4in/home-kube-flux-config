@@ -7,7 +7,7 @@ resources:
 - helmrepos
 - infra
 - media
-- velero
+#- velero
 - system-upgrade
 - iot
 - cloudnative-pg
