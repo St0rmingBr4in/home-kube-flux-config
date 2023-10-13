@@ -99,4 +99,4 @@ extraVolumes:
       - name: worldedit-schematics
         nfs:
           server: nasse.hard.st0rmingbr4in.lan
-          path: /volume1/kubernetes_storage/worldedit-schematics
+          path: /volume1/kubernetes_storage/worldedit_schematics
