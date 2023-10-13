@@ -1,0 +1,21 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+  namespace: cloudnative-pg
+spec:
+  chart:
+    spec:
+      chart: cloudnative-pg
+      sourceRef:
+        kind: HelmRepository
+        name: truecharts
+        namespace: flux-system
+      version: 2.0.3
+  interval: 1h0m0s
+  releaseName: cloudnative-pg
+  targetNamespace: cloudnative-pg
+  valuesFrom:
+    - kind: ConfigMap
+      name: cloudnative-pg-values

@@ -10,6 +10,7 @@ resources:
 - velero
 - system-upgrade
 - iot
+- cloudnative-pg
 patches:
 - path: namespace-no-prune-patch.yaml
   target:
