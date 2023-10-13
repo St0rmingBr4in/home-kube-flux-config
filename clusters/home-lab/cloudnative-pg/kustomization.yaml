@@ -13,3 +13,4 @@ configMapGenerator:
 
 configurations:
   - ../common/kustomizeconfig.yaml
+namespace: cloudnative-pg
