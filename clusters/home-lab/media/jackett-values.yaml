@@ -5,9 +5,8 @@ operator:
   traefik:
     namespace: prod-infra
 
-# image:
-#   repository: lscr.io/linuxserver/jackett
-#   tag: 0.21.1011
+ image:
+   tag: v0.20.2297 # Pin version until System.InsufficientExecutionStackException is fixed
 
 ingress:
   main:
