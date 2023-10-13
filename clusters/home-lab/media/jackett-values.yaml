@@ -5,9 +5,9 @@ operator:
   traefik:
     namespace: prod-infra
 
-image:
-  repository: lscr.io/linuxserver/jackett
-  tag: 0.21.1011
+# image:
+#   repository: lscr.io/linuxserver/jackett
+#   tag: 0.21.1011
 
 ingress:
   main:
@@ -22,15 +22,15 @@ ingress:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 200Mi
+    cpu: 1000m
+    memory: 2000Mi
   requests:
-    cpu: 100m
-    memory: 200Mi
+    cpu: 1000m
+    memory: 2000Mi
 
-securityContext:
-  container:
-    runAsUser: 1025
+# securityContext:
+#   container:
+#     runAsUser: 1025
 
 persistence:
   config:
