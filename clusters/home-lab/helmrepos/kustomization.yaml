@@ -12,7 +12,7 @@ resources:
   - kube-vip.yaml
   - mojo2600.yaml
   - mongoose.yaml
-  - prometheus-community.yaml
+#  - prometheus-community.yaml
   - t3n.yaml
   - traefik.yaml
   - truecharts.yaml
