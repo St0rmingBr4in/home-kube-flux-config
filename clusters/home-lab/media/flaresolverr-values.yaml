@@ -4,3 +4,11 @@ persistence:
   config:
     enabled: false
     # existingClaim: flaresolverr-config
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi

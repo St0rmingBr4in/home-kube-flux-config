@@ -53,7 +53,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: lWpQM
+        rollme: rFWIV
       labels:
         app: flaresolverr-10.0.5
         app.kubernetes.io/instance: flaresolverr
@@ -131,11 +131,11 @@ spec:
             timeoutSeconds: 5
           resources:
             limits:
-              cpu: 4000m
-              memory: 8Gi
+              cpu: 100m
+              memory: 300Mi
             requests:
-              cpu: 10m
-              memory: 50Mi
+              cpu: 100m
+              memory: 300Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

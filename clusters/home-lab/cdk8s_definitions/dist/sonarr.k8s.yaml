@@ -81,7 +81,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: rplTK
+        rollme: BOscy
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr
@@ -254,7 +254,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: ylFK1
+        rollme: Khtzc
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr
