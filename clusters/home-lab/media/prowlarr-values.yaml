@@ -1,0 +1,30 @@
+---
+operator:
+  verify:
+    enabled: false
+  traefik:
+    namespace: prod-infra
+
+ingress:
+  main:
+    enabled: true
+    hosts:
+      - host: prowlarr.st0rmingbr4in.com
+        paths:
+          - path: /
+    enableFixedMiddlewares: true
+    fixedMiddlewares:
+      - basic-auth
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2000Mi
+  requests:
+    cpu: 1000m
+    memory: 2000Mi
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: prowlarr-config

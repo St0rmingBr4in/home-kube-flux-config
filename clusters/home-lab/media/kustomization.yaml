@@ -10,6 +10,8 @@ resources:
   - flaresolverr.yaml
   - jackett-config-pvc.yaml
   - jackett.yaml
+  - prowlarr-config-pvc.yaml
+  - prowlarr.yaml
   - jellyfin-config-pvc.yaml
   - jellyfin.yaml
   - media-downloads-pvc.yaml
@@ -30,6 +32,9 @@ configMapGenerator:
   - name: jackett-values
     files:
       - values.yaml=jackett-values.yaml
+  - name: prowlarr-values
+    files:
+      - values.yaml=prowlarr-values.yaml
   - name: jellyfin-values
     files:
       - values.yaml=jellyfin-values.yaml
