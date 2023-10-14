@@ -11,6 +11,7 @@ resources:
 # - system-upgrade
 - iot
 - cloudnative-pg
+- cdk8s_definitions
 patches:
 - path: namespace-no-prune-patch.yaml
   target:
