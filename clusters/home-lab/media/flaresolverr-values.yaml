@@ -1,1 +1,6 @@
 ---
+
+persistence:
+  config:
+    enabled: false
+    # existingClaim: flaresolverr-config
