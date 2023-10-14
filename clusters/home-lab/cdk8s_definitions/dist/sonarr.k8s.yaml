@@ -1,0 +1,463 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+    service.name: main
+  name: sonarr
+  namespace: prod-media
+spec:
+  ports:
+    - name: main
+      port: 8989
+      protocol: TCP
+      targetPort: 8989
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/name: sonarr
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+    service.name: metrics
+  name: sonarr-metrics
+  namespace: prod-media
+spec:
+  ports:
+    - name: metrics
+      port: 8990
+      protocol: TCP
+      targetPort: 8990
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/name: sonarr
+    pod.name: exportarr
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+  name: sonarr-exportarr
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sonarr
+      app.kubernetes.io/name: sonarr
+      pod.name: exportarr
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        rollme: rplTK
+      labels:
+        app: sonarr-16.0.2
+        app.kubernetes.io/instance: sonarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: sonarr
+        app.kubernetes.io/version: 3.0.10.156
+        helm-revision: "1"
+        helm.sh/chart: sonarr-16.0.2
+        pod.name: exportarr
+        release: sonarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - args:
+            - sonarr
+          env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: CONFIG
+              value: /config/config.xml
+            - name: INTERFACE
+              value: 0.0.0.0
+            - name: PORT
+              value: "8990"
+            - name: URL
+              value: http://sonarr:8989
+          image: tccr.io/truecharts/exportarr:v1.5.5@sha256:0dbba4994ac9926e284b5a24fe38e7ca546bcda4b20bbd1ab2444b8bc190d6cb
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 8990
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: sonarr
+          ports:
+            - containerPort: 8990
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 8990
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /healthz
+              port: 8990
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: true
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: sonarr-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+  name: sonarr
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sonarr
+      app.kubernetes.io/name: sonarr
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        rollme: ylFK1
+      labels:
+        app: sonarr-16.0.2
+        app.kubernetes.io/instance: sonarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: sonarr
+        app.kubernetes.io/version: 3.0.10.156
+        helm-revision: "1"
+        helm.sh/chart: sonarr-16.0.2
+        pod.name: main
+        release: sonarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: SONARR__AUTHENTICATION_METHOD
+              value: ""
+            - name: SONARR__PORT
+              value: "8989"
+          image: tccr.io/truecharts/sonarr:3.0.10.1567@sha256:f420ed0b9341a5241c2278d51a7f4f59635a9c3a5670ac893542fa59052e61b2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ping
+              port: 8989
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: sonarr
+          ports:
+            - containerPort: 8989
+              name: main
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ping
+              port: 8989
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 100m
+              memory: 250Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /ping
+              port: 8989
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /downloads
+              name: downloads
+              readOnly: false
+            - mountPath: /tv
+              name: media
+              readOnly: false
+              subPath: Series
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: sonarr-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: media-downloads
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-library
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+  name: sonarr
+  namespace: prod-media
+spec:
+  rules:
+    - host: sonarr.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: sonarr
+                port:
+                  number: 8989
+            path: /
+            pathType: Prefix
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: sonarr-16.0.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 3.0.10.156
+    helm-revision: "1"
+    helm.sh/chart: sonarr-16.0.2
+    release: sonarr
+  name: sonarr
+  namespace: prod-media
+spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sonarr
+      app.kubernetes.io/name: sonarr
+      service.name: main
