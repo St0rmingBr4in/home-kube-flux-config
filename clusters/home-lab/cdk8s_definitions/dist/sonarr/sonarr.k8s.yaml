@@ -81,7 +81,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: ADc7J
+        rollme: XL7iG
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr
@@ -254,7 +254,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: xI3Rf
+        rollme: cKho7
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr

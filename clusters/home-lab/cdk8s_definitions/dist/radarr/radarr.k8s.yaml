@@ -81,7 +81,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: pNfUr
+        rollme: 4DBrb
       labels:
         app: radarr-17.0.7
         app.kubernetes.io/instance: radarr
@@ -254,7 +254,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: tozKs
+        rollme: XLapG
       labels:
         app: radarr-17.0.7
         app.kubernetes.io/instance: radarr

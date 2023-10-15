@@ -2,3 +2,4 @@ language: python
 app: pipenv run python main.py
 imports:
   - k8s
+  - https://github.com/fluxcd/kustomize-controller/releases/download/v1.1.1/kustomize-controller.crds.yaml

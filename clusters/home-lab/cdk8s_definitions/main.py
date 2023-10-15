@@ -4,7 +4,14 @@ import yaml
 from cdk8s import App, Chart, Names, ApiObject, Helm, Yaml
 from constructs import Construct
 
-KUSTOMIZE_API_VERSION="kustomize.config.k8s.io/v1beta1"
+from imports.io.fluxcd.toolkit.kustomize import (
+    Kustomization,
+    KustomizationSpecSourceRefKind,
+    KustomizationSpecDecryptionProvider,
+)
+
+KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
+
 
 def helm_repo(repo_name):
     if repo_name == "truecharts":
@@ -13,30 +20,54 @@ def helm_repo(repo_name):
 
 class HelmChart(Chart):
     def __init__(
-        self, scope: Construct, resource_id: str, repo_name, values_dir, **kwargs
+        self, scope: Construct, identifier: str, repo_name, values_dir, **kwargs
     ):
-        super().__init__(scope, resource_id, disable_resource_name_hashes=True)
+        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
 
-        with open(f"{values_dir}/{resource_id}-values.yaml", "r") as file:
+        with open(f"{values_dir}/{identifier}-values.yaml", "r") as file:
             values = yaml.safe_load(file)
 
             Helm(
                 self,
-                resource_id,
-                release_name=resource_id,
+                identifier,
+                release_name=identifier,
                 repo=helm_repo(repo_name),
-                chart=resource_id,
+                chart=identifier,
                 values=values,
                 **kwargs,
             )
 
 
+class KustomizationChart(Chart):
+    def __init__(self, scope, identifier, **kwargs):
+        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
+        Kustomization(self, f"{identifier}-kustomization", **kwargs)
+
+
 class HelmApp(App):
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, namespace, **kwargs):
         super().__init__(outdir=f"dist/{name}")
         self.name = name
 
-        HelmChart(scope=self, resource_id=name, **kwargs)
+        HelmChart(scope=self, identifier=name, namespace=namespace, **kwargs)
+        KustomizationChart(
+            scope=self,
+            identifier=f"{name}-flux-kustomization",
+            metadata={"namespace": "flux-system", "name": name},
+            spec={
+                "interval": "10m0s",
+                "path": f"./clusters/home-lab/cdk8s_definitions/dist/{name}",
+                "prune": True,
+                "decryption": {
+                    "provider": KustomizationSpecDecryptionProvider.SOPS,
+                    "secret_ref": {"name": "sops-gpg"},
+                },
+                "source_ref": {
+                    "kind": KustomizationSpecSourceRefKind.GIT_REPOSITORY,
+                    "name": "flux-system",
+                },
+            },
+        )
 
     def get_name(self):
         return self.name
@@ -89,7 +120,10 @@ Yaml.save(
         {
             "apiVersion": KUSTOMIZE_API_VERSION,
             "kind": "Kustomization",
-            "resources": [f"dist/{app.get_name()}" for app in apps],
+            "resources": [
+                f"dist/{app.get_name()}/{app.get_name()}-flux-kustomization.k8s.yaml"
+                for app in apps
+            ],
         }
     ],
 )
