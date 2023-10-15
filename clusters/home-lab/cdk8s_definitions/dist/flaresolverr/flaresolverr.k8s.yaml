@@ -53,7 +53,7 @@ spec:
   template:
     metadata:
       annotations:
-        rollme: rFWIV
+        rollme: m5Nuq
       labels:
         app: flaresolverr-10.0.5
         app.kubernetes.io/instance: flaresolverr
