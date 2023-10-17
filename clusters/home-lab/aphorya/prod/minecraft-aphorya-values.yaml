@@ -11,7 +11,7 @@ minecraftServer:
   externalTrafficPolicy: Cluster
   serviceType: LoadBalancer
   loadBalancerIP: 192.168.62.17
-  servicePort: 25555
+  servicePort: 25565
   extraPorts:
     - name: metrics
       containerPort: 9940
