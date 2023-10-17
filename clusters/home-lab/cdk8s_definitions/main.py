@@ -19,23 +19,16 @@ def helm_repo(repo_name):
 
 
 class HelmChart(Chart):
-    def __init__(
-        self, scope: Construct, identifier: str, repo_name, values_dir, **kwargs
-    ):
+    def __init__(self, scope: Construct, identifier: str, **kwargs):
         super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
 
-        with open(f"{values_dir}/{identifier}-values.yaml", "r") as file:
-            values = yaml.safe_load(file)
-
-            Helm(
-                self,
-                identifier,
-                release_name=identifier,
-                repo=helm_repo(repo_name),
-                chart=identifier,
-                values=values,
-                **kwargs,
-            )
+        Helm(
+            self,
+            identifier,
+            release_name=identifier,
+            chart=identifier,
+            **kwargs,
+        )
 
 
 class KustomizationChart(Chart):
@@ -45,11 +38,26 @@ class KustomizationChart(Chart):
 
 
 class HelmApp(App):
-    def __init__(self, name, namespace, **kwargs):
+    def __init__(self, name, values_dir, **kwargs):
         super().__init__(outdir=f"dist/{name}")
         self.name = name
 
-        HelmChart(scope=self, identifier=name, namespace=namespace, **kwargs)
+        with open(f"{values_dir}/{name}.yaml", "r") as helm_release_file:
+            helm_release = yaml.safe_load(helm_release_file)
+            with open(f"{values_dir}/{name}-values.yaml", "r") as values_file:
+                values = yaml.safe_load(values_file)
+
+                HelmChart(
+                    scope=self,
+                    identifier=name,
+                    values=values,
+                    version=helm_release["spec"]["chart"]["spec"]["version"],
+                    repo=helm_repo(
+                        helm_release["spec"]["chart"]["spec"]["sourceRef"]["name"]
+                    ),
+                    **kwargs,
+                )
+
         KustomizationChart(
             scope=self,
             identifier=f"{name}-flux-kustomization",
@@ -90,22 +98,16 @@ class HelmApp(App):
 apps = [
     HelmApp(
         name="flaresolverr",
-        repo_name="truecharts",
-        version="10.0.5",
         namespace="prod-media",
         values_dir="../media",
     ),
     HelmApp(
         name="radarr",
-        repo_name="truecharts",
-        version="17.0.7",
         namespace="prod-media",
         values_dir="../media",
     ),
     HelmApp(
         name="sonarr",
-        repo_name="truecharts",
-        version="16.0.2",
         namespace="prod-media",
         values_dir="../media",
     ),
