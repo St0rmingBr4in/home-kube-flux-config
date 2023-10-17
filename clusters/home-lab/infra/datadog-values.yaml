@@ -154,6 +154,7 @@ agents:
 
 clusterAgent:
   enabled: true
+  tokenExistingSecret: datadog-cluster-agent
   resources:
     requests:
       cpu: 50m

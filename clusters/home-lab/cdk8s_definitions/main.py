@@ -15,10 +15,9 @@ KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
 
 
 def helm_repo(repo_name):
-    if repo_name == "truecharts":
-        return "https://charts.truecharts.org"
-    else:
-        raise Exception("Unknown repo")
+    with open(f"../helmrepos/{repo_name}.yaml", "r") as helm_repo_file:
+        helm_repo = yaml.safe_load(helm_repo_file)
+        return helm_repo["spec"]["url"]
 
 
 class HelmChart(Chart):
@@ -35,9 +34,11 @@ class HelmChart(Chart):
 
         for o in helm.api_objects:
             if o.kind == "Deployment":
-                o.add_json_patch(
-                    JsonPatch.remove("/spec/template/metadata/annotations/rollme")
-                )
+                met = o.to_json()["spec"]["template"]["metadata"]
+                if "annotations" in met and "rollme" in met["annotations"]:
+                    o.add_json_patch(
+                        JsonPatch.remove("/spec/template/metadata/annotations/rollme")
+                    )
 
 
 class KustomizationChart(Chart):
@@ -137,6 +138,30 @@ apps = [
     HelmApp(
         name="qbittorrent",
         values_dir="../media",
+    ),
+    HelmApp(
+        name="external-service",
+        values_dir="../infra",
+    ),
+    HelmApp(
+        name="vault",
+        values_dir="../infra",
+    ),
+    HelmApp(
+        name="pihole",
+        values_dir="../infra",
+    ),
+    HelmApp(
+        name="kube-vip",
+        values_dir="../infra",
+    ),
+    HelmApp(
+        name="datadog",
+        values_dir="../infra",
+    ),
+    HelmApp(
+        name="cert-manager",
+        values_dir="../infra",
     ),
 ]
 

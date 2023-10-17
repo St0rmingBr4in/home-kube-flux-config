@@ -9,3 +9,9 @@ resources:
   - dist/jellyfin/jellyfin-flux-kustomization.k8s.yaml
   - dist/prowlarr/prowlarr-flux-kustomization.k8s.yaml
   - dist/qbittorrent/qbittorrent-flux-kustomization.k8s.yaml
+  - dist/external-service/external-service-flux-kustomization.k8s.yaml
+  - dist/vault/vault-flux-kustomization.k8s.yaml
+  - dist/pihole/pihole-flux-kustomization.k8s.yaml
+  - dist/kube-vip/kube-vip-flux-kustomization.k8s.yaml
+  - dist/datadog/datadog-flux-kustomization.k8s.yaml
+  - dist/cert-manager/cert-manager-flux-kustomization.k8s.yaml

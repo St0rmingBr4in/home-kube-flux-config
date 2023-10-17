@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: datadog
+  namespace: flux-system
+spec:
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-gpg
+  interval: 10m0s
+  path: ./clusters/home-lab/cdk8s_definitions/dist/datadog
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

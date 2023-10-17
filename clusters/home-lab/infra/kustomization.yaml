@@ -5,18 +5,12 @@ resources:
   - namespace.yaml
   - ../common/
   - https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy/?ref=vertical-pod-autoscaler-0.14.0&timeout=90s
-#  - amd-gpu-device-plugin.yaml
   - datadog-secret.yaml
-  - datadog.yaml
-  - cert-manager.yaml
+  - datadog-cluster-agent-secret.yaml
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
-  - external-services.yaml
-#  - kube-prometheus-stack.yaml
-  - kube-vip.yaml
   - pihole.yaml
   - vault-pvc-0.yaml
-  - vault.yaml
   - st0rmingbr4in-com-certificate.yaml
   - basic-auth.yaml
   - basic-auth-middleware.yaml
@@ -24,28 +18,4 @@ resources:
   - traefik-customchart.yaml
   - traefik.yaml
 
-configMapGenerator:
-#  - name: amd-gpu-device-plugin-values
-#    files:
-#      - values.yaml=amd-gpu-device-plugin-values.yaml
-  - name: cert-manager-values
-    files:
-      - values.yaml=cert-manager-values.yaml
-  - name: datadog-values
-    files:
-      - values.yaml=datadog-values.yaml
-  - name: external-service-values
-    files:
-      - values.yaml=external-services-values.yaml
-#  - name: kube-prometheus-stack-values
-#    files:
-#      - values.yaml=kube-prometheus-stack-values.yaml
-  - name: vault-values
-    files:
-      - values.yaml=vault-values.yaml
-  - name: traefik-values
-    files:
-      - values.yaml=traefik-values.yaml
-configurations:
-  - kustomizeconfig.yaml
 namespace: prod-infra
