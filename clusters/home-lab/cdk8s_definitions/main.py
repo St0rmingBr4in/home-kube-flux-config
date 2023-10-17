@@ -62,6 +62,7 @@ class HelmApp(App):
                     repo=helm_repo(
                         helm_release["spec"]["chart"]["spec"]["sourceRef"]["name"]
                     ),
+                    namespace=helm_release["spec"]["targetNamespace"],
                     **kwargs,
                 )
 
@@ -105,17 +106,14 @@ class HelmApp(App):
 apps = [
     HelmApp(
         name="flaresolverr",
-        namespace="prod-media",
         values_dir="../media",
     ),
     HelmApp(
         name="radarr",
-        namespace="prod-media",
         values_dir="../media",
     ),
     HelmApp(
         name="sonarr",
-        namespace="prod-media",
         values_dir="../media",
     ),
 ]
