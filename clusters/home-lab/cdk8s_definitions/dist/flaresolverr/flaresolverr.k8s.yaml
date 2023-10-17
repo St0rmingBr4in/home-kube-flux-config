@@ -52,8 +52,7 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        rollme: JP6gZ
+      annotations: {}
       labels:
         app: flaresolverr-10.0.5
         app.kubernetes.io/instance: flaresolverr

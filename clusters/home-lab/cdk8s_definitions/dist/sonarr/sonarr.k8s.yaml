@@ -80,8 +80,7 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        rollme: XL7iG
+      annotations: {}
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr
@@ -253,8 +252,7 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        rollme: cKho7
+      annotations: {}
       labels:
         app: sonarr-16.0.2
         app.kubernetes.io/instance: sonarr

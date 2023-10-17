@@ -80,8 +80,7 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        rollme: 4DBrb
+      annotations: {}
       labels:
         app: radarr-17.0.7
         app.kubernetes.io/instance: radarr
@@ -253,8 +252,7 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        rollme: XLapG
+      annotations: {}
       labels:
         app: radarr-17.0.7
         app.kubernetes.io/instance: radarr

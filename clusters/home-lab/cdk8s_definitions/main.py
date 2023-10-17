@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+
 import cdk8s_plus_27 as kplus
 import yaml
-from cdk8s import App, Chart, Names, ApiObject, Helm, Yaml
+from cdk8s import App, Chart, Names, ApiObject, Helm, Yaml, JsonPatch
 from constructs import Construct
 
 from imports.io.fluxcd.toolkit.kustomize import (
@@ -22,13 +23,19 @@ class HelmChart(Chart):
     def __init__(self, scope: Construct, identifier: str, **kwargs):
         super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
 
-        Helm(
+        helm = Helm(
             self,
             identifier,
             release_name=identifier,
             chart=identifier,
             **kwargs,
         )
+
+        for o in helm.api_objects:
+            if o.kind == "Deployment":
+                o.add_json_patch(
+                    JsonPatch.remove("/spec/template/metadata/annotations/rollme")
+                )
 
 
 class KustomizationChart(Chart):
