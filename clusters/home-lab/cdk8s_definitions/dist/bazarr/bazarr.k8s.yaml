@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bazarr-15.0.10
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/version: 1.3.0
+    helm-revision: "1"
+    helm.sh/chart: bazarr-15.0.10
+    release: bazarr
+    service.name: main
+  name: bazarr
+  namespace: prod-media
+spec:
+  ports:
+    - name: main
+      port: 6767
+      protocol: TCP
+      targetPort: 6767
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/name: bazarr
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bazarr-15.0.10
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/version: 1.3.0
+    helm-revision: "1"
+    helm.sh/chart: bazarr-15.0.10
+    release: bazarr
+  name: bazarr
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: bazarr
+      app.kubernetes.io/name: bazarr
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: bazarr-15.0.10
+        app.kubernetes.io/instance: bazarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: bazarr
+        app.kubernetes.io/version: 1.3.0
+        helm-revision: "1"
+        helm.sh/chart: bazarr-15.0.10
+        pod.name: main
+        release: bazarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          image: tccr.io/truecharts/bazarr:v1.3.0@sha256:853b458858e3f0c62e9c15aaae35d73691457d37e14d2f9e797d8a9cadc861c7
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 6767
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: bazarr
+          ports:
+            - containerPort: 6767
+              name: main
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 6767
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 200Mi
+            requests:
+              cpu: 1000m
+              memory: 200Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 6767
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /media
+              name: media
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: bazarr-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-library
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: tc-system-chain-basic@kubernetescrd
+  labels:
+    app: bazarr-15.0.10
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/version: 1.3.0
+    helm-revision: "1"
+    helm.sh/chart: bazarr-15.0.10
+    release: bazarr
+  name: bazarr
+  namespace: prod-media
+spec:
+  rules:
+    - host: bazarr.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: bazarr
+                port:
+                  number: 6767
+            path: /
+            pathType: Prefix

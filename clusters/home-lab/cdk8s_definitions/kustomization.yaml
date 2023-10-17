@@ -4,3 +4,8 @@ resources:
   - dist/flaresolverr/flaresolverr-flux-kustomization.k8s.yaml
   - dist/radarr/radarr-flux-kustomization.k8s.yaml
   - dist/sonarr/sonarr-flux-kustomization.k8s.yaml
+  - dist/bazarr/bazarr-flux-kustomization.k8s.yaml
+  - dist/jackett/jackett-flux-kustomization.k8s.yaml
+  - dist/jellyfin/jellyfin-flux-kustomization.k8s.yaml
+  - dist/prowlarr/prowlarr-flux-kustomization.k8s.yaml
+  - dist/qbittorrent/qbittorrent-flux-kustomization.k8s.yaml

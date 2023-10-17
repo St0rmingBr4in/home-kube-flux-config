@@ -1,0 +1,261 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: qbittorrent-16.0.4
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/version: 4.5.5
+    helm-revision: "1"
+    helm.sh/chart: qbittorrent-16.0.4
+    release: qbittorrent
+    service.name: main
+  name: qbittorrent
+  namespace: prod-media
+spec:
+  ports:
+    - name: main
+      port: 10095
+      protocol: TCP
+      targetPort: 8080
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/name: qbittorrent
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: qbittorrent-16.0.4
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/version: 4.5.5
+    helm-revision: "1"
+    helm.sh/chart: qbittorrent-16.0.4
+    release: qbittorrent
+    service.name: torrent
+  name: qbittorrent-torrent
+  namespace: prod-media
+spec:
+  ports:
+    - name: torrent
+      port: 6881
+      protocol: TCP
+      targetPort: 6881
+    - name: torrentudp
+      port: 6881
+      protocol: UDP
+      targetPort: 6881
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/name: qbittorrent
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: qbittorrent-16.0.4
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/version: 4.5.5
+    helm-revision: "1"
+    helm.sh/chart: qbittorrent-16.0.4
+    release: qbittorrent
+  name: qbittorrent
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: qbittorrent
+      app.kubernetes.io/name: qbittorrent
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: qbittorrent-16.0.4
+        app.kubernetes.io/instance: qbittorrent
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: qbittorrent
+        app.kubernetes.io/version: 4.5.5
+        helm-revision: "1"
+        helm.sh/chart: qbittorrent-16.0.4
+        pod.name: main
+        release: qbittorrent
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          image: tccr.io/truecharts/qbittorrent:v4.5.5@sha256:9e35007e156864388ab679d1aa8679a5faad48bae1611ec711bd888534dd3750
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: qbittorrent
+          ports:
+            - containerPort: 8080
+              name: main
+              protocol: TCP
+            - containerPort: 6881
+              name: torrent
+              protocol: TCP
+            - containerPort: 6881
+              name: torrentudp
+              protocol: UDP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 500Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /downloads
+              name: downloads
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: media-downloads
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+  labels:
+    app: qbittorrent-16.0.4
+    app.kubernetes.io/instance: qbittorrent
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/version: 4.5.5
+    helm-revision: "1"
+    helm.sh/chart: qbittorrent-16.0.4
+    release: qbittorrent
+  name: qbittorrent
+  namespace: prod-media
+spec:
+  rules:
+    - host: qbittorrent.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: qbittorrent
+                port:
+                  number: 10095
+            path: /
+            pathType: Prefix

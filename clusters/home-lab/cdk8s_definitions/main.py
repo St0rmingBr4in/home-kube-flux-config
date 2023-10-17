@@ -17,6 +17,8 @@ KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
 def helm_repo(repo_name):
     if repo_name == "truecharts":
         return "https://charts.truecharts.org"
+    else:
+        raise Exception("Unknown repo")
 
 
 class HelmChart(Chart):
@@ -114,6 +116,26 @@ apps = [
     ),
     HelmApp(
         name="sonarr",
+        values_dir="../media",
+    ),
+    HelmApp(
+        name="bazarr",
+        values_dir="../media",
+    ),
+    HelmApp(
+        name="jackett",
+        values_dir="../media",
+    ),
+    HelmApp(
+        name="jellyfin",
+        values_dir="../media",
+    ),
+    HelmApp(
+        name="prowlarr",
+        values_dir="../media",
+    ),
+    HelmApp(
+        name="qbittorrent",
         values_dir="../media",
     ),
 ]

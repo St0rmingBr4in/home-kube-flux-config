@@ -1,0 +1,446 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+    service.name: main
+  name: prowlarr
+  namespace: prod-media
+spec:
+  ports:
+    - name: main
+      port: 9696
+      protocol: TCP
+      targetPort: 9696
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/name: prowlarr
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+    service.name: metrics
+  name: prowlarr-metrics
+  namespace: prod-media
+spec:
+  ports:
+    - name: metrics
+      port: 9697
+      protocol: TCP
+      targetPort: 9697
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/name: prowlarr
+    pod.name: exportarr
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+  name: prowlarr-exportarr
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: prowlarr
+      app.kubernetes.io/name: prowlarr
+      pod.name: exportarr
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: prowlarr-12.0.13
+        app.kubernetes.io/instance: prowlarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: prowlarr
+        app.kubernetes.io/version: 1.9.3.4013
+        helm-revision: "1"
+        helm.sh/chart: prowlarr-12.0.13
+        pod.name: exportarr
+        release: prowlarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - args:
+            - prowlarr
+          env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: CONFIG
+              value: /config/config.xml
+            - name: INTERFACE
+              value: 0.0.0.0
+            - name: PORT
+              value: "9697"
+            - name: URL
+              value: http://prowlarr:9696
+          image: tccr.io/truecharts/exportarr:v1.5.5@sha256:0dbba4994ac9926e284b5a24fe38e7ca546bcda4b20bbd1ab2444b8bc190d6cb
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 9697
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: prowlarr
+          ports:
+            - containerPort: 9697
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: 9697
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 500Mi
+            requests:
+              cpu: 1000m
+              memory: 500Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /healthz
+              port: 9697
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: true
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+  name: prowlarr
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: prowlarr
+      app.kubernetes.io/name: prowlarr
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: prowlarr-12.0.13
+        app.kubernetes.io/instance: prowlarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: prowlarr
+        app.kubernetes.io/version: 1.9.3.4013
+        helm-revision: "1"
+        helm.sh/chart: prowlarr-12.0.13
+        pod.name: main
+        release: prowlarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: PROWLARR__AUTHENTICATION_METHOD
+              value: ""
+            - name: PROWLARR__PORT
+              value: "9696"
+          image: tccr.io/truecharts/prowlarr:v1.9.3.4013@sha256:c2552d39bded7da923e7e03f531ee53337beb39c0f710d853eaeeb3ebcdec0d8
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 9696
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: prowlarr
+          ports:
+            - containerPort: 9696
+              name: main
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 9696
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 500Mi
+            requests:
+              cpu: 1000m
+              memory: 500Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 9696
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+  name: prowlarr
+  namespace: prod-media
+spec:
+  rules:
+    - host: prowlarr.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: prowlarr
+                port:
+                  number: 9696
+            path: /
+            pathType: Prefix
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: prowlarr-12.0.13
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.9.3.4013
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-12.0.13
+    release: prowlarr
+  name: prowlarr
+  namespace: prod-media
+spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: prowlarr
+      app.kubernetes.io/name: prowlarr
+      service.name: main

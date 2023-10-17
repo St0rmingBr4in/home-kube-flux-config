@@ -1,0 +1,266 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jellyfin-15.0.11
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/version: 10.8.11
+    helm-revision: "1"
+    helm.sh/chart: jellyfin-15.0.11
+    release: jellyfin
+    service.name: autodiscovery
+  name: jellyfin-autodiscovery
+  namespace: prod-media
+spec:
+  ports:
+    - name: autodiscovery
+      port: 7359
+      protocol: UDP
+      targetPort: 7359
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/name: jellyfin
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jellyfin-15.0.11
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/version: 10.8.11
+    helm-revision: "1"
+    helm.sh/chart: jellyfin-15.0.11
+    release: jellyfin
+    service.name: main
+  name: jellyfin
+  namespace: prod-media
+spec:
+  ports:
+    - name: main
+      port: 8096
+      protocol: TCP
+      targetPort: 8096
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/name: jellyfin
+    pod.name: main
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jellyfin-15.0.11
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/version: 10.8.11
+    helm-revision: "1"
+    helm.sh/chart: jellyfin-15.0.11
+    release: jellyfin
+  name: jellyfin
+  namespace: prod-media
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: jellyfin
+      app.kubernetes.io/name: jellyfin
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app: jellyfin-15.0.11
+        app.kubernetes.io/instance: jellyfin
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: jellyfin
+        app.kubernetes.io/version: 10.8.11
+        helm-revision: "1"
+        helm.sh/chart: jellyfin-15.0.11
+        pod.name: main
+        release: jellyfin
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: JELLYFIN_PublishedServerUrl
+              value: https://jellyfin.st0rmingbr4in.com
+          image: tccr.io/truecharts/jellyfin:v10.8.11@sha256:586eebeb787d89028b7891e189bc4bbf82141d67235252781ba72088708734f9
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8096
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: jellyfin
+          ports:
+            - containerPort: 7359
+              name: autodiscovery
+              protocol: UDP
+            - containerPort: 8096
+              name: main
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8096
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 7
+              memory: 2Gi
+            requests:
+              cpu: 3500m
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 8096
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /cache
+              name: cache
+              readOnly: false
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /media
+              name: media
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /config/transcodes
+              name: transcode
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - emptyDir: {}
+          name: cache
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-library
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: transcode
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+  labels:
+    app: jellyfin-15.0.11
+    app.kubernetes.io/instance: jellyfin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jellyfin
+    app.kubernetes.io/version: 10.8.11
+    helm-revision: "1"
+    helm.sh/chart: jellyfin-15.0.11
+    release: jellyfin
+  name: jellyfin
+  namespace: prod-media
+spec:
+  rules:
+    - host: jellyfin.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: jellyfin
+                port:
+                  number: 8096
+            path: /
+            pathType: Prefix
