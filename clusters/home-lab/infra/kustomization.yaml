@@ -9,7 +9,6 @@ resources:
   - datadog-cluster-agent-secret.yaml
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
-  - pihole.yaml
   - vault-pvc-0.yaml
   - st0rmingbr4in-com-certificate.yaml
   - basic-auth.yaml
@@ -18,4 +17,10 @@ resources:
   - traefik-customchart.yaml
   - traefik.yaml
 
+configMapGenerator:
+  - name: traefik-values
+    files:
+      - values.yaml=traefik-values.yaml
+configurations:
+  - kustomizeconfig.yaml
 namespace: prod-infra
