@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: vault-flux-kust-vault-flux-kustomization-kustomization-c8a535f9
+  name: cert-manager-prod-infra-flux-kustomization-kustomizati-c8f20987
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-infra/vault
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-infra/cert-manager
   prune: true
   sourceRef:
     kind: GitRepository

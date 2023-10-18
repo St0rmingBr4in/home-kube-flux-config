@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: home-a-home-assistant-flux-kustomization-kustomization-c86ea54b
+  name: home-assistant-prod-iot-flux-kustomization-kustomizati-c8524c9d
   namespace: flux-system
 spec:
   decryption:

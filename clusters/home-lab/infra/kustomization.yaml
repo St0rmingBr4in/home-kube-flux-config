@@ -10,8 +10,6 @@ resources:
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
   - vault-pvc-0.yaml
-  - st0rmingbr4in-com-certificate.yaml
-  - aphorya-fr-certificate.yaml
   - basic-auth.yaml
   - basic-auth-middleware.yaml
   - metrics-redirect-middleware.yaml

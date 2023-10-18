@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: flaresol-flaresolverr-flux-kustomization-kustomization-c83a247b
+  name: st0rmingbr4in-com-prod-infra-flux-kustomization-kustom-c8b7cc2d
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/flaresolverr
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-infra/st0rmingbr4in-com
   prune: true
   sourceRef:
     kind: GitRepository

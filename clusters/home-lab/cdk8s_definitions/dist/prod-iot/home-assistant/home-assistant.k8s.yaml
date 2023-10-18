@@ -15,9 +15,9 @@ metadata:
 stringData:
   host: home-assistant-cnpg-main-rw
   jdbc: jdbc:postgresql://home-assistant-cnpg-main-rw:5432/home-assistant
-  nossl: postgresql://home-assistant:tEHrgnibcfiuudpeYH8mzRZ83RBGz66iRv3CixjGaWgyQrmCVj4z4DYLqS6HAB@home-assistant-cnpg-main-rw:5432/home-assistant?sslmode=disable
+  nossl: postgresql://home-assistant:UHSN9TZ8JFakfHsxSW1Oe2n96V2RUnD96WUbEvlSETclVjeEgYX4H6FPDSGi46@home-assistant-cnpg-main-rw:5432/home-assistant?sslmode=disable
   porthost: home-assistant-cnpg-main-rw:5432
-  std: postgresql://home-assistant:tEHrgnibcfiuudpeYH8mzRZ83RBGz66iRv3CixjGaWgyQrmCVj4z4DYLqS6HAB@home-assistant-cnpg-main-rw:5432/home-assistant
+  std: postgresql://home-assistant:UHSN9TZ8JFakfHsxSW1Oe2n96V2RUnD96WUbEvlSETclVjeEgYX4H6FPDSGi46@home-assistant-cnpg-main-rw:5432/home-assistant
 type: Opaque
 ---
 apiVersion: v1
@@ -35,7 +35,7 @@ metadata:
   name: home-assistant-cnpg-main-user
   namespace: prod-iot
 stringData:
-  password: tEHrgnibcfiuudpeYH8mzRZ83RBGz66iRv3CixjGaWgyQrmCVj4z4DYLqS6HAB
+  password: UHSN9TZ8JFakfHsxSW1Oe2n96V2RUnD96WUbEvlSETclVjeEgYX4H6FPDSGi46
   username: home-assistant
 type: kubernetes.io/basic-auth
 ---
@@ -135,7 +135,7 @@ data:
     recorder:
       purge_keep_days: 30
       commit_interval: 3
-      db_url: "postgresql://home-assistant:tEHrgnibcfiuudpeYH8mzRZ83RBGz66iRv3CixjGaWgyQrmCVj4z4DYLqS6HAB@home-assistant-cnpg-main-rw:5432/home-assistant?client_encoding=utf8"
+      db_url: "postgresql://home-assistant:UHSN9TZ8JFakfHsxSW1Oe2n96V2RUnD96WUbEvlSETclVjeEgYX4H6FPDSGi46@home-assistant-cnpg-main-rw:5432/home-assistant?client_encoding=utf8"
 ---
 apiVersion: v1
 kind: Service

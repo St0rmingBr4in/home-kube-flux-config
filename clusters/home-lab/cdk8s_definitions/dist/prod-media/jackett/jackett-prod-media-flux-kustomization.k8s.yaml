@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: exte-external-service-flux-kustomization-kustomization-c88517fe
+  name: ja-jackett-prod-media-flux-kustomization-kustomization-c8f5248a
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-aphorya/external-service
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/jackett
   prune: true
   sourceRef:
     kind: GitRepository

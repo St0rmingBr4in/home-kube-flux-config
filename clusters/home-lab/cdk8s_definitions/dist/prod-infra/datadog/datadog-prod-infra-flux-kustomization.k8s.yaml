@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: bazarr-flux-ku-bazarr-flux-kustomization-kustomization-c89dde27
+  name: da-datadog-prod-infra-flux-kustomization-kustomization-c8adfff1
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/bazarr
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-infra/datadog
   prune: true
   sourceRef:
     kind: GitRepository

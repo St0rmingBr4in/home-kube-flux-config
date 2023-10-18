@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kube-vip-flu-kube-vip-flux-kustomization-kustomization-c89944e4
+  name: qbittorrent-prod-media-flux-kustomization-kustomizatio-c8a36285
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/kube-system/kube-vip
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/qbittorrent
   prune: true
   sourceRef:
     kind: GitRepository

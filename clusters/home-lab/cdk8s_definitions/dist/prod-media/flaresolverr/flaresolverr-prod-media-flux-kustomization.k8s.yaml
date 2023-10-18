@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cloudn-cloudnative-pg-flux-kustomization-kustomization-c8a974aa
+  name: flaresolverr-prod-media-flux-kustomization-kustomizati-c856bcf2
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/cloudnative-pg/cloudnative-pg
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/flaresolverr
   prune: true
   sourceRef:
     kind: GitRepository

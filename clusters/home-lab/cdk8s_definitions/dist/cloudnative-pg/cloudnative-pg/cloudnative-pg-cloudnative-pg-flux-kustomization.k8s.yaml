@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cert-man-cert-manager-flux-kustomization-kustomization-c8142cfc
+  name: cloudnative-pg-cloudnative-pg-flux-kustomization-kusto-c82eefb2
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-infra/cert-manager
+  path: ./clusters/home-lab/cdk8s_definitions/dist/cloudnative-pg/cloudnative-pg
   prune: true
   sourceRef:
     kind: GitRepository

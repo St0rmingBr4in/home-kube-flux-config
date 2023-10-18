@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: jackett-flux-jackett-flux-kustomization-kustomization-c82366d0
+  name: son-sonarr-prod-media-flux-kustomization-kustomization-c8fd7d5f
   namespace: flux-system
 spec:
   decryption:
@@ -9,7 +9,7 @@ spec:
     secretRef:
       name: sops-gpg
   interval: 10m0s
-  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/jackett
+  path: ./clusters/home-lab/cdk8s_definitions/dist/prod-media/sonarr
   prune: true
   sourceRef:
     kind: GitRepository
