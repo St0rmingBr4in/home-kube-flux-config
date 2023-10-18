@@ -9,4 +9,5 @@ ports:
     ingress:
       hosts:
         - host: www.aphorya.fr
-  
+          paths:
+            - '/'

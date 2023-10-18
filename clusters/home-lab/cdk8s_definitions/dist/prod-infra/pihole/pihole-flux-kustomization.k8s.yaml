@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: pihole-prod-infra
+  name: pihole-flux-ku-pihole-flux-kustomization-kustomization-c838b5ce
   namespace: flux-system
 spec:
   decryption:

@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: qbittorrent-prod-media
+  name: qbittorre-qbittorrent-flux-kustomization-kustomization-c80b3847
   namespace: flux-system
 spec:
   decryption:

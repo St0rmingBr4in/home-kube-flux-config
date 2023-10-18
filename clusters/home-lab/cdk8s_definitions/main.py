@@ -47,8 +47,8 @@ class HelmChart(Chart):
 
 
 class KustomizationChart(Chart):
-    def __init__(self, scope, identifier, **kwargs):
-        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
+    def __init__(self, scope, identifier, namespace, **kwargs):
+        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=False, namespace=namespace)
         Kustomization(self, f"{identifier}-kustomization", **kwargs)
 
 
@@ -82,7 +82,7 @@ class HelmApp(App):
             KustomizationChart(
                 scope=self,
                 identifier=f"{name}-flux-kustomization",
-                metadata={"namespace": "flux-system", "name": f"{name}-{namespace}"},
+                namespace = "flux-system",
                 spec={
                     "interval": "10m0s",
                     "path": f"./clusters/home-lab/cdk8s_definitions/dist/{namespace}/{name}",

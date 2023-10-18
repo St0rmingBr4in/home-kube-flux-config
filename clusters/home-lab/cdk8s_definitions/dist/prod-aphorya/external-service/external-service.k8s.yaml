@@ -29,7 +29,15 @@ metadata:
 spec:
   rules:
     - host: www.aphorya.fr
-      http: {}
+      http:
+        paths:
+          - backend:
+              service:
+                name: external-service
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
 ---
 apiVersion: v1
 kind: Endpoints

@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: bazarr-prod-media
+  name: bazarr-flux-ku-bazarr-flux-kustomization-kustomization-c89dde27
   namespace: flux-system
 spec:
   decryption:
