@@ -82,7 +82,7 @@ class HelmApp(App):
             KustomizationChart(
                 scope=self,
                 identifier=f"{name}-flux-kustomization",
-                metadata={"namespace": "flux-system", "name": name},
+                metadata={"namespace": "flux-system", "name": f"{name}-{namespace}"},
                 spec={
                     "interval": "10m0s",
                     "path": f"./clusters/home-lab/cdk8s_definitions/dist/{namespace}/{name}",
