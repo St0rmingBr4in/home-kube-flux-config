@@ -15,3 +15,5 @@ resources:
   - dist/kube-vip/kube-vip-flux-kustomization.k8s.yaml
   - dist/datadog/datadog-flux-kustomization.k8s.yaml
   - dist/cert-manager/cert-manager-flux-kustomization.k8s.yaml
+  - dist/home-assistant/home-assistant-flux-kustomization.k8s.yaml
+  - dist/cloudnative-pg/cloudnative-pg-flux-kustomization.k8s.yaml

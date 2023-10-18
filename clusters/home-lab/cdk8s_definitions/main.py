@@ -169,6 +169,14 @@ apps = [
         name="cert-manager",
         values_dir="../infra",
     ),
+    HelmApp(
+        name="home-assistant",
+        values_dir="../iot",
+    ),
+    HelmApp(
+        name="cloudnative-pg",
+        values_dir="../cloudnative-pg",
+    ),
 ]
 
 for app in apps:
