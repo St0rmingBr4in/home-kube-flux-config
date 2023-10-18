@@ -2,6 +2,9 @@
 operator:
   verify:
     enabled: false
+  traefik:
+    namespace: prod-infra
+
 ingress:
   main:
     enabled: true
@@ -9,9 +12,9 @@ ingress:
       - host: bazarr.st0rmingbr4in.com
         paths:
           - path: /
-
-middlewares:
-  - prod-infra-basic-auth
+    enableFixedMiddlewares: true
+    fixedMiddlewares:
+      - basic-auth
 
 securityContext:
   runAsUser: 1025
@@ -28,7 +31,6 @@ persistence:
   config:
     enabled: true
     existingClaim: bazarr-config
-#     mountPath: /config
   media:
     enabled: true
     existingClaim: media-library

@@ -33,7 +33,6 @@ class HelmChart(Chart):
             self,
             identifier,
             release_name=identifier,
-            chart=identifier,
             namespace=namespace,
             **kwargs,
         )
@@ -66,6 +65,7 @@ class HelmApp(App):
                 HelmChart(
                     scope=self,
                     identifier=name,
+                    chart=helm_release["spec"]["chart"]["spec"]["chart"],
                     values=values,
                     version=helm_release["spec"]["chart"]["spec"]["version"],
                     repo=helm_repo(
