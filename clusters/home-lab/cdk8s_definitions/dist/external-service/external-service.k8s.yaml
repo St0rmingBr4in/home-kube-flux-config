@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/name: external-service
     helm.sh/chart: external-service-1.1.0
   name: external-service
+  namespace: prod-infra
 spec:
   ports:
     - name: nas-photos
@@ -32,6 +33,7 @@ metadata:
     app.kubernetes.io/name: external-service
     helm.sh/chart: external-service-1.1.0
   name: external-service
+  namespace: prod-infra
 spec:
   rules:
     - host: nas.st0rmingbr4in.com
@@ -94,6 +96,7 @@ metadata:
     app.kubernetes.io/name: external-service
     helm.sh/chart: external-service-1.1.0
   name: external-service
+  namespace: prod-infra
 subsets:
   - addresses:
       - ip: 192.168.42.42

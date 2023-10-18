@@ -21,14 +21,20 @@ def helm_repo(repo_name):
 
 
 class HelmChart(Chart):
-    def __init__(self, scope: Construct, identifier: str, **kwargs):
-        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=True)
+    def __init__(self, scope: Construct, identifier: str, namespace, **kwargs):
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=True,
+            namespace=namespace,
+        )
 
         helm = Helm(
             self,
             identifier,
             release_name=identifier,
             chart=identifier,
+            namespace=namespace,
             **kwargs,
         )
 

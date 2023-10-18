@@ -16,6 +16,7 @@ metadata:
   annotations:
     rbac.authorization.kubernetes.io/autoupdate: "true"
   name: kube-vip
+  namespace: kube-system
 rules:
   - apiGroups:
       - ""
@@ -49,6 +50,7 @@ metadata:
     app.kubernetes.io/version: v0.4.1
     helm.sh/chart: kube-vip-0.4.4
   name: kube-vip
+  namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

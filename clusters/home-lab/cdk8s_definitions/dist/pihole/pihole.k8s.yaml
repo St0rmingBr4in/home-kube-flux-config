@@ -7,6 +7,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-password
+  namespace: prod-infra
 data:
   password: YWRtaW4=
 type: Opaque
@@ -20,6 +21,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-custom-dnsmasq
+  namespace: prod-infra
 data:
   02-custom.conf: |
     addn-hosts=/etc/addn-hosts
@@ -35,6 +37,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-dhcp
+  namespace: prod-infra
 spec:
   externalTrafficPolicy: Local
   ports:
@@ -56,6 +59,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-dns-tcp
+  namespace: prod-infra
 spec:
   externalTrafficPolicy: Local
   ports:
@@ -77,6 +81,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-dns-udp
+  namespace: prod-infra
 spec:
   externalTrafficPolicy: Local
   ports:
@@ -98,6 +103,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole-web
+  namespace: prod-infra
 spec:
   ports:
     - name: http
@@ -122,6 +128,7 @@ metadata:
     heritage: Helm
     release: pihole
   name: pihole
+  namespace: prod-infra
 spec:
   replicas: 1
   selector:
@@ -226,6 +233,7 @@ metadata:
   annotations:
     helm.sh/hook: test
   name: pihole-smoke-test
+  namespace: prod-infra
 spec:
   containers:
     - command:

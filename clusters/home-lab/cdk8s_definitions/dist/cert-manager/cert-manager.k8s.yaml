@@ -65,6 +65,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: certificaterequests.cert-manager.io
+  namespace: prod-infra
 spec:
   group: cert-manager.io
   names:
@@ -268,6 +269,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: certificates.cert-manager.io
+  namespace: prod-infra
 spec:
   group: cert-manager.io
   names:
@@ -647,6 +649,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: challenges.acme.cert-manager.io
+  namespace: prod-infra
 spec:
   group: acme.cert-manager.io
   names:
@@ -1710,6 +1713,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: clusterissuers.cert-manager.io
+  namespace: prod-infra
 spec:
   group: cert-manager.io
   names:
@@ -2988,6 +2992,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: issuers.cert-manager.io
+  namespace: prod-infra
 spec:
   group: cert-manager.io
   names:
@@ -4266,6 +4271,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: orders.acme.cert-manager.io
+  namespace: prod-infra
 spec:
   group: acme.cert-manager.io
   names:
@@ -4449,6 +4455,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-cainjector
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4516,6 +4523,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-issuers
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4564,6 +4572,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-clusterissuers
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4612,6 +4621,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-certificates
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4683,6 +4693,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-orders
+  namespace: prod-infra
 rules:
   - apiGroups:
       - acme.cert-manager.io
@@ -4751,6 +4762,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-challenges
+  namespace: prod-infra
 rules:
   - apiGroups:
       - acme.cert-manager.io
@@ -4858,6 +4870,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-ingress-shim
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4932,6 +4945,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
     rbac.authorization.k8s.io/aggregate-to-view: "true"
   name: cert-manager-view
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -4967,6 +4981,7 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-admin: "true"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
   name: cert-manager-edit
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -5010,6 +5025,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-approve:cert-manager-io
+  namespace: prod-infra
 rules:
   - apiGroups:
       - cert-manager.io
@@ -5033,6 +5049,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-certificatesigningrequests
+  namespace: prod-infra
 rules:
   - apiGroups:
       - certificates.k8s.io
@@ -5078,6 +5095,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-webhook:subjectaccessreviews
+  namespace: prod-infra
 rules:
   - apiGroups:
       - authorization.k8s.io
@@ -5098,6 +5116,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-cainjector
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5119,6 +5138,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-issuers
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5140,6 +5160,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-clusterissuers
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5161,6 +5182,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-certificates
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5182,6 +5204,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-orders
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5203,6 +5226,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-challenges
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5224,6 +5248,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-ingress-shim
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5245,6 +5270,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-approve:cert-manager-io
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5266,6 +5292,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-controller-certificatesigningrequests
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5287,6 +5314,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-webhook:subjectaccessreviews
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -5737,6 +5765,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-webhook
+  namespace: prod-infra
 webhooks:
   - admissionReviewVersions:
       - v1
@@ -5776,6 +5805,7 @@ metadata:
     app.kubernetes.io/version: v1.9.1
     helm.sh/chart: cert-manager-v1.9.1
   name: cert-manager-webhook
+  namespace: prod-infra
 webhooks:
   - admissionReviewVersions:
       - v1

@@ -448,6 +448,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-cluster-agent
+  namespace: prod-infra
 rules:
   - apiGroups:
       - ""
@@ -668,6 +669,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-helm-check
+  namespace: prod-infra
 rules:
   - apiGroups:
       - ""
@@ -689,6 +691,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-ksm-core
+  namespace: prod-infra
 rules:
   - apiGroups:
       - ""
@@ -790,6 +793,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog
+  namespace: prod-infra
 rules:
   - nonResourceURLs:
       - /metrics
@@ -838,6 +842,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-cluster-agent
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -857,6 +862,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-helm-check
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -876,6 +882,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog-ksm-core
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -895,6 +902,7 @@ metadata:
     app.kubernetes.io/version: "7"
     helm.sh/chart: datadog-3.39.2
   name: datadog
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -62,6 +62,7 @@ metadata:
     app.kubernetes.io/name: vault
     helm.sh/chart: vault-0.25.0
   name: vault-server-binding
+  namespace: prod-infra
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
