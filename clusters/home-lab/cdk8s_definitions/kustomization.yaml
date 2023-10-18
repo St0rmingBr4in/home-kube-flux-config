@@ -1,19 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - dist/flaresolverr/flaresolverr-flux-kustomization.k8s.yaml
-  - dist/radarr/radarr-flux-kustomization.k8s.yaml
-  - dist/sonarr/sonarr-flux-kustomization.k8s.yaml
-  - dist/bazarr/bazarr-flux-kustomization.k8s.yaml
-  - dist/jackett/jackett-flux-kustomization.k8s.yaml
-  - dist/jellyfin/jellyfin-flux-kustomization.k8s.yaml
-  - dist/prowlarr/prowlarr-flux-kustomization.k8s.yaml
-  - dist/qbittorrent/qbittorrent-flux-kustomization.k8s.yaml
-  - dist/external-service/external-service-flux-kustomization.k8s.yaml
-  - dist/vault/vault-flux-kustomization.k8s.yaml
-  - dist/pihole/pihole-flux-kustomization.k8s.yaml
-  - dist/kube-vip/kube-vip-flux-kustomization.k8s.yaml
-  - dist/datadog/datadog-flux-kustomization.k8s.yaml
-  - dist/cert-manager/cert-manager-flux-kustomization.k8s.yaml
-  - dist/home-assistant/home-assistant-flux-kustomization.k8s.yaml
-  - dist/cloudnative-pg/cloudnative-pg-flux-kustomization.k8s.yaml
+  - dist/prod-media/flaresolverr/flaresolverr-flux-kustomization.k8s.yaml
+  - dist/prod-media/radarr/radarr-flux-kustomization.k8s.yaml
+  - dist/prod-media/sonarr/sonarr-flux-kustomization.k8s.yaml
+  - dist/prod-media/bazarr/bazarr-flux-kustomization.k8s.yaml
+  - dist/prod-media/jackett/jackett-flux-kustomization.k8s.yaml
+  - dist/prod-media/jellyfin/jellyfin-flux-kustomization.k8s.yaml
+  - dist/prod-media/prowlarr/prowlarr-flux-kustomization.k8s.yaml
+  - dist/prod-media/qbittorrent/qbittorrent-flux-kustomization.k8s.yaml
+  - dist/prod-infra/external-service/external-service-flux-kustomization.k8s.yaml
+  - dist/prod-infra/vault/vault-flux-kustomization.k8s.yaml
+  - dist/prod-infra/pihole/pihole-flux-kustomization.k8s.yaml
+  - dist/kube-system/kube-vip/kube-vip-flux-kustomization.k8s.yaml
+  - dist/prod-infra/datadog/datadog-flux-kustomization.k8s.yaml
+  - dist/prod-infra/cert-manager/cert-manager-flux-kustomization.k8s.yaml
+  - dist/prod-iot/home-assistant/home-assistant-flux-kustomization.k8s.yaml
+  - dist/cloudnative-pg/cloudnative-pg/cloudnative-pg-flux-kustomization.k8s.yaml
+  - dist/prod-aphorya/external-service/external-service-flux-kustomization.k8s.yaml

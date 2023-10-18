@@ -14,7 +14,7 @@ spec:
       version: 1.1.0
   interval: 1h0m0s
   releaseName: external-service
-  targetNamespace: prod-infra
+  targetNamespace: prod-aphorya
   valuesFrom:
     - kind: ConfigMap
       name: external-service-values
