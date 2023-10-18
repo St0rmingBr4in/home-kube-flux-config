@@ -125,21 +125,18 @@ class HelmApp(FluxApp):
                     **kwargs,
                 )
 
-class CertificateChart(Chart):
-    def __init__(self, scope: Construct, identifier: str, namespace):
-        super().__init__(
-            scope=scope,
-            id=identifier,
-            disable_resource_name_hashes=True,
-            namespace=namespace,
-        )
-        Include(scope=self, id=f"{identifier}-certificate", url=os.path.join("../infra", f"{identifier}-certificate.yaml"))
-
 class CertificateApp(FluxApp):
     def __init__(self, name):
         namespace="prod-infra"
         super().__init__(name=name, namespace=namespace)
-        CertificateChart(scope=self, identifier=name, namespace=namespace)
+
+        chart = Chart(
+            scope=self,
+            id=name,
+            disable_resource_name_hashes=True,
+            namespace=namespace,
+        )
+        Include(scope=chart, id=f"{name}-certificate", url=os.path.join("../infra", f"{name}-certificate.yaml"))
 
 apps = [
     HelmApp(
