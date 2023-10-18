@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: qbittorrent-16.0.4
+    app: qbittorrent-16.0.5
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/version: 4.5.5
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.4
+    helm.sh/chart: qbittorrent-16.0.5
     release: qbittorrent
     service.name: main
   name: qbittorrent
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: qbittorrent-16.0.4
+    app: qbittorrent-16.0.5
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/version: 4.5.5
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.4
+    helm.sh/chart: qbittorrent-16.0.5
     release: qbittorrent
     service.name: torrent
   name: qbittorrent-torrent
@@ -62,13 +62,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: qbittorrent-16.0.4
+    app: qbittorrent-16.0.5
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/version: 4.5.5
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.4
+    helm.sh/chart: qbittorrent-16.0.5
     release: qbittorrent
   name: qbittorrent
   namespace: prod-media
@@ -86,13 +86,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: qbittorrent-16.0.4
+        app: qbittorrent-16.0.5
         app.kubernetes.io/instance: qbittorrent
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: qbittorrent
         app.kubernetes.io/version: 4.5.5
         helm-revision: "1"
-        helm.sh/chart: qbittorrent-16.0.4
+        helm.sh/chart: qbittorrent-16.0.5
         pod.name: main
         release: qbittorrent
     spec:
@@ -107,7 +107,7 @@ spec:
               value: "0022"
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: tccr.io/truecharts/qbittorrent:v4.5.5@sha256:9e35007e156864388ab679d1aa8679a5faad48bae1611ec711bd888534dd3750
+          image: tccr.io/truecharts/qbittorrent:v4.5.5@sha256:a7b89f5a4259eb4914115ff6336a416fe92e3ebcd3a1aae4cbca5bbe3dd84fa1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -237,13 +237,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
   labels:
-    app: qbittorrent-16.0.4
+    app: qbittorrent-16.0.5
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/version: 4.5.5
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.4
+    helm.sh/chart: qbittorrent-16.0.5
     release: qbittorrent
   name: qbittorrent
   namespace: prod-media

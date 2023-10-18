@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
     service.name: main
   name: prowlarr
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
     service.name: metrics
   name: prowlarr-metrics
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
   name: prowlarr-exportarr
   namespace: prod-media
@@ -82,13 +82,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: prowlarr-12.0.13
+        app: prowlarr-12.0.15
         app.kubernetes.io/instance: prowlarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: prowlarr
-        app.kubernetes.io/version: 1.9.3.4013
+        app.kubernetes.io/version: 1.9.4.4039
         helm-revision: "1"
-        helm.sh/chart: prowlarr-12.0.13
+        helm.sh/chart: prowlarr-12.0.15
         pod.name: exportarr
         release: prowlarr
     spec:
@@ -230,13 +230,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
   name: prowlarr
   namespace: prod-media
@@ -254,13 +254,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: prowlarr-12.0.13
+        app: prowlarr-12.0.15
         app.kubernetes.io/instance: prowlarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: prowlarr
-        app.kubernetes.io/version: 1.9.3.4013
+        app.kubernetes.io/version: 1.9.4.4039
         helm-revision: "1"
-        helm.sh/chart: prowlarr-12.0.13
+        helm.sh/chart: prowlarr-12.0.15
         pod.name: main
         release: prowlarr
     spec:
@@ -279,7 +279,7 @@ spec:
               value: ""
             - name: PROWLARR__PORT
               value: "9696"
-          image: tccr.io/truecharts/prowlarr:v1.9.3.4013@sha256:c2552d39bded7da923e7e03f531ee53337beb39c0f710d853eaeeb3ebcdec0d8
+          image: tccr.io/truecharts/prowlarr:v1.9.4.4039@sha256:8df837a280707286043e9396250f7b84d95ff286205ae6e75948d3e644e256ca
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -397,13 +397,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
   name: prowlarr
   namespace: prod-media
@@ -424,13 +424,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: prowlarr-12.0.13
+    app: prowlarr-12.0.15
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.9.3.4013
+    app.kubernetes.io/version: 1.9.4.4039
     helm-revision: "1"
-    helm.sh/chart: prowlarr-12.0.13
+    helm.sh/chart: prowlarr-12.0.15
     release: prowlarr
   name: prowlarr
   namespace: prod-media

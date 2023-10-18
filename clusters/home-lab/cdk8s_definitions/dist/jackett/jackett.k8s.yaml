@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jackett-15.0.14
+    app: jackett-15.0.19
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1011
+    app.kubernetes.io/version: 0.21.1033
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.14
+    helm.sh/chart: jackett-15.0.19
     release: jackett
     service.name: main
   name: jackett
@@ -30,13 +30,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jackett-15.0.14
+    app: jackett-15.0.19
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1011
+    app.kubernetes.io/version: 0.21.1033
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.14
+    helm.sh/chart: jackett-15.0.19
     release: jackett
   name: jackett
   namespace: prod-media
@@ -54,13 +54,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: jackett-15.0.14
+        app: jackett-15.0.19
         app.kubernetes.io/instance: jackett
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jackett
-        app.kubernetes.io/version: 0.21.1011
+        app.kubernetes.io/version: 0.21.1033
         helm-revision: "1"
-        helm.sh/chart: jackett-15.0.14
+        helm.sh/chart: jackett-15.0.19
         pod.name: main
         release: jackett
     spec:
@@ -200,13 +200,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
   labels:
-    app: jackett-15.0.14
+    app: jackett-15.0.19
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1011
+    app.kubernetes.io/version: 0.21.1033
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.14
+    helm.sh/chart: jackett-15.0.19
     release: jackett
   name: jackett
   namespace: prod-media

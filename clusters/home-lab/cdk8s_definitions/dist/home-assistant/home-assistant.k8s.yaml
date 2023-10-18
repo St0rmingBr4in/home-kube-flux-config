@@ -1,228 +1,198 @@
 apiVersion: v1
 kind: Secret
 metadata:
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant-cnpg-main-urls
-    namespace: prod-iot
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant-cnpg-main-urls
+  namespace: prod-iot
 stringData:
-    host: ENC[AES256_GCM,data:EPU4+A6dXUftpA/ONxxUgnA5pdjUlRFQx3/A,iv:8d4QcFgzdzUQXvFHiaDldLddbTlq3Nm4VR2wHXPTJRM=,tag:ejndgvd0mOrF6iVcxc364Q==,type:str]
-    jdbc: ENC[AES256_GCM,data:G/7qz1xgxExfT+8fGwiqjKWnhWnh63d3G5dOPOMmyYJxQdnPP3cISwJFpJ1stg88B7k7+OCmNRW1IzyoNos5Yrg=,iv:pxYufbfgwvEEFqodTcAu1uR+ANuznq7ibl5n+rRIbBk=,tag:Ua3+irDtUSisfY5uEzAnIg==,type:str]
-    nossl: ENC[AES256_GCM,data:BRtmQSOMN2VMXuouzc8D+oO2n1Fq88D/f7AC47eHAIl0guCUfS+mqq0Mi5gybmPUpABRhd06E4qz0+C8Yrsm67nibpt6eT03vVHT6JKl4tj0O2XRb30KiiJqRqlFuX+WazaHT1XB27fIkZg6+kI0mjeulmFYBIbEeLuSOVhMKsBrOt5SoS6Th1pcKO9cDwz1wTy1iQkAljw//w==,iv:f2SGPbH2SivKO8IWZJbQrR6j/4+rIhhwDaDxsaMAkag=,tag:6IYoyrfXK74xJlXU1pwlEQ==,type:str]
-    porthost: ENC[AES256_GCM,data:pZkEerxLxLQlC8xvWzTTMoyht0dGnnSNr+q7LuKj/mo=,iv:7eU7bibXRvtGTTtPnYjL5WII2KskpnhwUy9gCuy8OoM=,tag:WsrZWS2CLc17C0EvQTjuQQ==,type:str]
-    std: ENC[AES256_GCM,data:tvXtKvyMBHm1OVQH+EkLOV67tuX/RSW+gqSjwfBnBd+NfwSLNDtvtRXofiiPWBfvn4GOYMmWy48PV/FVzRBoetif3L4t7kdIfGJmVcuF9I7hI+RwSvbMFIb/MaOIa9hZEoxNlhSzlPntezM3WbKYx/XKsH8T8vPeyP+Grrg/uk9sB35QplEmXt2s,iv:fY7mFr0r50T9okgPlWJ8MlKNdWvn4sxQXgsvT5TG1/E=,tag:I7ci9bU4R64wqtiYQIkNwQ==,type:str]
+  host: home-assistant-cnpg-main-rw
+  jdbc: jdbc:postgresql://home-assistant-cnpg-main-rw:5432/home-assistant
+  nossl: postgresql://home-assistant:ionqVPUDBQUCj4ct9XNAYCUVtvCQtNOlwcUIysZz44sfoeURlZOoG3vOtGmPkY@home-assistant-cnpg-main-rw:5432/home-assistant?sslmode=disable
+  porthost: home-assistant-cnpg-main-rw:5432
+  std: postgresql://home-assistant:ionqVPUDBQUCj4ct9XNAYCUVtvCQtNOlwcUIysZz44sfoeURlZOoG3vOtGmPkY@home-assistant-cnpg-main-rw:5432/home-assistant
 type: Opaque
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant-cnpg-main-user
-    namespace: prod-iot
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant-cnpg-main-user
+  namespace: prod-iot
 stringData:
-    password: ENC[AES256_GCM,data:AszPBWxJaOJ9oFxJKeG51HvxLlsLttYyHlwxB2LTo0/YWHerNb/rdbFV9CCQ8R1RGsdqT327vnBjaM7Sigg=,iv:VZdQFhLPDL6CeZfhDmbWewiEwC4NlLx4PxFHfo7Ftiw=,tag:CJnUfHFJqWyWXCX4igsKuQ==,type:str]
-    username: ENC[AES256_GCM,data:iIjrdNDXkjm7PYeqhzA=,iv:bby3evFAaHn+vfTCrGEt/oeq9A0WXfDfA2ggQxs0CrI=,tag:NMlX3CLUVw92kJnStI49Yg==,type:str]
+  password: ionqVPUDBQUCj4ct9XNAYCUVtvCQtNOlwcUIysZz44sfoeURlZOoG3vOtGmPkY
+  username: home-assistant
 type: kubernetes.io/basic-auth
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant-init
-    namespace: prod-iot
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant-init
+  namespace: prod-iot
 data:
-    configuration.yaml.default: ENC[AES256_GCM,data:6X36bQPvdfeciM/Kp108LaJEiDsJrvZs8NPVq0PY8cFLEmXj2zjbJ775O7migloPQuitIluv/Ykf+b87dKGlIJPMRoneO35ekl8hXRPZHZT1rTr1H+FzdwCsGoIPyemKdRyGHpzvOBf2ZDw+SUM8YP+FMAwX8R+cIFJeKhs1qb/h8HUvaT+eTMaK9LVhGb/MtSW/1gC3z4tjiCfwcbIPiuv3VWELbXxxUlimT8DVDEHAo6doO916mRvrMeApe16YJ+r+yVhRdBSaTIpLxsLjOA3vnf/fvu705fORu67/tlpKu0NtKzXUlKxQmWbMe6/T7e1PJ+vp2i7xAaZRVZJf6HNIgQhP,iv:yvlrz75Xg4Mv0rm+6EJVImn6zCTttJyqkX6MhsDtWZc=,tag:CKuwYzVPxtYIVBJngREd1A==,type:str]
-    http.default: ENC[AES256_GCM,data:ifgsbL4BABq71Rr6XSVGHr2pu2gIqLB14B2frg4rbj/OEkhvfsbC6T0ED/qxLFn7FngOog==,iv:EidjngOKQwEgCgh1t40k2VtgmfomnPYEWjA3UuYZY+Q=,tag:BdiLiaw5MrLNt0T9axZ0Xw==,type:str]
-    init.sh: ENC[AES256_GCM,data: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,iv:BuYMNVRGupEVt7I9c2gx7cG+WQ5DsJ/FhtofNbOmDKA=,tag:H1KSwN/MrF8Pe9ftIOKwrA==,type:str]
-    recorder.default: ENC[AES256_GCM,data:1DikDT5AhNc02Nnuf/vt8BYCsh6FLq/+A0qXc/p3y11tHGuTH2nWgWDhp/BKEHVLKrK4giqdToUNE8K7zPo/JihSHepXt8xgA2xHWKlyXDKZkzKT+5xLLIoTpjVPbFWPDZF1wHJ2pZy5nbVSDA3YUHuzmPbhZtpv3k3P1DJIfgUMUvhLC4TKoldyfoyVf06bDE1c+F5Z4DqqyPY4JuiITXGafQzMJUPLKnKGyolkYvUaTm8HqoGNWKwt0BE3olLFNHlzLjMIwBBYQ5CgLpYdBgDbmJQIzkG5dfCNtix2gOQ=,iv:1YPG5OuqKgKwNiYd7iz5vwyc5lN/LB+ecJH8l7fSapY=,tag:HzXKiA3MRKq52e0mhgrjxA==,type:str]
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
+  configuration.yaml.default: |-
+    # Configure a default setup of Home Assistant (frontend, api, etc)
+    default_config:
 
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+    # Text to speech
+    tts:
+      - platform: google_translate
+
+    group: !include groups.yaml
+    automation: !include automations.yaml
+    script: !include scripts.yaml
+    scene: !include scenes.yaml
+  http.default: |-
+    http:
+      use_x_forwarded_for: true
+      trusted_proxies:
+  init.sh: |-
+    #!/bin/sh
+    config_file="/config/configuration.yaml"
+    if test -f "$config_file"; then
+      echo "configuration.yaml exists."
+      if grep -q recorder: "$config_file"; then
+        echo "configuration.yaml already contains recorder"
+      else
+        echo "" >> "$config_file"
+        cat /config/init/recorder.default >> "$config_file"
+      fi
+      if grep -q http: "$config_file"; then
+        echo "configuration.yaml already contains http section"
+      else
+        echo "" >> "$config_file"
+        cat /config/init/http.default >> "$config_file"
+      fi
+    else
+      echo "configuration.yaml does NOT exist."
+      cp /config/init/configuration.yaml.default "$config_file"
+      echo "" >> "$config_file"
+      cat /config/init/recorder.default >> "$config_file"
+      echo "" >> "$config_file"
+      cat /config/init/http.default >> "$config_file"
+      echo "" >> "$config_file"
+    fi
+
+    echo "Creating include files..."
+    for include_file in groups.yaml automations.yaml scripts.yaml scenes.yaml; do
+      if test -f "/config/$include_file"; then
+        echo "$include_file exists."
+      else
+        echo "$include_file does NOT exist."
+        touch "/config/$include_file"
+      fi
+    done
+
+    cd "/config" || echo "Could not change path to /config"
+    echo "Creating custom_components directory..."
+    mkdir "/config/custom_components" || echo "custom_components directory already exists"
+
+    echo "Changing to the custom_components directory..."
+    cd "/config/custom_components" || echo "Could not change path to /config/custom_components"
+
+    echo "Downloading HACS"
+    wget "https://github.com/hacs/integration/releases/latest/download/hacs.zip" || exit 0
+
+    if [ -d "/config/custom_components/hacs" ]; then
+      echo "HACS directory already exist, cleaning up..."
+      rm -R "/config/custom_components/hacs"
+    fi
+
+    echo "Creating HACS directory..."
+    mkdir "/config/custom_components/hacs"
+
+    echo "Unpacking HACS..."
+    unzip "/config/custom_components/hacs.zip" -d "/config/custom_components/hacs" >/dev/null 2>&1
+
+    echo "Removing HACS zip file..."
+    rm "/config/custom_components/hacs.zip"
+    echo "Installation complete."
+  recorder.default: |-
+    recorder:
+      purge_keep_days: 30
+      commit_interval: 3
+      db_url: "postgresql://home-assistant:ionqVPUDBQUCj4ct9XNAYCUVtvCQtNOlwcUIysZz44sfoeURlZOoG3vOtGmPkY@home-assistant-cnpg-main-rw:5432/home-assistant?client_encoding=utf8"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-        service.name: main
-    name: home-assistant
-    namespace: prod-iot
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+    service.name: main
+  name: home-assistant
+  namespace: prod-iot
 spec:
-    ports:
-        - name: main
-          port: 8123
-          protocol: TCP
-          targetPort: 8123
-    publishNotReadyAddresses: false
-    selector:
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/name: home-assistant
-        pod.name: main
-    type: ClusterIP
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  ports:
+    - name: main
+      port: 8123
+      protocol: TCP
+      targetPort: 8123
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/name: home-assistant
+    pod.name: main
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    labels:
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant
+  namespace: prod-iot
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: home-assistant
+      app.kubernetes.io/name: home-assistant
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations: {}
+      labels:
         app: home-assistant-20.0.10
         app.kubernetes.io/instance: home-assistant
         app.kubernetes.io/managed-by: Helm
@@ -230,610 +200,421 @@ metadata:
         app.kubernetes.io/version: 2023.10.1
         helm-revision: "1"
         helm.sh/chart: home-assistant-20.0.10
+        pod.name: main
         release: home-assistant
-    name: home-assistant
-    namespace: prod-iot
-spec:
-    replicas: 1
-    revisionHistoryLimit: 3
-    selector:
-        matchLabels:
-            app.kubernetes.io/instance: home-assistant
-            app.kubernetes.io/name: home-assistant
-            pod.name: main
-    strategy:
-        type: Recreate
-    template:
-        metadata:
-            annotations: {}
-            labels:
-                app: home-assistant-20.0.10
-                app.kubernetes.io/instance: home-assistant
-                app.kubernetes.io/managed-by: Helm
-                app.kubernetes.io/name: home-assistant
-                app.kubernetes.io/version: 2023.10.1
-                helm-revision: "1"
-                helm.sh/chart: home-assistant-20.0.10
-                pod.name: main
-                release: home-assistant
-        spec:
-            automountServiceAccountToken: false
-            containers:
-                - env:
-                    - name: TZ
-                      value: UTC
-                    - name: UMASK
-                      value: "0022"
-                    - name: UMASK_SET
-                      value: "0022"
-                    - name: PUID
-                      value: "568"
-                    - name: USER_ID
-                      value: "568"
-                    - name: UID
-                      value: "568"
-                    - name: PGID
-                      value: "568"
-                    - name: GROUP_ID
-                      value: "568"
-                    - name: GID
-                      value: "568"
-                  image: tccr.io/truecharts/home-assistant:v2023.10.1@sha256:6b961048427e973e7bca4e9ff4e1ed3b269f1432aa0d43735cdc4a406201124a
-                  imagePullPolicy: IfNotPresent
-                  livenessProbe:
-                    failureThreshold: 5
-                    httpGet:
-                        path: /
-                        port: 8123
-                        scheme: HTTP
-                    initialDelaySeconds: 10
-                    periodSeconds: 10
-                    successThreshold: 1
-                    timeoutSeconds: 5
-                  name: home-assistant
-                  ports:
-                    - containerPort: 8123
-                      name: main
-                      protocol: TCP
-                  readinessProbe:
-                    failureThreshold: 5
-                    httpGet:
-                        path: /
-                        port: 8123
-                        scheme: HTTP
-                    initialDelaySeconds: 10
-                    periodSeconds: 10
-                    successThreshold: 2
-                    timeoutSeconds: 5
-                  resources:
-                    limits:
-                        cpu: 200m
-                        memory: 300Mi
-                    requests:
-                        cpu: 200m
-                        memory: 300Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                        add:
-                            - CAP_NET_RAW
-                            - CAP_NET_BIND_SERVICE
-                            - CHOWN
-                            - SETUID
-                            - SETGID
-                            - FOWNER
-                            - DAC_OVERRIDE
-                        drop:
-                            - ALL
-                    privileged: false
-                    readOnlyRootFilesystem: false
-                    runAsGroup: 0
-                    runAsNonRoot: false
-                    runAsUser: 0
-                    seccompProfile:
-                        type: RuntimeDefault
-                  startupProbe:
-                    failureThreshold: 60
-                    initialDelaySeconds: 10
-                    periodSeconds: 5
-                    successThreshold: 1
-                    tcpSocket:
-                        port: 8123
-                    timeoutSeconds: 2
-                  stdin: false
-                  tty: false
-                  volumeMounts:
-                    - mountPath: /config
-                      name: config
-                      readOnly: false
-                    - mountPath: /dev/shm
-                      name: devshm
-                      readOnly: false
-                    - mountPath: /shared
-                      name: shared
-                      readOnly: false
-                    - mountPath: /tmp
-                      name: tmp
-                      readOnly: false
-                    - mountPath: /var/logs
-                      name: varlogs
-                      readOnly: false
-                    - mountPath: /var/run
-                      name: varrun
-                      readOnly: false
-            dnsConfig:
-                options:
-                    - name: ndots
-                      value: "1"
-            dnsPolicy: ClusterFirst
-            enableServiceLinks: false
-            hostNetwork: false
-            hostPID: false
-            initContainers:
-                - command:
-                    - /bin/sh
-                    - -c
-                    - |-
-                      /bin/sh <<'EOF'
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: PUID
+              value: "568"
+            - name: USER_ID
+              value: "568"
+            - name: UID
+              value: "568"
+            - name: PGID
+              value: "568"
+            - name: GROUP_ID
+              value: "568"
+            - name: GID
+              value: "568"
+          image: tccr.io/truecharts/home-assistant:v2023.10.1@sha256:6b961048427e973e7bca4e9ff4e1ed3b269f1432aa0d43735cdc4a406201124a
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8123
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: home-assistant
+          ports:
+            - containerPort: 8123
+              name: main
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: 8123
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 2
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 200m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 300Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CAP_NET_RAW
+                - CAP_NET_BIND_SERVICE
+                - CHOWN
+                - SETUID
+                - SETGID
+                - FOWNER
+                - DAC_OVERRIDE
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            failureThreshold: 60
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            tcpSocket:
+              port: 8123
+            timeoutSeconds: 2
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      hostNetwork: false
+      hostPID: false
+      initContainers:
+        - command:
+            - /bin/sh
+            - -c
+            - |-
+              /bin/sh <<'EOF'
 
 
-                      echo "Executing DB waits..."
+              echo "Executing DB waits..."
 
 
-                      echo "Detected RW pooler, testing RW pooler availability..."
-                      until
-                        echo "Testing database on url:  home-assistant-cnpg-main-rw"
-                        pg_isready -U home-assistant -d home-assistant -h home-assistant-cnpg-main-rw
-                        do sleep 5
-                      done
+              echo "Detected RW pooler, testing RW pooler availability..."
+              until
+                echo "Testing database on url:  home-assistant-cnpg-main-rw"
+                pg_isready -U home-assistant -d home-assistant -h home-assistant-cnpg-main-rw
+                do sleep 5
+              done
 
 
 
-                      sleep 5
-                      EOF
-                  env:
-                    - name: TZ
-                      value: UTC
-                    - name: UMASK
-                      value: "0022"
-                    - name: UMASK_SET
-                      value: "0022"
-                    - name: S6_READ_ONLY_ROOT
-                      value: "1"
-                  image: tccr.io/truecharts/db-wait-postgres:1.1.0@sha256:a163c7836d7bb436a428f5d55bbba0eb73bcdb9bc202047e2523bbb539c113e6
-                  imagePullPolicy: IfNotPresent
-                  name: home-assistant-system-cnpg-wait
-                  resources:
-                    limits:
-                        cpu: 4000m
-                        memory: 8Gi
-                    requests:
-                        cpu: 10m
-                        memory: 50Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                        add: []
-                        drop:
-                            - ALL
-                    privileged: false
-                    readOnlyRootFilesystem: true
-                    runAsGroup: 568
-                    runAsNonRoot: true
-                    runAsUser: 568
-                    seccompProfile:
-                        type: RuntimeDefault
-                  stdin: false
-                  tty: false
-                  volumeMounts:
-                    - mountPath: /config
-                      name: config
-                      readOnly: false
-                    - mountPath: /dev/shm
-                      name: devshm
-                      readOnly: false
-                    - mountPath: /shared
-                      name: shared
-                      readOnly: false
-                    - mountPath: /tmp
-                      name: tmp
-                      readOnly: false
-                    - mountPath: /var/logs
-                      name: varlogs
-                      readOnly: false
-                    - mountPath: /var/run
-                      name: varrun
-                      readOnly: false
-                - command:
-                    - /config/init/init.sh
-                  env:
-                    - name: TZ
-                      value: UTC
-                    - name: UMASK
-                      value: "0022"
-                    - name: UMASK_SET
-                      value: "0022"
-                    - name: PUID
-                      value: "568"
-                    - name: USER_ID
-                      value: "568"
-                    - name: UID
-                      value: "568"
-                    - name: PGID
-                      value: "568"
-                    - name: GROUP_ID
-                      value: "568"
-                    - name: GID
-                      value: "568"
-                  image: tccr.io/truecharts/home-assistant:v2023.10.1@sha256:6b961048427e973e7bca4e9ff4e1ed3b269f1432aa0d43735cdc4a406201124a
-                  imagePullPolicy: IfNotPresent
-                  name: home-assistant-init-init
-                  resources:
-                    limits:
-                        cpu: 200m
-                        memory: 300Mi
-                    requests:
-                        cpu: 200m
-                        memory: 300Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                        add:
-                            - CAP_NET_RAW
-                            - CAP_NET_BIND_SERVICE
-                            - CHOWN
-                            - SETUID
-                            - SETGID
-                            - FOWNER
-                            - DAC_OVERRIDE
-                        drop:
-                            - ALL
-                    privileged: false
-                    readOnlyRootFilesystem: false
-                    runAsGroup: 0
-                    runAsNonRoot: false
-                    runAsUser: 0
-                    seccompProfile:
-                        type: RuntimeDefault
-                  stdin: false
-                  tty: false
-                  volumeMounts:
-                    - mountPath: /config
-                      name: config
-                      readOnly: false
-                    - mountPath: /dev/shm
-                      name: devshm
-                      readOnly: false
-                    - mountPath: /config/init
-                      name: init
-                      readOnly: true
-                    - mountPath: /shared
-                      name: shared
-                      readOnly: false
-                    - mountPath: /tmp
-                      name: tmp
-                      readOnly: false
-                    - mountPath: /var/logs
-                      name: varlogs
-                      readOnly: false
-                    - mountPath: /var/run
-                      name: varrun
-                      readOnly: false
-            restartPolicy: Always
-            securityContext:
-                fsGroup: 568
-                fsGroupChangePolicy: OnRootMismatch
-                supplementalGroups:
-                    - 568
-                sysctls: []
-            serviceAccountName: default
-            shareProcessNamespace: false
-            terminationGracePeriodSeconds: 60
-            volumes:
-                - name: config
-                  persistentVolumeClaim:
-                    claimName: home-assistant
-                - emptyDir:
-                    medium: Memory
-                  name: devshm
-                - configMap:
-                    defaultMode: 511
-                    name: home-assistant-init
-                    optional: false
-                  name: init
-                - emptyDir: {}
-                  name: shared
-                - emptyDir: {}
-                  name: tmp
-                - emptyDir: {}
-                  name: varlogs
-                - emptyDir:
-                    medium: Memory
-                  name: varrun
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+              sleep 5
+              EOF
+          env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+          image: tccr.io/truecharts/db-wait-postgres:1.1.0@sha256:a163c7836d7bb436a428f5d55bbba0eb73bcdb9bc202047e2523bbb539c113e6
+          imagePullPolicy: IfNotPresent
+          name: home-assistant-system-cnpg-wait
+          resources:
+            limits:
+              cpu: 4000m
+              memory: 8Gi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: []
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
+            seccompProfile:
+              type: RuntimeDefault
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+        - command:
+            - /config/init/init.sh
+          env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: UMASK_SET
+              value: "0022"
+            - name: PUID
+              value: "568"
+            - name: USER_ID
+              value: "568"
+            - name: UID
+              value: "568"
+            - name: PGID
+              value: "568"
+            - name: GROUP_ID
+              value: "568"
+            - name: GID
+              value: "568"
+          image: tccr.io/truecharts/home-assistant:v2023.10.1@sha256:6b961048427e973e7bca4e9ff4e1ed3b269f1432aa0d43735cdc4a406201124a
+          imagePullPolicy: IfNotPresent
+          name: home-assistant-init-init
+          resources:
+            limits:
+              cpu: 200m
+              memory: 300Mi
+            requests:
+              cpu: 200m
+              memory: 300Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - CAP_NET_RAW
+                - CAP_NET_BIND_SERVICE
+                - CHOWN
+                - SETUID
+                - SETGID
+                - FOWNER
+                - DAC_OVERRIDE
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /config
+              name: config
+              readOnly: false
+            - mountPath: /dev/shm
+              name: devshm
+              readOnly: false
+            - mountPath: /config/init
+              name: init
+              readOnly: true
+            - mountPath: /shared
+              name: shared
+              readOnly: false
+            - mountPath: /tmp
+              name: tmp
+              readOnly: false
+            - mountPath: /var/logs
+              name: varlogs
+              readOnly: false
+            - mountPath: /var/run
+              name: varrun
+              readOnly: false
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+          - 568
+        sysctls: []
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant
+        - emptyDir:
+            medium: Memory
+          name: devshm
+        - configMap:
+            defaultMode: 511
+            name: home-assistant-init
+            optional: false
+          name: init
+        - emptyDir: {}
+          name: shared
+        - emptyDir: {}
+          name: tmp
+        - emptyDir: {}
+          name: varlogs
+        - emptyDir:
+            medium: Memory
+          name: varrun
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-    annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: tc-system-chain-basic@kubernetescrd
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant
-    namespace: prod-iot
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: tc-system-chain-basic@kubernetescrd
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant
+  namespace: prod-iot
 spec:
-    rules:
-        - host: home-assistant.st0rmingbr4in.com
-          http:
-            paths:
-                - backend:
-                    service:
-                        name: home-assistant
-                        port:
-                            number: 8123
-                  path: /
-                  pathType: Prefix
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  rules:
+    - host: home-assistant.st0rmingbr4in.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: home-assistant
+                port:
+                  number: 8123
+            path: /
+            pathType: Prefix
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-    annotations:
-        cnpg.io/hibernation: "off"
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        cnpg.io/reload: "on"
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant-cnpg-main
-    namespace: prod-iot
+  annotations:
+    cnpg.io/hibernation: "off"
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    cnpg.io/reload: "on"
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant-cnpg-main
+  namespace: prod-iot
 spec:
-    bootstrap:
-        initdb:
-            database: home-assistant
-            owner: home-assistant
-            secret:
-                name: home-assistant-cnpg-main-user
-    instances: 2
-    monitoring:
-        enablePodMonitor: true
-    nodeMaintenanceWindow:
-        inProgress: false
-        reusePVC: true
-    postgresql: {}
-    primaryUpdateStrategy: unsupervised
-    resources:
-        limits:
-            cpu: 200m
-            memory: 300Mi
+  bootstrap:
+    initdb:
+      database: home-assistant
+      owner: home-assistant
+      secret:
+        name: home-assistant-cnpg-main-user
+  instances: 2
+  monitoring:
+    enablePodMonitor: true
+  nodeMaintenanceWindow:
+    inProgress: false
+    reusePVC: true
+  postgresql: {}
+  primaryUpdateStrategy: unsupervised
+  resources:
+    limits:
+      cpu: 200m
+      memory: 300Mi
+    requests:
+      cpu: 200m
+      memory: 300Mi
+  storage:
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
         requests:
-            cpu: 200m
-            memory: 300Mi
-    storage:
-        pvcTemplate:
-            accessModes:
-                - ReadWriteOnce
-            resources:
-                requests:
-                    storage: 256Gi
-    walStorage:
-        pvcTemplate:
-            accessModes:
-                - ReadWriteOnce
-            resources:
-                requests:
-                    storage: 256Gi
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+          storage: 256Gi
+  walStorage:
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 256Gi
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-    labels:
-        app: home-assistant-20.0.10
-        app.kubernetes.io/instance: home-assistant
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: home-assistant
-        app.kubernetes.io/version: 2023.10.1
-        helm-revision: "1"
-        helm.sh/chart: home-assistant-20.0.10
-        release: home-assistant
-    name: home-assistant
-    namespace: prod-iot
+  labels:
+    app: home-assistant-20.0.10
+    app.kubernetes.io/instance: home-assistant
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: home-assistant
+    app.kubernetes.io/version: 2023.10.1
+    helm-revision: "1"
+    helm.sh/chart: home-assistant-20.0.10
+    release: home-assistant
+  name: home-assistant
+  namespace: prod-iot
 spec:
-    jobLabel: app.kubernetes.io/name
-    podMetricsEndpoints:
-        - port: metrics
-    selector:
-        matchLabels:
-            cnpg.io/poolerName: home-assistant-cnpg-main-rw
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  jobLabel: app.kubernetes.io/name
+  podMetricsEndpoints:
+    - port: metrics
+  selector:
+    matchLabels:
+      cnpg.io/poolerName: home-assistant-cnpg-main-rw
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Pooler
 metadata:
-    name: home-assistant-cnpg-main-rw
-    namespace: prod-iot
+  name: home-assistant-cnpg-main-rw
+  namespace: prod-iot
 spec:
-    cluster:
-        name: home-assistant-cnpg-main
-    instances: 2
-    pgbouncer:
-        parameters:
-            default_pool_size: "10"
-            max_client_conn: "1000"
-        poolMode: session
-    type: rw
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:39:43Z"
-    mac: ENC[AES256_GCM,data:8hetI/sYt6MGScZ1xCJtIW7vm0ys/IUT0Xot0JihuHamogn8qedsC+2Da7MEjrgpDFCzFZwPxVZH4YmbFYDRtys1ShbucvGgMDmbOBrnplqGqZZc4mS195wK55Ts4Dt7gcvaZRDgy38iaEMpyLoJs3iCUMca6wXU6Ne6P5GfxuE=,iv:6hjqZzVfYqH0wnYceju5b3gm31Eg7uO1em02kXze4rY=,tag:T7NKtE0rfMSMPo/tooezhA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:39:43Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+J/GGo4ZfRS2dUdEDzDj4M/z+fB450GBWxS9266UhiILF
-            UcqWY+/MBdPUDJ/U1tPtucQo2WSt6mnbQjILkTGh0O2fGoZyVBWdk8s+ackxrGHr
-            Vhkpw5U/z7B3gdpC/wucjfS6xGXL0c0OORaOzCXK3Mfc5ptRk+F9LlVS+jIH3tDS
-            Jner+4fBFdD/xEAXZfEay6CYHzSgHG83pFBHU+KRxDsWkDox680sDwoR8+Q67sXs
-            PT4IotyUHR847btaFzz2V/qcq2HOV6N4ZWFkJvkZrfWKXZxOZoSu1oUsOg4XeP0I
-            zimPBI5rlsgQXZYOoBeWMpJa+JtNlpO6uGLgVrEubk5YyQFRc4S6ZFEDHwh+mqs0
-            F4SqGiR1IMxDobj/fKNxkMqrvIpMEOvW0P5XA82SZ7iqsTD9sg8PDOIKSDddB++K
-            lz87AwLXAlZ0CG6siLcwzsc4pk2qreBbXRbpsW7BshmRCKx/afiIptR/sA2gWVGR
-            zz3KI2JhZpgLXsrd0memhkNFhlbENB32jN0TBIo7ieEp86OPEgO2A/Mk8aj2oqSo
-            698Z62DwEJIlNC9PJ4UqSUJNjEhSSGE0FjhJtVnP7jBlbOjTqMBqNtJP41zKhRel
-            +k8XkdiSNHK6PF1+SDMo8AmHvfCJ1ZODQB/n5RVxsqzy0PpfpBbb5QEeqiAk7OPS
-            lQHQiz6cEDthWJsQ9LdcGB+9kHhpfITUKVrhSl8N8t+3sNnDPB2fTVZfC6muTKJ5
-            ejQT0ZO6dvDUfxViuWcYH1Ryb9n9ys27lj+1baTFRdIs2wH83gLjTjYO4sChZWgF
-            8wKVkxyjMnoPpo3PIcyL2J1wonzBOPyS2sgXjl33sknSnsCakGr1NdLoWDYdqUiM
-            qosD8hic
-            =X4Ui
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  cluster:
+    name: home-assistant-cnpg-main
+  instances: 2
+  pgbouncer:
+    parameters:
+      default_pool_size: "10"
+      max_client_conn: "1000"
+    poolMode: session
+  type: rw

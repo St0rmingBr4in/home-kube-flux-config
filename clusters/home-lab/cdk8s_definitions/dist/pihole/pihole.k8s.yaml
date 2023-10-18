@@ -1,510 +1,247 @@
 apiVersion: v1
 kind: Secret
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-password
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-password
+  namespace: prod-infra
 data:
-    password: ENC[AES256_GCM,data:SPUKL9QX8UM=,iv:xqxRj7VKSueJTZ0waZgj9zbffsbyUw3P1G1XNQqKOEU=,tag:aUWaCh81QaNuzSdr/Devog==,type:str]
+  password: YWRtaW4=
 type: Opaque
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-custom-dnsmasq
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-custom-dnsmasq
+  namespace: prod-infra
 data:
-    02-custom.conf: ENC[AES256_GCM,data:XeoTVUhWR7J4oY3juhzZfUSLKKWHM3hLqRsf,iv:lUfFD/yDLZPGc2lyvdrOVRAZue2ci9Q7wfPDtz8iu1A=,tag:MrnoMRYKuCLr+LQZtT2pLA==,type:str]
-    05-pihole-custom-cname.conf: ""
-    addn-hosts: ""
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  02-custom.conf: |
+    addn-hosts=/etc/addn-hosts
+  05-pihole-custom-cname.conf: ""
+  addn-hosts: ""
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-dhcp
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-dhcp
+  namespace: prod-infra
 spec:
-    externalTrafficPolicy: Local
-    ports:
-        - name: client-udp
-          port: 67
-          protocol: UDP
-          targetPort: client-udp
-    selector:
-        app: pihole
-        release: pihole
-    type: NodePort
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  externalTrafficPolicy: Local
+  ports:
+    - name: client-udp
+      port: 67
+      protocol: UDP
+      targetPort: client-udp
+  selector:
+    app: pihole
+    release: pihole
+  type: NodePort
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-dns-tcp
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-dns-tcp
+  namespace: prod-infra
 spec:
-    externalTrafficPolicy: Local
-    ports:
-        - name: dns
-          port: 53
-          protocol: TCP
-          targetPort: dns
-    selector:
-        app: pihole
-        release: pihole
-    type: NodePort
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  externalTrafficPolicy: Local
+  ports:
+    - name: dns
+      port: 53
+      protocol: TCP
+      targetPort: dns
+  selector:
+    app: pihole
+    release: pihole
+  type: NodePort
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-dns-udp
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-dns-udp
+  namespace: prod-infra
 spec:
-    externalTrafficPolicy: Local
-    ports:
-        - name: dns-udp
-          port: 53
-          protocol: UDP
-          targetPort: dns-udp
-    selector:
-        app: pihole
-        release: pihole
-    type: NodePort
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  externalTrafficPolicy: Local
+  ports:
+    - name: dns-udp
+      port: 53
+      protocol: UDP
+      targetPort: dns-udp
+  selector:
+    app: pihole
+    release: pihole
+  type: NodePort
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole-web
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole-web
+  namespace: prod-infra
 spec:
-    ports:
-        - name: http
-          port: 80
-          protocol: TCP
-          targetPort: http
-        - name: https
-          port: 443
-          protocol: TCP
-          targetPort: https
-    selector:
-        app: pihole
-        release: pihole
-    type: ClusterIP
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https
+  selector:
+    app: pihole
+    release: pihole
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    labels:
-        app: pihole
-        chart: pihole-2.18.0
-        heritage: Helm
-        release: pihole
-    name: pihole
-    namespace: prod-infra
+  labels:
+    app: pihole
+    chart: pihole-2.18.0
+    heritage: Helm
+    release: pihole
+  name: pihole
+  namespace: prod-infra
 spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app: pihole
-            release: pihole
-    strategy:
-        rollingUpdate:
-            maxSurge: 1
-            maxUnavailable: 1
-        type: RollingUpdate
-    template:
-        metadata:
-            annotations:
-                checksum.config.adlists: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-                checksum.config.blacklist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-                checksum.config.dnsmasqConfig: c790a30e43345241e42908cfedcb1fa59909514908b3c4aaf8fd251787d370f
-                checksum.config.regex: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-                checksum.config.staticDhcpConfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-                checksum.config.whitelist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
-            labels:
-                app: pihole
-                release: pihole
-        spec:
-            containers:
-                - env:
-                    - name: WEB_PORT
-                      value: "80"
-                    - name: VIRTUAL_HOST
-                      value: pi.hole
-                    - name: WEBPASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                            key: password
-                            name: pihole-password
-                    - name: PIHOLE_DNS_
-                      value: 8.8.8.8;8.8.4.4
-                  image: pihole/pihole:2023.05.2
-                  imagePullPolicy: IfNotPresent
-                  livenessProbe:
-                    failureThreshold: 10
-                    httpGet:
-                        path: /admin/index.php
-                        port: http
-                        scheme: HTTP
-                    initialDelaySeconds: 60
-                    timeoutSeconds: 5
-                  name: pihole
-                  ports:
-                    - containerPort: 80
-                      name: http
-                      protocol: TCP
-                    - containerPort: 53
-                      name: dns
-                      protocol: TCP
-                    - containerPort: 53
-                      name: dns-udp
-                      protocol: UDP
-                    - containerPort: 443
-                      name: https
-                      protocol: TCP
-                    - containerPort: 67
-                      name: client-udp
-                      protocol: UDP
-                  readinessProbe:
-                    failureThreshold: 3
-                    httpGet:
-                        path: /admin/index.php
-                        port: http
-                        scheme: HTTP
-                    initialDelaySeconds: 60
-                    timeoutSeconds: 5
-                  resources: {}
-                  securityContext:
-                    privileged: false
-                  volumeMounts:
-                    - mountPath: /etc/pihole
-                      name: config
-                    - mountPath: /etc/dnsmasq.d/02-custom.conf
-                      name: custom-dnsmasq
-                      subPath: 02-custom.conf
-                    - mountPath: /etc/addn-hosts
-                      name: custom-dnsmasq
-                      subPath: addn-hosts
-            dnsConfig:
-                nameservers:
-                    - 127.0.0.1
-                    - 8.8.8.8
-            dnsPolicy: None
-            hostNetwork: false
-            volumes:
-                - emptyDir: {}
-                  name: config
-                - configMap:
-                    defaultMode: 420
-                    name: pihole-custom-dnsmasq
-                  name: custom-dnsmasq
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+      release: pihole
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum.config.adlists: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.blacklist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.dnsmasqConfig: c790a30e43345241e42908cfedcb1fa59909514908b3c4aaf8fd251787d370f
+        checksum.config.regex: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.staticDhcpConfig: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+        checksum.config.whitelist: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546
+      labels:
+        app: pihole
+        release: pihole
+    spec:
+      containers:
+        - env:
+            - name: WEB_PORT
+              value: "80"
+            - name: VIRTUAL_HOST
+              value: pi.hole
+            - name: WEBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: pihole-password
+            - name: PIHOLE_DNS_
+              value: 8.8.8.8;8.8.4.4
+          image: pihole/pihole:2023.05.2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /admin/index.php
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          name: pihole
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 53
+              name: dns
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 443
+              name: https
+              protocol: TCP
+            - containerPort: 67
+              name: client-udp
+              protocol: UDP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /admin/index.php
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+          resources: {}
+          securityContext:
+            privileged: false
+          volumeMounts:
+            - mountPath: /etc/pihole
+              name: config
+            - mountPath: /etc/dnsmasq.d/02-custom.conf
+              name: custom-dnsmasq
+              subPath: 02-custom.conf
+            - mountPath: /etc/addn-hosts
+              name: custom-dnsmasq
+              subPath: addn-hosts
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - 8.8.8.8
+      dnsPolicy: None
+      hostNetwork: false
+      volumes:
+        - emptyDir: {}
+          name: config
+        - configMap:
+            defaultMode: 420
+            name: pihole-custom-dnsmasq
+          name: custom-dnsmasq
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-    annotations:
-        helm.sh/hook: test
-    name: pihole-smoke-test
-    namespace: prod-infra
+  annotations:
+    helm.sh/hook: test
+  name: pihole-smoke-test
+  namespace: prod-infra
 spec:
-    containers:
-        - command:
-            - sh
-            - -c
-            - curl http://pihole-web:80/
-          image: curlimages/curl
-          imagePullPolicy: IfNotPresent
-          name: hook1-container
-    restartPolicy: Never
-    terminationGracePeriodSeconds: 0
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-10-18T00:41:52Z"
-    mac: ENC[AES256_GCM,data:5JtviA3XdSamdrUMh2Eg2xAknYoMnwNXAKr/9ug4ZbMNgAU3LW+6IqlTPB6ANtYsspou03pZAWbWq90dbH7lD0g492S/3MW8jPtM4wc5ttQqv0LstpzsAW9i/pydiN7fjmpJi2O5wNFs1dP6xh/n/PalF1q7JcEPzY9UFCW/Z5w=,iv:72baDAAKCAd4U0ZNPb1JlTjedIjql/sk9E344o7+5e4=,tag:XTDq8cV6nAHxzd5K9rUmYA==,type:str]
-    pgp:
-        - created_at: "2023-10-18T00:41:52Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydARAAsrKdF9mqO6ZKXohuDvYS5HrkruQv4jeZcDgtGLoE/Ilh
-            aniy6gt2DgjEEJBFW16RnqRZuX314j69v6MN7137pqSqa118ADRjbFPinUrXjwy0
-            6cnCQt37/IBx6REris/yCJM5mNBsdGGLGqLY33dv2EWWENlVmRlsx2WOTK6lV/Q7
-            783w2ztIpRYZJaZeLI+IBlifLonlFKOgXiomhfokoa742mzWGCs3elyKi/dS87an
-            9rrCDPrD5bsz3Lz8o/rHDLjmYtPoFT2nphjAj+bsvsaV+69N/OuwLhf1qH5Zfxwb
-            BezgklRSNsFkIrfa+hbsoYzmhv157m3FwP+MuA1VKUjY8jegGVGyO7S6MNqe1IZa
-            9oAYWoqm6Jn/SczUjkASKDPpgWRZsmeKdccY0CW6KPXSTE/DT8l76U7dRwXkB12s
-            vz9OCUH60apXPF+Sq2yEZ5dJCfJTV5qO+V5eI+1fxADVSVd7wjr2PTfiMgiZpk6c
-            EH522ziSkBzHdF2DHGhqR96b4WLl1/6q8pdFPviBjkWI2dYPPOpYkYPBS4/BnoNm
-            cln1h0dAbuiQz2V9y0Jf2jPkjHKoHvJGEqUB7rdmXGpIoduwWkuD5krW5IVAYAjh
-            aIUov/B7czdznHcB7B8o2jsUnNZXFEnPDCmlzu2+DqOCfdp+dUVNMxHJZ7elXzzS
-            kQGvE0UImU0YWVD8+K3tRC4F00clYk7JFQmBfSjkxtOwkfE9A78nMiRjaMdjs6Jm
-            fdCZn33keQgStXeyiLmDcWBDLqDNJJCO7dO9nUL0jrc6L1qRrWtX3BpkhNbZZdu9
-            YZePzK6MdW7K49+l03INwtD/2p6m2Tv3D4gpjqtYwWSVsnJASMjHak6+HR9q4Scv
-            pC0=
-            =JTZS
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  containers:
+    - command:
+        - sh
+        - -c
+        - curl http://pihole-web:80/
+      image: curlimages/curl
+      imagePullPolicy: IfNotPresent
+      name: hook1-container
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 0

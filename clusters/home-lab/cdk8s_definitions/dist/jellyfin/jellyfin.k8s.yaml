@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-15.0.11
+    app: jellyfin-15.0.15
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
     app.kubernetes.io/version: 10.8.11
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.11
+    helm.sh/chart: jellyfin-15.0.15
     release: jellyfin
     service.name: autodiscovery
   name: jellyfin-autodiscovery
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-15.0.11
+    app: jellyfin-15.0.15
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
     app.kubernetes.io/version: 10.8.11
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.11
+    helm.sh/chart: jellyfin-15.0.15
     release: jellyfin
     service.name: main
   name: jellyfin
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jellyfin-15.0.11
+    app: jellyfin-15.0.15
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
     app.kubernetes.io/version: 10.8.11
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.11
+    helm.sh/chart: jellyfin-15.0.15
     release: jellyfin
   name: jellyfin
   namespace: prod-media
@@ -82,13 +82,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: jellyfin-15.0.11
+        app: jellyfin-15.0.15
         app.kubernetes.io/instance: jellyfin
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jellyfin
         app.kubernetes.io/version: 10.8.11
         helm-revision: "1"
-        helm.sh/chart: jellyfin-15.0.11
+        helm.sh/chart: jellyfin-15.0.15
         pod.name: main
         release: jellyfin
     spec:
@@ -242,13 +242,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: ""
   labels:
-    app: jellyfin-15.0.11
+    app: jellyfin-15.0.15
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
     app.kubernetes.io/version: 10.8.11
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.11
+    helm.sh/chart: jellyfin-15.0.15
     release: jellyfin
   name: jellyfin
   namespace: prod-media

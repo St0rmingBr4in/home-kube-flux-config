@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: bazarr-15.0.10
+    app: bazarr-15.0.12
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.0
+    app.kubernetes.io/version: 1.3.1
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.10
+    helm.sh/chart: bazarr-15.0.12
     release: bazarr
     service.name: main
   name: bazarr
@@ -30,13 +30,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: bazarr-15.0.10
+    app: bazarr-15.0.12
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.0
+    app.kubernetes.io/version: 1.3.1
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.10
+    helm.sh/chart: bazarr-15.0.12
     release: bazarr
   name: bazarr
   namespace: prod-media
@@ -54,13 +54,13 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: bazarr-15.0.10
+        app: bazarr-15.0.12
         app.kubernetes.io/instance: bazarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: bazarr
-        app.kubernetes.io/version: 1.3.0
+        app.kubernetes.io/version: 1.3.1
         helm-revision: "1"
-        helm.sh/chart: bazarr-15.0.10
+        helm.sh/chart: bazarr-15.0.12
         pod.name: main
         release: bazarr
     spec:
@@ -75,7 +75,7 @@ spec:
               value: "0022"
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: tccr.io/truecharts/bazarr:v1.3.0@sha256:853b458858e3f0c62e9c15aaae35d73691457d37e14d2f9e797d8a9cadc861c7
+          image: tccr.io/truecharts/bazarr:v1.3.1@sha256:f1167ba3f2764283563614f9f99d5ad88e5f3565319bf8b0b5cc31fc1d3bdaf4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -199,13 +199,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: tc-system-chain-basic@kubernetescrd
   labels:
-    app: bazarr-15.0.10
+    app: bazarr-15.0.12
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.0
+    app.kubernetes.io/version: 1.3.1
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.10
+    helm.sh/chart: bazarr-15.0.12
     release: bazarr
   name: bazarr
   namespace: prod-media
