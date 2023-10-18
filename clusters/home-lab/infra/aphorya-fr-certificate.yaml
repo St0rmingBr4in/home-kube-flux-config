@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: aphorya.fr
+spec:
+  commonName: "*.aphorya.fr"
+  dnsNames:
+    - "*.aphorya.fr"
+  secretName: aphorya.fr-cert
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer

@@ -11,6 +11,9 @@ ports:
         - main: "st0rmingbr4in.com"
           sans:
             - "*.st0rmingbr4in.com"
+        - main: "aphorya.fr"
+          sans:
+            - "*.aphorya.fr"
 
 rbac:
   enabled: true
