@@ -15,9 +15,6 @@ resources:
   - traefik-customchart.yaml
   - traefik.yaml
 
-patchesStrategicMerge:
-  - set-resources.yaml
-
 configMapGenerator:
   - name: traefik-values
     files:
