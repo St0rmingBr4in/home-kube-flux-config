@@ -8479,11 +8479,11 @@ spec:
             timeoutSeconds: 5
           resources:
             limits:
-              cpu: 4000m
-              memory: 8Gi
+              cpu: 1
+              memory: 500Mi
             requests:
-              cpu: 10m
-              memory: 50Mi
+              cpu: 1
+              memory: 500Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
