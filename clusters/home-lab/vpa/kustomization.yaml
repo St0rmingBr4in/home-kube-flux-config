@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy/?ref=vertical-pod-autoscaler-0.14.0&timeout=90s
+  - vpa-tls-certs.yaml
+
+patchesStrategicMerge:
+  - set-resources.yaml

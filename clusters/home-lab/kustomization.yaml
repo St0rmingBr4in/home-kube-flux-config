@@ -7,6 +7,7 @@ resources:
 - helmrepos
 - infra
 - media
+- vpa
 # - velero
 # - system-upgrade
 - iot

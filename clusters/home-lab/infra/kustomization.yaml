@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
-  - https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy/?ref=vertical-pod-autoscaler-0.14.0&timeout=90s
   - datadog-secret.yaml
   - datadog-cluster-agent-secret.yaml
   - digitalocean-token.yaml
