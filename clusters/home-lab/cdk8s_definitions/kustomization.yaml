@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - dist/prod-infra/traefik/traefik-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-media/flaresolverr/flaresolverr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/radarr/radarr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/sonarr/sonarr-prod-media-flux-kustomization.k8s.yaml

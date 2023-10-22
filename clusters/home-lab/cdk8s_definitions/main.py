@@ -125,15 +125,22 @@ class HelmApp(FluxApp):
             ) as values_file:
                 values = yaml.safe_load(values_file)
 
+                chart=helm_release["spec"]["chart"]["spec"]["chart"]
+                repo=helm_repo(
+                    helm_release["spec"]["chart"]["spec"]["sourceRef"]["name"]
+                )
+
+                if chart == "./traefik":
+                    chart = "/Users/julien.doche/Documents/git-repos/traefik-helm-chart/traefik"
+                    repo = ""
+
                 HelmChart(
                     scope=self,
                     identifier=name,
-                    chart=helm_release["spec"]["chart"]["spec"]["chart"],
+                    chart=chart,
                     values=values,
                     version=helm_release["spec"]["chart"]["spec"]["version"],
-                    repo=helm_repo(
-                        helm_release["spec"]["chart"]["spec"]["sourceRef"]["name"]
-                    ),
+                    repo=repo,
                     namespace=namespace,
                     **kwargs,
                 )
@@ -160,6 +167,10 @@ class CertificateApp(FluxApp):
 
 
 apps = [
+    HelmApp(
+        name="traefik",
+        root_dir="../infra",
+    ),
     HelmApp(
         name="flaresolverr",
         root_dir="../media",

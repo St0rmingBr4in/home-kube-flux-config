@@ -12,13 +12,7 @@ resources:
   - basic-auth.yaml
   - basic-auth-middleware.yaml
   - metrics-redirect-middleware.yaml
-  - traefik-customchart.yaml
-  - traefik.yaml
 
-configMapGenerator:
-  - name: traefik-values
-    files:
-      - values.yaml=traefik-values.yaml
 configurations:
   - kustomizeconfig.yaml
 namespace: prod-infra
