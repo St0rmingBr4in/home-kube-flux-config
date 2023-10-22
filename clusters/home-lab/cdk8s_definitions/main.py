@@ -14,11 +14,14 @@ from imports.io.fluxcd.toolkit.kustomize import (
 
 KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
 
+
 def app_dist_dir(app):
     return os.path.join("dist", app.namespace, app.name)
 
+
 def chart_flux_kustomization_name(app):
     return f"{app.name}-{app.namespace}-flux-kustomization"
+
 
 def chart_flux_kustomization_file(app):
     return f"{chart_flux_kustomization_name(app)}.k8s.yaml"
@@ -58,7 +61,12 @@ class HelmChart(Chart):
 
 class KustomizationChart(Chart):
     def __init__(self, scope, identifier, namespace, **kwargs):
-        super().__init__(scope=scope, id=identifier, disable_resource_name_hashes=False, namespace=namespace)
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=False,
+            namespace=namespace,
+        )
         Kustomization(self, f"{identifier}-kustomization", **kwargs)
 
 
@@ -71,10 +79,12 @@ class FluxApp(App):
         KustomizationChart(
             scope=self,
             identifier=chart_flux_kustomization_name(self),
-            namespace = "flux-system",
+            namespace="flux-system",
             spec={
                 "interval": "10m0s",
-                "path": os.path.join("./clusters/home-lab/cdk8s_definitions", app_dist_dir(self)),
+                "path": os.path.join(
+                    "./clusters/home-lab/cdk8s_definitions", app_dist_dir(self)
+                ),
                 "prune": True,
                 "decryption": {
                     "provider": KustomizationSpecDecryptionProvider.SOPS,
@@ -101,15 +111,18 @@ class FluxApp(App):
             ],
         )
 
+
 class HelmApp(FluxApp):
-    def __init__(self, name, values_dir, **kwargs):
-        with open(os.path.join(values_dir, f"{name}.yaml"), "r") as helm_release_file:
+    def __init__(self, name, root_dir, additionnal_objs=[], **kwargs):
+        with open(os.path.join(root_dir, f"{name}.yaml"), "r") as helm_release_file:
             helm_release = yaml.safe_load(helm_release_file)
             namespace = helm_release["spec"]["targetNamespace"]
 
             super().__init__(name=name, namespace=namespace)
 
-            with open(os.path.join(values_dir, f"{name}-values.yaml"), "r") as values_file:
+            with open(
+                os.path.join(root_dir, f"{name}-values.yaml"), "r"
+            ) as values_file:
                 values = yaml.safe_load(values_file)
 
                 HelmChart(
@@ -124,10 +137,13 @@ class HelmApp(FluxApp):
                     namespace=namespace,
                     **kwargs,
                 )
+        for o in additionnal_objs:
+            Include(scope=self, id=o, url=os.path.join(root_dir, o))
+
 
 class CertificateApp(FluxApp):
     def __init__(self, name):
-        namespace="prod-infra"
+        namespace = "prod-infra"
         super().__init__(name=name, namespace=namespace)
 
         chart = Chart(
@@ -136,83 +152,84 @@ class CertificateApp(FluxApp):
             disable_resource_name_hashes=True,
             namespace=namespace,
         )
-        Include(scope=chart, id=f"{name}-certificate", url=os.path.join("../infra", f"{name}-certificate.yaml"))
+        Include(
+            scope=chart,
+            id=f"{name}-certificate",
+            url=os.path.join("../infra", f"{name}-certificate.yaml"),
+        )
+
 
 apps = [
     HelmApp(
         name="flaresolverr",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="radarr",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="sonarr",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="bazarr",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="jackett",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="jellyfin",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="prowlarr",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="qbittorrent",
-        values_dir="../media",
+        root_dir="../media",
     ),
     HelmApp(
         name="external-service",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="vault",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="pihole",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="kube-vip",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="datadog",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="cert-manager",
-        values_dir="../infra",
+        root_dir="../infra",
     ),
     HelmApp(
         name="home-assistant",
-        values_dir="../iot",
+        root_dir="../iot",
     ),
     HelmApp(
         name="cloudnative-pg",
-        values_dir="../cloudnative-pg",
+        root_dir="../cloudnative-pg",
     ),
     HelmApp(
         name="external-service",
-        values_dir="../aphorya/prod",
+        root_dir="../aphorya/prod",
     ),
-    CertificateApp(
-            name="st0rmingbr4in-com"
-            ),
-    CertificateApp(
-            name="aphorya-fr"
-            ),
+    CertificateApp(name="st0rmingbr4in-com"),
+    CertificateApp(name="aphorya-fr"),
 ]
 
 for app in apps:

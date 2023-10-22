@@ -34,4 +34,4 @@ persistence:
   media:
     enabled: true
     existingClaim: media-library
-    mountPath: /media
+    mountPath: /tv

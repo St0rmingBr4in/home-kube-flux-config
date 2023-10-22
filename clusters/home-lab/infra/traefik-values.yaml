@@ -1,7 +1,8 @@
 ---
 ports:
   web:
-    redirectTo: websecure
+    redirectTo:
+      port: websecure
     port: 80
   websecure:
     port: 443
@@ -34,6 +35,7 @@ metrics:
 
 experimental:
   kubernetesGateway:
+    namespacePolicy: All
     enabled: true
     gateway:
       enabled: true

@@ -139,7 +139,7 @@ spec:
             - mountPath: /dev/shm
               name: devshm
               readOnly: false
-            - mountPath: /media
+            - mountPath: /tv
               name: media
               readOnly: false
             - mountPath: /shared
