@@ -408,7 +408,7 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: ""
   labels:
     app: radarr-17.0.8
     app.kubernetes.io/instance: radarr

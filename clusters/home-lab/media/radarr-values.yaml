@@ -13,8 +13,7 @@ ingress:
         paths:
           - path: /
     enableFixedMiddlewares: true
-    fixedMiddlewares:
-      - basic-auth
+    fixedMiddlewares: []
 
 resources:
   limits:
