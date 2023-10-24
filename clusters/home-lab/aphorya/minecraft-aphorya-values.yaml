@@ -58,7 +58,14 @@ extraVolumes:
       - name: worldedit-schematics
         mountPath: /data/plugins/WorldEdit/schematics
         readOnly: false
+      - name: plugin-updates
+        mountPath: /data/plugins/update/
+        readOnly: true
     volumes:
+      - name: plugin-updates
+        nfs:
+          server: nasse.hard.st0rmingbr4in.lan
+          path: /volume1/kubernetes_storage/minecraft-plugins
       - name: worldedit-schematics
         nfs:
           server: nasse.hard.st0rmingbr4in.lan

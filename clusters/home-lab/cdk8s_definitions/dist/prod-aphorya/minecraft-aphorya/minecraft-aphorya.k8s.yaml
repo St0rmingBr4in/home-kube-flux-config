@@ -215,6 +215,9 @@ spec:
             - mountPath: /data/plugins/WorldEdit/schematics
               name: worldedit-schematics
               readOnly: false
+            - mountPath: /data/plugins/update/
+              name: plugin-updates
+              readOnly: true
       securityContext:
         fsGroup: 2000
         runAsGroup: 3000
@@ -234,6 +237,10 @@ spec:
             claimName: minecraft-aphorya-datadir
         - emptyDir: {}
           name: backupdir
+        - name: plugin-updates
+          nfs:
+            path: /volume1/kubernetes_storage/minecraft-plugins
+            server: nasse.hard.st0rmingbr4in.lan
         - name: worldedit-schematics
           nfs:
             path: /volume1/kubernetes_storage/worldedit_schematics
