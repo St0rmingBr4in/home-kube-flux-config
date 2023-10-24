@@ -19,5 +19,6 @@ resources:
   - dist/prod-iot/home-assistant/home-assistant-prod-iot-flux-kustomization.k8s.yaml
   - dist/cloudnative-pg/cloudnative-pg/cloudnative-pg-cloudnative-pg-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/external-service/external-service-prod-aphorya-flux-kustomization.k8s.yaml
+  - dist/prod-aphorya/minecraft-aphorya/minecraft-aphorya-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-infra/st0rmingbr4in-com/st0rmingbr4in-com-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/aphorya-fr/aphorya-fr-prod-infra-flux-kustomization.k8s.yaml

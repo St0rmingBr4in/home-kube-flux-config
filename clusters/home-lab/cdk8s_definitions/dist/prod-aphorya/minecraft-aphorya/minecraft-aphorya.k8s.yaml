@@ -1,0 +1,240 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: minecraft-aphorya-minecraft
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft-rcon
+  namespace: prod-aphorya
+data:
+  rcon-password: Q0hBTkdFTUUh
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: minecraft-aphorya-minecraft
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft-curseforge
+  namespace: prod-aphorya
+data:
+  cf-api-key: Q0hBTkdFTUUh
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: minecraft-aphorya-minecraft-metrics
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft-metrics
+  namespace: prod-aphorya
+spec:
+  ports:
+    - name: metrics
+      port: 9940
+      protocol: TCP
+      targetPort: metrics
+  selector:
+    app: minecraft-aphorya-minecraft
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    metallb.universe.tf/allow-shared-ip: prod
+  labels:
+    app: minecraft-aphorya-minecraft
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft
+  namespace: prod-aphorya
+spec:
+  externalTrafficPolicy: Cluster
+  loadBalancerIP: 192.168.62.17
+  ports:
+    - name: minecraft
+      port: 25565
+      protocol: TCP
+      targetPort: minecraft
+  selector:
+    app: minecraft-aphorya-minecraft
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: minecraft-aphorya-minecraft
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft
+  namespace: prod-aphorya
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft-aphorya-minecraft
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "9940"
+        prometheus.io/scrape: "true"
+      labels:
+        app: minecraft-aphorya-minecraft
+        app.kubernetes.io/instance: minecraft-aphorya-minecraft
+        app.kubernetes.io/name: minecraft
+        app.kubernetes.io/version: 4.10.0
+    spec:
+      containers:
+        - env:
+            - name: EULA
+              value: "true"
+            - name: TYPE
+              value: SPIGOT
+            - name: VERSION
+              value: 1.20.2
+            - name: DIFFICULTY
+              value: easy
+            - name: WHITELIST
+              value: juldoc,RaKk0o
+            - name: OPS
+              value: juldoc,RaKk0o
+            - name: MAX_PLAYERS
+              value: "20"
+            - name: MAX_WORLD_SIZE
+              value: "10000"
+            - name: MAX_BUILD_HEIGHT
+              value: "256"
+            - name: MAX_TICK_TIME
+              value: "60000"
+            - name: SPAWN_PROTECTION
+              value: "16"
+            - name: VIEW_DISTANCE
+              value: "10"
+            - name: MODE
+              value: survival
+            - name: MOTD
+              value: Aphorya
+            - name: PVP
+              value: "true"
+            - name: LEVEL_TYPE
+              value: DEFAULT
+            - name: LEVEL
+              value: world
+            - name: MODRINTH_ALLOWED_VERSION_TYPE
+              value: release
+            - name: MEMORY
+              value: 6G
+            - name: OVERRIDE_SERVER_PROPERTIES
+              value: "false"
+            - name: ENABLE_RCON
+              value: "false"
+          image: itzg/minecraft-server:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mc-health && touch /data/test
+            failureThreshold: 100
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: minecraft-aphorya-minecraft
+          ports:
+            - containerPort: 25565
+              name: minecraft
+              protocol: TCP
+            - containerPort: 9940
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mc-health && touch /data/test
+            failureThreshold: 100
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: "8"
+              memory: 9G
+            requests:
+              cpu: "4"
+              memory: 9G
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          stdin: true
+          tty: true
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /data
+              name: datadir
+            - mountPath: /backups
+              name: backupdir
+              readOnly: true
+            - mountPath: /data/plugins/WorldEdit/schematics
+              name: worldedit-schematics
+              readOnly: false
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - effect: NoSchedule
+          key: ram
+          operator: Exists
+      volumes:
+        - emptyDir: {}
+          name: tmp
+        - name: datadir
+          persistentVolumeClaim:
+            claimName: minecraft-aphorya-datadir
+        - emptyDir: {}
+          name: backupdir
+        - name: worldedit-schematics
+          nfs:
+            path: /volume1/kubernetes_storage/worldedit_schematics
+            server: nasse.hard.st0rmingbr4in.lan

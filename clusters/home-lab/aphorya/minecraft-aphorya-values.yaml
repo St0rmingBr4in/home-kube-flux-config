@@ -55,47 +55,10 @@ persistence:
     existingClaim: minecraft-aphorya-datadir
 extraVolumes:
   - volumeMounts:
-      - name: plugin-updates
-        mountPath: /data/plugins/update/
-        readOnly: true
       - name: worldedit-schematics
         mountPath: /data/plugins/WorldEdit/schematics
         readOnly: false
-      - name: nametagedit
-        mountPath: /data/plugins/NametagEdit/
-        readOnly: true
-      - name: worldedit
-        mountPath: /etc/minecraft-config/plugins/WorldEdit/
-        readOnly: true
-      - name: mycommand
-        mountPath: /etc/minecraft-config/plugins/MyCommand/
-        readOnly: true
-      - name: mycommand-commands
-        mountPath: /etc/minecraft-config/plugins/MyCommand/commands/
-        readOnly: true
-      - name: prometheusexporter
-        mountPath: /data/plugins/PrometheusExporter
-        readOnly: true
     volumes:
-      - name: worldedit
-        configMap:
-          name: minecraft-aphorya-worldedit
-      - name: mycommand-commands
-        configMap:
-          name: minecraft-aphorya-mycommand-commands
-      - name: mycommand
-        configMap:
-          name: minecraft-aphorya-mycommand
-      - name: nametagedit
-        configMap:
-          name: minecraft-aphorya-nametagedit
-      - name: prometheusexporter
-        configMap:
-          name: minecraft-aphorya-prometheusexporter
-      - name: plugin-updates
-        nfs:
-          server: nasse.hard.st0rmingbr4in.lan
-          path: /volume1/kubernetes_storage/minecraft-plugins
       - name: worldedit-schematics
         nfs:
           server: nasse.hard.st0rmingbr4in.lan

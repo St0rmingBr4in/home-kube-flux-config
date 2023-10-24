@@ -197,7 +197,7 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: ""
   labels:
     app: bazarr-15.0.12
     app.kubernetes.io/instance: bazarr

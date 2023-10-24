@@ -237,7 +237,11 @@ apps = [
     ),
     HelmApp(
         name="external-service",
-        root_dir="../aphorya/prod",
+        root_dir="../aphorya",
+    ),
+    HelmApp(
+        name="minecraft-aphorya",
+        root_dir="../aphorya",
     ),
     CertificateApp(name="st0rmingbr4in-com"),
     CertificateApp(name="aphorya-fr"),

@@ -1,9 +1,0 @@
----
-apiVersion: builtin
-kind: ConfigMapGenerator
-metadata:
-  name: minecraft-aphorya-worldedit
-files:
-  - data/plugins/WorldEdit/config.yml
-options:
-  disableNameSuffixHash: true
