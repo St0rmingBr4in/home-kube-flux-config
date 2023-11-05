@@ -11,7 +11,6 @@ dp:
       cpu: 2m
       memory: 40Mi
     limits:
-      cpu: 10m
       memory: 40Mi
 lbl:
   resources:
@@ -19,5 +18,4 @@ lbl:
       cpu: 2m
       memory: 50Mi
     limits:
-      cpu: 10m
       memory: 50Mi

@@ -40,7 +40,6 @@ livenessProbe:
   failureThreshold: 100
 resources:
   limits:
-    cpu: "8"
     memory: 9G
   requests:
     cpu: "4"

@@ -253,7 +253,7 @@ spec:
             timeoutSeconds: 5
           resources:
             limits:
-              cpu: 200m
+              cpu: 4000m
               memory: 300Mi
             requests:
               cpu: 200m
@@ -416,7 +416,7 @@ spec:
           name: home-assistant-init-init
           resources:
             limits:
-              cpu: 200m
+              cpu: 4000m
               memory: 300Mi
             requests:
               cpu: 200m
@@ -561,7 +561,7 @@ spec:
   primaryUpdateStrategy: unsupervised
   resources:
     limits:
-      cpu: 200m
+      cpu: 4000m
       memory: 300Mi
     requests:
       cpu: 200m

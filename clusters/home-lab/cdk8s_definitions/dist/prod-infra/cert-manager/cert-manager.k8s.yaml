@@ -5583,7 +5583,6 @@ spec:
           name: cert-manager
           resources:
             limits:
-              cpu: 100m
               memory: 130Mi
             requests:
               cpu: 100m
@@ -5653,7 +5652,6 @@ spec:
               protocol: TCP
           resources:
             limits:
-              cpu: 100m
               memory: 100Mi
             requests:
               cpu: 100m
@@ -5738,7 +5736,6 @@ spec:
             timeoutSeconds: 1
           resources:
             limits:
-              cpu: 100m
               memory: 100Mi
             requests:
               cpu: 100m

@@ -1207,7 +1207,6 @@ spec:
             timeoutSeconds: 5
           resources:
             limits:
-              cpu: 200m
               memory: 300Mi
             requests:
               cpu: 200m
@@ -1334,7 +1333,6 @@ spec:
               protocol: TCP
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m
@@ -1426,7 +1424,6 @@ spec:
           name: process-agent
           resources:
             limits:
-              cpu: 50m
               memory: 100Mi
             requests:
               cpu: 50m
@@ -1512,7 +1509,6 @@ spec:
           name: system-probe
           resources:
             limits:
-              cpu: 50m
               memory: 512Mi
             requests:
               cpu: 50m
@@ -1671,7 +1667,6 @@ spec:
           name: security-agent
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m
@@ -1722,7 +1717,6 @@ spec:
           name: init-volume
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m
@@ -1765,7 +1759,6 @@ spec:
           name: init-config
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m
@@ -1801,7 +1794,6 @@ spec:
           name: seccomp-setup
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m
@@ -2112,7 +2104,6 @@ spec:
             timeoutSeconds: 5
           resources:
             limits:
-              cpu: 50m
               memory: 150Mi
             requests:
               cpu: 50m

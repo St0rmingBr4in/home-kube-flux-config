@@ -21,7 +21,6 @@ ingress:
 
 resources:
   limits:
-    cpu: 200m
     memory: 300Mi
   requests:
     cpu: 200m
@@ -30,7 +29,6 @@ resources:
 postgresql:
   resources:
     limits:
-      cpu: 200m
       memory: 300Mi
     requests:
       cpu: 200m

@@ -10,7 +10,6 @@ extraArgs:
 
 resources:
   limits:
-    cpu: 100m
     memory: 100Mi
   requests:
     cpu: 100m
@@ -18,7 +17,6 @@ resources:
 webhook:
   resources:
     limits:
-      cpu: 100m
       memory: 100Mi
     requests:
       cpu: 100m
@@ -26,7 +24,6 @@ webhook:
 cainjector:
   resources:
     limits:
-      cpu: 100m
       memory: 130Mi
     requests:
       cpu: 100m

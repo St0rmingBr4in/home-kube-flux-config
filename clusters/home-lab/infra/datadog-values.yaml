@@ -93,7 +93,6 @@ agents:
           cpu: 200m
           memory: 300Mi
         limits:
-          cpu: 200m
           memory: 300Mi
     processAgent:
       resources:
@@ -101,7 +100,6 @@ agents:
           cpu: 50m
           memory: 100Mi
         limits:
-          cpu: 50m
           memory: 100Mi
     traceAgent:
       resources:
@@ -109,7 +107,6 @@ agents:
           cpu: 50m
           memory: 150Mi
         limits:
-          cpu: 50m
           memory: 150Mi
     systemProbe:
       resources:
@@ -117,7 +114,6 @@ agents:
           cpu: 50m
           memory: 512Mi
         limits:
-          cpu: 50m
           memory: 512Mi
     securityAgent:
       resources:
@@ -125,7 +121,6 @@ agents:
           cpu: 50m
           memory: 150Mi
         limits:
-          cpu: 50m
           memory: 150Mi
     initContainers:
       resources:
@@ -133,7 +128,6 @@ agents:
           cpu: 50m
           memory: 150Mi
         limits:
-          cpu: 50m
           memory: 150Mi
   tolerations:
     - effect: NoSchedule
@@ -160,7 +154,6 @@ clusterAgent:
       cpu: 50m
       memory: 150Mi
     limits:
-      cpu: 50m
       memory: 150Mi
   tolerations:
     - effect: NoSchedule
@@ -173,5 +166,4 @@ kube-state-metrics:
       cpu: 50m
       memory: 100Mi
     limits:
-      cpu: 50m
       memory: 100Mi
