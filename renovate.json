@@ -4,5 +4,8 @@
   ],
   "flux": {
     "fileMatch": ["\\.yaml$"]
+  },
+  "postUpgradeTasks": {
+    "commands": ["touch test"]
   }
 }
