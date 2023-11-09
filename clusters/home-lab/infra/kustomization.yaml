@@ -4,8 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
-  - datadog-secret.yaml
-  - datadog-cluster-agent-secret.yaml
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
   - vault-pvc-0.yaml

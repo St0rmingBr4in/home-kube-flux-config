@@ -59,6 +59,16 @@ class HelmChart(Chart):
                     )
 
 
+class IncludeChart(Chart):
+    def __init__(self, scope: Construct, identifier: str, **kwargs):
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=True,
+        )
+        Include(scope=self, id=identifier, **kwargs)
+
+
 class KustomizationChart(Chart):
     def __init__(self, scope, identifier, namespace, **kwargs):
         super().__init__(
@@ -71,9 +81,10 @@ class KustomizationChart(Chart):
 
 
 class FluxApp(App):
-    def __init__(self, name, namespace, **kwarg):
+    def __init__(self, name, namespace, root_dir=None, additionnal_objs=[], **kwarg):
         self.name = name
         self.namespace = namespace
+        self.root_dir = root_dir
         super().__init__(outdir=os.path.join("dist", namespace, name), **kwarg)
 
         KustomizationChart(
@@ -97,6 +108,13 @@ class FluxApp(App):
             },
         )
 
+        for o in additionnal_objs:
+            IncludeChart(
+                scope=self,
+                identifier=o.removesuffix(".yaml"),
+                url=os.path.join(root_dir, o),
+            )
+
     def synth(self):
         super().synth()
 
@@ -106,27 +124,33 @@ class FluxApp(App):
                 {
                     "apiVersion": KUSTOMIZE_API_VERSION,
                     "kind": "Kustomization",
-                    "resources": [f"{self.name}.k8s.yaml"],
+                    "resources": [
+                        f"{c.node.id}.k8s.yaml"
+                        for c in self.charts
+                        if not isinstance(c, KustomizationChart)
+                    ],
                 }
             ],
         )
 
 
 class HelmApp(FluxApp):
-    def __init__(self, name, root_dir, additionnal_objs=[], **kwargs):
+    def __init__(self, name, root_dir, **kwargs):
         with open(os.path.join(root_dir, f"{name}.yaml"), "r") as helm_release_file:
             helm_release = yaml.safe_load(helm_release_file)
             namespace = helm_release["spec"]["targetNamespace"]
 
-            super().__init__(name=name, namespace=namespace)
+            super().__init__(
+                name=name, namespace=namespace, root_dir=root_dir, **kwargs
+            )
 
             with open(
                 os.path.join(root_dir, f"{name}-values.yaml"), "r"
             ) as values_file:
                 values = yaml.safe_load(values_file)
 
-                chart=helm_release["spec"]["chart"]["spec"]["chart"]
-                repo=helm_repo(
+                chart = helm_release["spec"]["chart"]["spec"]["chart"]
+                repo = helm_repo(
                     helm_release["spec"]["chart"]["spec"]["sourceRef"]["name"]
                 )
 
@@ -142,10 +166,7 @@ class HelmApp(FluxApp):
                     version=helm_release["spec"]["chart"]["spec"]["version"],
                     repo=repo,
                     namespace=namespace,
-                    **kwargs,
                 )
-        for o in additionnal_objs:
-            Include(scope=self, id=o, url=os.path.join(root_dir, o))
 
 
 class CertificateApp(FluxApp):
@@ -167,6 +188,17 @@ class CertificateApp(FluxApp):
 
 
 apps = [
+    FluxApp(
+        name="basicauth-traefik-secret",
+        namespace="prod-media",
+        root_dir="../media/",
+        additionnal_objs=["basicauth-traefik-secret.yaml"],
+    ),
+    HelmApp(
+        name="renovate",
+        root_dir="../renovate",
+        additionnal_objs=["renovate-secret.yaml"],
+    ),
     HelmApp(
         name="traefik",
         root_dir="../infra",
@@ -222,6 +254,7 @@ apps = [
     HelmApp(
         name="datadog",
         root_dir="../infra",
+        additionnal_objs=["datadog-cluster-agent-secret.yaml", "datadog-secret.yaml"],
     ),
     HelmApp(
         name="cert-manager",

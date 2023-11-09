@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ../common/
-  - basicauth-traefik-secret.yaml
   - bazarr-config-pvc.yaml
   - jackett-config-pvc.yaml
   - prowlarr-config-pvc.yaml
