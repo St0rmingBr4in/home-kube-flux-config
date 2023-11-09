@@ -152,7 +152,7 @@ spec:
             - name: MODRINTH_ALLOWED_VERSION_TYPE
               value: release
             - name: MEMORY
-              value: 10G
+              value: 6G
             - name: OVERRIDE_SERVER_PROPERTIES
               value: "false"
             - name: ENABLE_RCON
