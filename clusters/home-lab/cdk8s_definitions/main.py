@@ -15,10 +15,6 @@ from imports.io.fluxcd.toolkit.kustomize import (
 KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
 
 
-def app_dist_dir(app):
-    return os.path.join("dist", app.namespace, app.name)
-
-
 def chart_flux_kustomization_name(app):
     return f"{app.name}-{app.namespace}-flux-kustomization"
 
@@ -94,7 +90,7 @@ class FluxApp(App):
             spec={
                 "interval": "10m0s",
                 "path": os.path.join(
-                    "./clusters/home-lab/cdk8s_definitions", app_dist_dir(self)
+                    "./clusters/home-lab/cdk8s_definitions", self.dist_dir()
                 ),
                 "prune": True,
                 "decryption": {
@@ -119,7 +115,7 @@ class FluxApp(App):
         super().synth()
 
         Yaml.save(
-            file_path=os.path.join(app_dist_dir(self), "kustomization.yaml"),
+            file_path=os.path.join(self.dist_dir(), "kustomization.yaml"),
             docs=[
                 {
                     "apiVersion": KUSTOMIZE_API_VERSION,
@@ -132,6 +128,9 @@ class FluxApp(App):
                 }
             ],
         )
+
+    def dist_dir(self):
+        return os.path.join("dist", self.namespace, self.name)
 
 
 class HelmApp(FluxApp):
@@ -290,7 +289,7 @@ Yaml.save(
             "apiVersion": KUSTOMIZE_API_VERSION,
             "kind": "Kustomization",
             "resources": [
-                os.path.join(app_dist_dir(app), chart_flux_kustomization_file(app))
+                os.path.join(app.dist_dir(), chart_flux_kustomization_file(app))
                 for app in apps
             ],
         }
