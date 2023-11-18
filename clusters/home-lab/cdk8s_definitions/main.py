@@ -187,6 +187,10 @@ class CertificateApp(FluxApp):
 
 
 apps = [
+    HelmApp(
+        name="dynmap-db",
+        root_dir="../aphorya",
+    ),
     FluxApp(
         name="basicauth-traefik-secret",
         namespace="prod-media",
