@@ -70,7 +70,7 @@ extraVolumes:
         mountPath: /data/plugins/WorldEdit/schematics
         readOnly: false
       - name: plugin-updates
-        mountPath: /data/plugins/update/
+        mountPath: /plugins-update/
         readOnly: true
     volumes:
       - name: plugin-updates

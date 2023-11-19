@@ -240,7 +240,7 @@ spec:
             - mountPath: /data/plugins/WorldEdit/schematics
               name: worldedit-schematics
               readOnly: false
-            - mountPath: /data/plugins/update/
+            - mountPath: /plugins-update/
               name: plugin-updates
               readOnly: true
       securityContext:
