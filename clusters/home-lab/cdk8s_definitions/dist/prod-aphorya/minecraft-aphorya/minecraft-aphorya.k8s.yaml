@@ -104,7 +104,7 @@ metadata:
 spec:
   ports:
     - name: rcon
-      nodePort: 25575
+      nodePort: 30569
       port: 25575
       protocol: TCP
       targetPort: rcon

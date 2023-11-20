@@ -4,7 +4,7 @@ minecraftServer:
     enabled: true
     existingSecret: rcon-secret
     serviceType: NodePort
-    nodePort: 25575
+    nodePort: "30569"
   eula: true
   version: "1.20.2"
   motd: "Aphorya"
