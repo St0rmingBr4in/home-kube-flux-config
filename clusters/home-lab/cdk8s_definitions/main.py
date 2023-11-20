@@ -203,10 +203,6 @@ apps = [
         additionnal_objs=["renovate-secret.yaml"],
     ),
     HelmApp(
-        name="traefik",
-        root_dir="../infra",
-    ),
-    HelmApp(
         name="flaresolverr",
         root_dir="../media",
     ),
