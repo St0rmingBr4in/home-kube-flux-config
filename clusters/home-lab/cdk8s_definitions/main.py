@@ -278,6 +278,7 @@ apps = [
     HelmApp(
         name="minecraft-aphorya",
         root_dir="../aphorya",
+        additionnal_objs=["minecraft-aphorya-rcon-secret.yaml"],
     ),
     CertificateApp(name="st0rmingbr4in-com"),
     CertificateApp(name="aphorya-fr"),
