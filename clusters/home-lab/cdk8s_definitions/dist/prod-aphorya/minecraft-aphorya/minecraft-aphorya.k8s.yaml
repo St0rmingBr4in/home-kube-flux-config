@@ -9,23 +9,6 @@ metadata:
     chart: minecraft-4.10.0
     heritage: Helm
     release: minecraft-aphorya
-  name: minecraft-aphorya-minecraft-rcon
-  namespace: prod-aphorya
-data:
-  rcon-password: Q0hBTkdFTUUh
-type: Opaque
----
-apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    app: minecraft-aphorya-minecraft
-    app.kubernetes.io/instance: minecraft-aphorya-minecraft
-    app.kubernetes.io/name: minecraft
-    app.kubernetes.io/version: 4.10.0
-    chart: minecraft-4.10.0
-    heritage: Helm
-    release: minecraft-aphorya
   name: minecraft-aphorya-minecraft-curseforge
   namespace: prod-aphorya
 data:
@@ -105,6 +88,30 @@ spec:
     app: minecraft-aphorya-minecraft
   type: LoadBalancer
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: minecraft-aphorya-minecraft
+    app.kubernetes.io/instance: minecraft-aphorya-minecraft
+    app.kubernetes.io/name: minecraft
+    app.kubernetes.io/version: 4.10.0
+    chart: minecraft-4.10.0
+    heritage: Helm
+    release: minecraft-aphorya
+  name: minecraft-aphorya-minecraft-rcon
+  namespace: prod-aphorya
+spec:
+  ports:
+    - name: rcon
+      nodePort: 25575
+      port: 25575
+      protocol: TCP
+      targetPort: rcon
+  selector:
+    app: minecraft-aphorya-minecraft
+  type: NodePort
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -179,7 +186,12 @@ spec:
             - name: OVERRIDE_SERVER_PROPERTIES
               value: "false"
             - name: ENABLE_RCON
-              value: "false"
+              value: "true"
+            - name: RCON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: rcon-password
+                  name: rcon-secret
           image: itzg/minecraft-server:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -197,6 +209,9 @@ spec:
           ports:
             - containerPort: 25565
               name: minecraft
+              protocol: TCP
+            - containerPort: 25575
+              name: rcon
               protocol: TCP
             - containerPort: 9940
               name: metrics
