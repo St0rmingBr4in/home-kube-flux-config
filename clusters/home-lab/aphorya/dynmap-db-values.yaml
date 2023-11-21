@@ -1,10 +1,12 @@
 ---
 primary:
   resources:
-      limits:
-        memory: 256Mi
-      requests:
-        memory: 256Mi
-        cpu: 250m
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 256Mi
+      cpu: 250m
   persistence:
     enabled: false
+auth:
+  existingSecret: "dynmap-db-postgresql"

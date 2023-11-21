@@ -190,6 +190,7 @@ apps = [
     HelmApp(
         name="dynmap-db",
         root_dir="../aphorya",
+        additionnal_objs=["dynmap-db-secret.yaml"],
     ),
     FluxApp(
         name="basicauth-traefik-secret",

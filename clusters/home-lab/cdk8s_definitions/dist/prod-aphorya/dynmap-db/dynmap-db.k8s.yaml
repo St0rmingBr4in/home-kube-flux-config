@@ -1,336 +1,189 @@
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-    labels:
-        app.kubernetes.io/instance: dynmap-db
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 16.1.0
-        helm.sh/chart: postgresql-13.2.11
-    name: dynmap-db-postgresql
-    namespace: prod-aphorya
-data:
-    postgres-password: ENC[AES256_GCM,data:HnxULgnmOPNNA/x7uQ1Vjw==,iv:bpk0FMQ44Pg1jVzSFTg9aB8l1hJeOLSWZaXQHEkKt3Q=,tag:spiQT7idTBJp1Xp+Np5wng==,type:str]
-type: Opaque
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-11-18T17:25:35Z"
-    mac: ENC[AES256_GCM,data:i6u1MPbkE2XlYMR1YRXnuQr1w8LB3L6GjDUd6NzezAqpzlQTwwDg7dydO5+ot7Kj7PntXhUthf2o1+swPjqOZZDEl4nVOvMUzJ+U8t2jKZKMQQUaaQIKFdPPvkHeFBTU1/BZXiNxPIM8u7q/fNsfRL8tfOOw+lO8YD/iL/PXEJo=,iv:jD8aiHU+8eSZJWuKwOyzV00Rq++dWKN6v8Ol7ijphrU=,tag:kcfnS9ymxsNHuyFL3+hkkQ==,type:str]
-    pgp:
-        - created_at: "2023-11-18T17:25:35Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+O6G/mv01UYa6JkMsySwujMjyPg0n0kVTDCdNqB7aGE6n
-            tzC/43ADafcjBl8KS/OVuLCM8zn6+VdHY2CFOuQHMlzhIN9E6MN1VFlEI1LLVi+m
-            bczLQeTZL17+oINcec3A1/l8k4QNu2WNDIpmgL2lHIQ3rCVd8D538eMkqy4blWke
-            u8fcilAwt4q10p2Xpy5yAYvu+ceLcc7c5E4/ebcTJpSkGRdOgtDbtBXrU5+vGqO1
-            slfbkWJUbhvTMdXiJ0Rm3fUzxM15IubQUZSulyt31AymTyjTjpUzU61OJlHvhYn6
-            cTi5ce3AxP+OZ/vjhkQ03m4uYbBKO7Jou1YGBG6xTNtDnXERO9ujVgtbxeXDQtUC
-            cCfr75yE6LKBDuVgtj552VkdCAdk1aZMyg4baYeqr79Jin1+ZwCTMVySkeOBw1yz
-            Z5lISVa/sufs4V2LopWhVEw5d9s6tBXsAoBWMsK66BxBVQudnIf3gJOLnUTtiuig
-            oDQSf7cv2Wv+t65NdAKsvVZFfqsaZ+R+5eyDNS+0DRJuR6IbKS1eUWnZkuuq8Azg
-            u075j+U3RW/t+iMpSaHAOwG5sB1nuM+Tsw157KMQzjSiQ+NdE39N4RAC/Yermj1b
-            ESOcNmZbGnD5ZUc2YhfliJc8BqXZobNH5WxwI7Rf6z+wW6XkKSZnN0HnxspVRBLS
-            lQHsSvZM8xxxVf8LbKeTErv8b5c1X2yyn70QbrsJLj709gSeqk5A6kPKcjtfTvA1
-            kPtpP2eoEFcLY6/wdRSGS0lb9HKJicvP0e39126o5sZrezNBQ3hWHmUALR1uwRHa
-            Jjj2Oj2wobCuJLCJ29iSSbFlg0m5WunoN55IiHepAAZm/y/K1Etu9C0SPcfBr+gc
-            UPDP3nvy
-            =rlPL
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: dynmap-db
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.11
+  name: dynmap-db-postgresql-hl
+  namespace: prod-aphorya
+spec:
+  clusterIP: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: dynmap-db
+    app.kubernetes.io/name: postgresql
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    annotations:
-        service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-    labels:
-        app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: dynmap-db
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 16.1.0
-        helm.sh/chart: postgresql-13.2.11
-    name: dynmap-db-postgresql-hl
-    namespace: prod-aphorya
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: dynmap-db
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.11
+  name: dynmap-db-postgresql
+  namespace: prod-aphorya
 spec:
-    clusterIP: None
-    ports:
-        - name: tcp-postgresql
-          port: 5432
-          targetPort: tcp-postgresql
-    publishNotReadyAddresses: true
-    selector:
-        app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: dynmap-db
-        app.kubernetes.io/name: postgresql
-    type: ClusterIP
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-11-18T17:25:35Z"
-    mac: ENC[AES256_GCM,data:i6u1MPbkE2XlYMR1YRXnuQr1w8LB3L6GjDUd6NzezAqpzlQTwwDg7dydO5+ot7Kj7PntXhUthf2o1+swPjqOZZDEl4nVOvMUzJ+U8t2jKZKMQQUaaQIKFdPPvkHeFBTU1/BZXiNxPIM8u7q/fNsfRL8tfOOw+lO8YD/iL/PXEJo=,iv:jD8aiHU+8eSZJWuKwOyzV00Rq++dWKN6v8Ol7ijphrU=,tag:kcfnS9ymxsNHuyFL3+hkkQ==,type:str]
-    pgp:
-        - created_at: "2023-11-18T17:25:35Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+O6G/mv01UYa6JkMsySwujMjyPg0n0kVTDCdNqB7aGE6n
-            tzC/43ADafcjBl8KS/OVuLCM8zn6+VdHY2CFOuQHMlzhIN9E6MN1VFlEI1LLVi+m
-            bczLQeTZL17+oINcec3A1/l8k4QNu2WNDIpmgL2lHIQ3rCVd8D538eMkqy4blWke
-            u8fcilAwt4q10p2Xpy5yAYvu+ceLcc7c5E4/ebcTJpSkGRdOgtDbtBXrU5+vGqO1
-            slfbkWJUbhvTMdXiJ0Rm3fUzxM15IubQUZSulyt31AymTyjTjpUzU61OJlHvhYn6
-            cTi5ce3AxP+OZ/vjhkQ03m4uYbBKO7Jou1YGBG6xTNtDnXERO9ujVgtbxeXDQtUC
-            cCfr75yE6LKBDuVgtj552VkdCAdk1aZMyg4baYeqr79Jin1+ZwCTMVySkeOBw1yz
-            Z5lISVa/sufs4V2LopWhVEw5d9s6tBXsAoBWMsK66BxBVQudnIf3gJOLnUTtiuig
-            oDQSf7cv2Wv+t65NdAKsvVZFfqsaZ+R+5eyDNS+0DRJuR6IbKS1eUWnZkuuq8Azg
-            u075j+U3RW/t+iMpSaHAOwG5sB1nuM+Tsw157KMQzjSiQ+NdE39N4RAC/Yermj1b
-            ESOcNmZbGnD5ZUc2YhfliJc8BqXZobNH5WxwI7Rf6z+wW6XkKSZnN0HnxspVRBLS
-            lQHsSvZM8xxxVf8LbKeTErv8b5c1X2yyn70QbrsJLj709gSeqk5A6kPKcjtfTvA1
-            kPtpP2eoEFcLY6/wdRSGS0lb9HKJicvP0e39126o5sZrezNBQ3hWHmUALR1uwRHa
-            Jjj2Oj2wobCuJLCJ29iSSbFlg0m5WunoN55IiHepAAZm/y/K1Etu9C0SPcfBr+gc
-            UPDP3nvy
-            =rlPL
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
----
-apiVersion: v1
-kind: Service
-metadata:
-    labels:
-        app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: dynmap-db
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: postgresql
-        app.kubernetes.io/version: 16.1.0
-        helm.sh/chart: postgresql-13.2.11
-    name: dynmap-db-postgresql
-    namespace: prod-aphorya
-spec:
-    ports:
-        - name: tcp-postgresql
-          port: 5432
-          targetPort: tcp-postgresql
-    selector:
-        app.kubernetes.io/component: primary
-        app.kubernetes.io/instance: dynmap-db
-        app.kubernetes.io/name: postgresql
-    sessionAffinity: None
-    type: ClusterIP
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-11-18T17:25:35Z"
-    mac: ENC[AES256_GCM,data:i6u1MPbkE2XlYMR1YRXnuQr1w8LB3L6GjDUd6NzezAqpzlQTwwDg7dydO5+ot7Kj7PntXhUthf2o1+swPjqOZZDEl4nVOvMUzJ+U8t2jKZKMQQUaaQIKFdPPvkHeFBTU1/BZXiNxPIM8u7q/fNsfRL8tfOOw+lO8YD/iL/PXEJo=,iv:jD8aiHU+8eSZJWuKwOyzV00Rq++dWKN6v8Ol7ijphrU=,tag:kcfnS9ymxsNHuyFL3+hkkQ==,type:str]
-    pgp:
-        - created_at: "2023-11-18T17:25:35Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+O6G/mv01UYa6JkMsySwujMjyPg0n0kVTDCdNqB7aGE6n
-            tzC/43ADafcjBl8KS/OVuLCM8zn6+VdHY2CFOuQHMlzhIN9E6MN1VFlEI1LLVi+m
-            bczLQeTZL17+oINcec3A1/l8k4QNu2WNDIpmgL2lHIQ3rCVd8D538eMkqy4blWke
-            u8fcilAwt4q10p2Xpy5yAYvu+ceLcc7c5E4/ebcTJpSkGRdOgtDbtBXrU5+vGqO1
-            slfbkWJUbhvTMdXiJ0Rm3fUzxM15IubQUZSulyt31AymTyjTjpUzU61OJlHvhYn6
-            cTi5ce3AxP+OZ/vjhkQ03m4uYbBKO7Jou1YGBG6xTNtDnXERO9ujVgtbxeXDQtUC
-            cCfr75yE6LKBDuVgtj552VkdCAdk1aZMyg4baYeqr79Jin1+ZwCTMVySkeOBw1yz
-            Z5lISVa/sufs4V2LopWhVEw5d9s6tBXsAoBWMsK66BxBVQudnIf3gJOLnUTtiuig
-            oDQSf7cv2Wv+t65NdAKsvVZFfqsaZ+R+5eyDNS+0DRJuR6IbKS1eUWnZkuuq8Azg
-            u075j+U3RW/t+iMpSaHAOwG5sB1nuM+Tsw157KMQzjSiQ+NdE39N4RAC/Yermj1b
-            ESOcNmZbGnD5ZUc2YhfliJc8BqXZobNH5WxwI7Rf6z+wW6XkKSZnN0HnxspVRBLS
-            lQHsSvZM8xxxVf8LbKeTErv8b5c1X2yyn70QbrsJLj709gSeqk5A6kPKcjtfTvA1
-            kPtpP2eoEFcLY6/wdRSGS0lb9HKJicvP0e39126o5sZrezNBQ3hWHmUALR1uwRHa
-            Jjj2Oj2wobCuJLCJ29iSSbFlg0m5WunoN55IiHepAAZm/y/K1Etu9C0SPcfBr+gc
-            UPDP3nvy
-            =rlPL
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: dynmap-db
+    app.kubernetes.io/name: postgresql
+  sessionAffinity: None
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-    labels:
+  labels:
+    app.kubernetes.io/component: primary
+    app.kubernetes.io/instance: dynmap-db
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/version: 16.1.0
+    helm.sh/chart: postgresql-13.2.11
+  name: dynmap-db-postgresql
+  namespace: prod-aphorya
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: primary
+      app.kubernetes.io/instance: dynmap-db
+      app.kubernetes.io/name: postgresql
+  serviceName: dynmap-db-postgresql-hl
+  template:
+    metadata:
+      labels:
         app.kubernetes.io/component: primary
         app.kubernetes.io/instance: dynmap-db
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: postgresql
         app.kubernetes.io/version: 16.1.0
         helm.sh/chart: postgresql-13.2.11
-    name: dynmap-db-postgresql
-    namespace: prod-aphorya
-spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app.kubernetes.io/component: primary
-            app.kubernetes.io/instance: dynmap-db
-            app.kubernetes.io/name: postgresql
-    serviceName: dynmap-db-postgresql-hl
-    template:
-        metadata:
-            labels:
-                app.kubernetes.io/component: primary
-                app.kubernetes.io/instance: dynmap-db
-                app.kubernetes.io/managed-by: Helm
-                app.kubernetes.io/name: postgresql
-                app.kubernetes.io/version: 16.1.0
-                helm.sh/chart: postgresql-13.2.11
-            name: dynmap-db-postgresql
-        spec:
-            affinity:
-                podAntiAffinity:
-                    preferredDuringSchedulingIgnoredDuringExecution:
-                        - podAffinityTerm:
-                            labelSelector:
-                                matchLabels:
-                                    app.kubernetes.io/component: primary
-                                    app.kubernetes.io/instance: dynmap-db
-                                    app.kubernetes.io/name: postgresql
-                            topologyKey: kubernetes.io/hostname
-                          weight: 1
-            containers:
-                - env:
-                    - name: BITNAMI_DEBUG
-                      value: "false"
-                    - name: POSTGRESQL_PORT_NUMBER
-                      value: "5432"
-                    - name: POSTGRESQL_VOLUME_DIR
-                      value: /bitnami/postgresql
-                    - name: PGDATA
-                      value: /bitnami/postgresql/data
-                    - name: POSTGRES_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                            key: postgres-password
-                            name: dynmap-db-postgresql
-                    - name: POSTGRESQL_ENABLE_LDAP
-                      value: "no"
-                    - name: POSTGRESQL_ENABLE_TLS
-                      value: "no"
-                    - name: POSTGRESQL_LOG_HOSTNAME
-                      value: "false"
-                    - name: POSTGRESQL_LOG_CONNECTIONS
-                      value: "false"
-                    - name: POSTGRESQL_LOG_DISCONNECTIONS
-                      value: "false"
-                    - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
-                      value: "off"
-                    - name: POSTGRESQL_CLIENT_MIN_MESSAGES
-                      value: error
-                    - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
-                      value: pgaudit
-                  image: docker.io/bitnami/postgresql:16.1.0-debian-11-r6
-                  imagePullPolicy: IfNotPresent
-                  livenessProbe:
-                    exec:
-                        command:
-                            - /bin/sh
-                            - -c
-                            - exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
-                    failureThreshold: 6
-                    initialDelaySeconds: 30
-                    periodSeconds: 10
-                    successThreshold: 1
-                    timeoutSeconds: 5
-                  name: postgresql
-                  ports:
-                    - containerPort: 5432
-                      name: tcp-postgresql
-                  readinessProbe:
-                    exec:
-                        command:
-                            - /bin/sh
-                            - -c
-                            - -e
-                            - |
-                              exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
-                              [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
-                    failureThreshold: 6
-                    initialDelaySeconds: 5
-                    periodSeconds: 10
-                    successThreshold: 1
-                    timeoutSeconds: 5
-                  resources:
-                    limits:
-                        memory: 256Mi
-                    requests:
-                        cpu: 250m
-                        memory: 256Mi
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                        drop:
-                            - ALL
-                    privileged: false
-                    readOnlyRootFilesystem: false
-                    runAsNonRoot: true
-                    runAsUser: 1001
-                    seccompProfile:
-                        type: RuntimeDefault
-                  volumeMounts:
-                    - mountPath: /dev/shm
-                      name: dshm
-            hostIPC: false
-            hostNetwork: false
-            securityContext:
-                fsGroup: 1001
-            serviceAccountName: default
-            volumes:
-                - emptyDir:
-                    medium: Memory
-                  name: dshm
-                - emptyDir: {}
-                  name: data
-    updateStrategy:
-        rollingUpdate: {}
-        type: RollingUpdate
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2023-11-18T17:25:35Z"
-    mac: ENC[AES256_GCM,data:i6u1MPbkE2XlYMR1YRXnuQr1w8LB3L6GjDUd6NzezAqpzlQTwwDg7dydO5+ot7Kj7PntXhUthf2o1+swPjqOZZDEl4nVOvMUzJ+U8t2jKZKMQQUaaQIKFdPPvkHeFBTU1/BZXiNxPIM8u7q/fNsfRL8tfOOw+lO8YD/iL/PXEJo=,iv:jD8aiHU+8eSZJWuKwOyzV00Rq++dWKN6v8Ol7ijphrU=,tag:kcfnS9ymxsNHuyFL3+hkkQ==,type:str]
-    pgp:
-        - created_at: "2023-11-18T17:25:35Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hQIMA6U2wmTOeuydAQ/+O6G/mv01UYa6JkMsySwujMjyPg0n0kVTDCdNqB7aGE6n
-            tzC/43ADafcjBl8KS/OVuLCM8zn6+VdHY2CFOuQHMlzhIN9E6MN1VFlEI1LLVi+m
-            bczLQeTZL17+oINcec3A1/l8k4QNu2WNDIpmgL2lHIQ3rCVd8D538eMkqy4blWke
-            u8fcilAwt4q10p2Xpy5yAYvu+ceLcc7c5E4/ebcTJpSkGRdOgtDbtBXrU5+vGqO1
-            slfbkWJUbhvTMdXiJ0Rm3fUzxM15IubQUZSulyt31AymTyjTjpUzU61OJlHvhYn6
-            cTi5ce3AxP+OZ/vjhkQ03m4uYbBKO7Jou1YGBG6xTNtDnXERO9ujVgtbxeXDQtUC
-            cCfr75yE6LKBDuVgtj552VkdCAdk1aZMyg4baYeqr79Jin1+ZwCTMVySkeOBw1yz
-            Z5lISVa/sufs4V2LopWhVEw5d9s6tBXsAoBWMsK66BxBVQudnIf3gJOLnUTtiuig
-            oDQSf7cv2Wv+t65NdAKsvVZFfqsaZ+R+5eyDNS+0DRJuR6IbKS1eUWnZkuuq8Azg
-            u075j+U3RW/t+iMpSaHAOwG5sB1nuM+Tsw157KMQzjSiQ+NdE39N4RAC/Yermj1b
-            ESOcNmZbGnD5ZUc2YhfliJc8BqXZobNH5WxwI7Rf6z+wW6XkKSZnN0HnxspVRBLS
-            lQHsSvZM8xxxVf8LbKeTErv8b5c1X2yyn70QbrsJLj709gSeqk5A6kPKcjtfTvA1
-            kPtpP2eoEFcLY6/wdRSGS0lb9HKJicvP0e39126o5sZrezNBQ3hWHmUALR1uwRHa
-            Jjj2Oj2wobCuJLCJ29iSSbFlg0m5WunoN55IiHepAAZm/y/K1Etu9C0SPcfBr+gc
-            UPDP3nvy
-            =rlPL
-            -----END PGP MESSAGE-----
-          fp: 700A165BB7D5DDC51DEDF3C5CBA59BAF26217FDB
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+      name: dynmap-db-postgresql
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: primary
+                    app.kubernetes.io/instance: dynmap-db
+                    app.kubernetes.io/name: postgresql
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      containers:
+        - env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: /bitnami/postgresql
+            - name: PGDATA
+              value: /bitnami/postgresql/data
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgres-password
+                  name: dynmap-db-postgresql
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: error
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: pgaudit
+          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r6
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: postgresql
+          ports:
+            - containerPort: 5432
+              name: tcp-postgresql
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /dev/shm
+              name: dshm
+      hostIPC: false
+      hostNetwork: false
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: default
+      volumes:
+        - emptyDir:
+            medium: Memory
+          name: dshm
+        - emptyDir: {}
+          name: data
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
