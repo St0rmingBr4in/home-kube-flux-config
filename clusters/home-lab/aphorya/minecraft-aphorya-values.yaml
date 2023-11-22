@@ -3,8 +3,9 @@ minecraftServer:
   rcon:
     enabled: true
     existingSecret: rcon-secret
-    serviceType: NodePort
-    nodePort: "30569"
+    serviceType: LoadBalancer
+    loadBalancerIP: 192.168.62.17
+    externalTrafficPolicy: Cluster
   eula: true
   version: "1.20.2"
   motd: "Aphorya"
