@@ -10,10 +10,10 @@ spec:
         - name: manager
           resources:
             requests:
-              memory: 60Mi
+              memory: 120Mi
               cpu: 125m
             limits:
-              memory: 60Mi
+              memory: 120Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
