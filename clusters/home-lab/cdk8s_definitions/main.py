@@ -241,6 +241,10 @@ apps = [
         root_dir="../media",
     ),
     HelmApp(
+        name="jellyseerr",
+        root_dir="../media",
+    ),
+    HelmApp(
         name="qbittorrent",
         root_dir="../media",
     ),

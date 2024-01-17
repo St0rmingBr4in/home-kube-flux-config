@@ -1,0 +1,21 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jellyseerr
+  namespace: prod-media
+spec:
+  chart:
+    spec:
+      chart: jellyseerr
+      sourceRef:
+        kind: HelmRepository
+        name: truecharts
+        namespace: flux-system
+      version: 8.1.6
+  interval: 1h0m0s
+  releaseName: jellyseerr
+  targetNamespace: prod-media
+  valuesFrom:
+    - kind: ConfigMap
+      name: jellyseerr-values

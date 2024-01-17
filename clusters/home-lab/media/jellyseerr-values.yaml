@@ -15,27 +15,18 @@ ingress:
             namespace: prod-infra
     enabled: true
     hosts:
-      - host: jackett.st0rmingbr4in.com
+      - host: jellyseerr.st0rmingbr4in.com
         paths:
           - path: /
 
 resources:
   limits:
-    memory: 500Mi
+    memory: 100Mi
   requests:
-    cpu: 1000m
-    memory: 500Mi
-
-# securityContext:
-#   container:
-#     runAsUser: 1025
+    cpu: 500m
+    memory: 100Mi
 
 persistence:
   config:
     enabled: true
-    existingClaim: jackett-config
-  torrentblackhole:
-    enabled: true
-    existingClaim: media-downloads
-    subPath: torrent-blackhole
-    mountPath: /downloads
+    existingClaim: jellyseerr-config
