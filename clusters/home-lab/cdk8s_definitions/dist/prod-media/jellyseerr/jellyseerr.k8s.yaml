@@ -2,27 +2,27 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jackett-18.1.6
-    app.kubernetes.io/instance: jackett
+    app: jellyseerr-8.1.6
+    app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1155
+    app.kubernetes.io/name: jellyseerr
+    app.kubernetes.io/version: 1.7.0
     helm-revision: "1"
-    helm.sh/chart: jackett-18.1.6
-    release: jackett
+    helm.sh/chart: jellyseerr-8.1.6
+    release: jellyseerr
     service.name: main
-  name: jackett
+  name: jellyseerr
   namespace: prod-media
 spec:
   ports:
     - name: main
-      port: 9117
+      port: 10241
       protocol: TCP
-      targetPort: 9117
+      targetPort: 10241
   publishNotReadyAddresses: false
   selector:
-    app.kubernetes.io/instance: jackett
-    app.kubernetes.io/name: jackett
+    app.kubernetes.io/instance: jellyseerr
+    app.kubernetes.io/name: jellyseerr
     pod.name: main
   type: ClusterIP
 ---
@@ -30,23 +30,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jackett-18.1.6
-    app.kubernetes.io/instance: jackett
+    app: jellyseerr-8.1.6
+    app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1155
+    app.kubernetes.io/name: jellyseerr
+    app.kubernetes.io/version: 1.7.0
     helm-revision: "1"
-    helm.sh/chart: jackett-18.1.6
-    release: jackett
-  name: jackett
+    helm.sh/chart: jellyseerr-8.1.6
+    release: jellyseerr
+  name: jellyseerr
   namespace: prod-media
 spec:
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app.kubernetes.io/instance: jackett
-      app.kubernetes.io/name: jackett
+      app.kubernetes.io/instance: jellyseerr
+      app.kubernetes.io/name: jellyseerr
       pod.name: main
   strategy:
     type: Recreate
@@ -54,16 +54,16 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: jackett-18.1.6
-        app.kubernetes.io/instance: jackett
+        app: jellyseerr-8.1.6
+        app.kubernetes.io/instance: jellyseerr
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: jackett
-        app.kubernetes.io/version: 0.21.1155
+        app.kubernetes.io/name: jellyseerr
+        app.kubernetes.io/version: 1.7.0
         helm-revision: "1"
-        helm.sh/chart: jackett-18.1.6
+        helm.sh/chart: jellyseerr-8.1.6
         pod.lifecycle: permanent
         pod.name: main
-        release: jackett
+        release: jellyseerr
     spec:
       automountServiceAccountToken: false
       containers:
@@ -74,40 +74,36 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
-            - name: PUID
-              value: "568"
-            - name: USER_ID
-              value: "568"
-            - name: UID
-              value: "568"
-            - name: PGID
-              value: "568"
-            - name: GROUP_ID
-              value: "568"
-            - name: GID
-              value: "568"
-          image: ghcr.io/linuxserver/jackett:0.21.1155@sha256:5c408d64cb2385a3ee2934c8a5773eaadd5cd114e6b338328d60ab964ec0c88c
+            - name: S6_READ_ONLY_ROOT
+              value: "1"
+            - name: JELLYFIN_TYPE
+              value: ""
+            - name: LOG_LEVEL
+              value: info
+            - name: PORT
+              value: "10241"
+          image: fallenbagel/jellyseerr:1.7.0@sha256:6dcdb5ba50913a14b2bd7df6388607ce175121f3416679c2746501256ac9f075
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             httpGet:
-              path: /UI/Login
-              port: 9117
+              path: /
+              port: 10241
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
-          name: jackett
+          name: jellyseerr
           ports:
-            - containerPort: 9117
+            - containerPort: 10241
               name: main
               protocol: TCP
           readinessProbe:
             failureThreshold: 5
             httpGet:
-              path: /UI/Login
-              port: 9117
+              path: /
+              port: 10241
               scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -116,26 +112,21 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 500Mi
+              memory: 100Mi
             requests:
-              cpu: 1000m
-              memory: 500Mi
+              cpu: 500m
+              memory: 100Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              add:
-                - CHOWN
-                - SETUID
-                - SETGID
-                - FOWNER
-                - DAC_OVERRIDE
+              add: []
               drop:
                 - ALL
             privileged: false
-            readOnlyRootFilesystem: false
-            runAsGroup: 0
-            runAsNonRoot: false
-            runAsUser: 0
+            readOnlyRootFilesystem: true
+            runAsGroup: 568
+            runAsNonRoot: true
+            runAsUser: 568
             seccompProfile:
               type: RuntimeDefault
           startupProbe:
@@ -144,12 +135,12 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             tcpSocket:
-              port: 9117
+              port: 10241
             timeoutSeconds: 2
           stdin: false
           tty: false
           volumeMounts:
-            - mountPath: /config
+            - mountPath: /app/config
               name: config
               readOnly: false
             - mountPath: /dev/shm
@@ -161,10 +152,6 @@ spec:
             - mountPath: /tmp
               name: tmp
               readOnly: false
-            - mountPath: /downloads
-              name: torrentblackhole
-              readOnly: false
-              subPath: torrent-blackhole
             - mountPath: /var/logs
               name: varlogs
               readOnly: false
@@ -180,7 +167,7 @@ spec:
       hostIPC: false
       hostNetwork: false
       hostPID: false
-      hostUsers: true
+      hostUsers: false
       nodeSelector:
         kubernetes.io/arch: amd64
       restartPolicy: Always
@@ -196,8 +183,8 @@ spec:
       topologySpreadConstraints:
         - labelSelector:
             matchLabels:
-              app.kubernetes.io/instance: jackett
-              app.kubernetes.io/name: jackett
+              app.kubernetes.io/instance: jellyseerr
+              app.kubernetes.io/name: jellyseerr
               pod.name: main
           maxSkew: 1
           nodeAffinityPolicy: Honor
@@ -206,8 +193,8 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
         - labelSelector:
             matchLabels:
-              app.kubernetes.io/instance: jackett
-              app.kubernetes.io/name: jackett
+              app.kubernetes.io/instance: jellyseerr
+              app.kubernetes.io/name: jellyseerr
               pod.name: main
           maxSkew: 1
           nodeAffinityPolicy: Honor
@@ -217,27 +204,24 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: jackett-config
+            claimName: jellyseerr-config
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 100Mi
           name: devshm
         - emptyDir: {}
           name: shared
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 100Mi
           name: tmp
-        - name: torrentblackhole
-          persistentVolumeClaim:
-            claimName: media-downloads
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 100Mi
           name: varlogs
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 100Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -248,25 +232,25 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: jackett-18.1.6
-    app.kubernetes.io/instance: jackett
+    app: jellyseerr-8.1.6
+    app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1155
+    app.kubernetes.io/name: jellyseerr
+    app.kubernetes.io/version: 1.7.0
     helm-revision: "1"
-    helm.sh/chart: jackett-18.1.6
-    release: jackett
-  name: jackett
+    helm.sh/chart: jellyseerr-8.1.6
+    release: jellyseerr
+  name: jellyseerr
   namespace: prod-media
 spec:
   rules:
-    - host: jackett.st0rmingbr4in.com
+    - host: jellyseerr.st0rmingbr4in.com
       http:
         paths:
           - backend:
               service:
-                name: jackett
+                name: jellyseerr
                 port:
-                  number: 9117
+                  number: 10241
             path: /
             pathType: Prefix

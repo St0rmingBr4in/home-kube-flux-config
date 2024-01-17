@@ -12,6 +12,7 @@ resources:
   - dist/prod-media/jackett/jackett-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/jellyfin/jellyfin-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/prowlarr/prowlarr-prod-media-flux-kustomization.k8s.yaml
+  - dist/prod-media/jellyseerr/jellyseerr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/qbittorrent/qbittorrent-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-infra/external-service/external-service-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/vault/vault-prod-infra-flux-kustomization.k8s.yaml
