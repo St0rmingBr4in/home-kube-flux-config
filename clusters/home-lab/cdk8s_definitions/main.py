@@ -156,6 +156,11 @@ class HelmApp(FluxApp):
                 if chart == "./traefik":
                     chart = "/Users/julien.doche/Documents/git-repos/traefik-helm-chart/traefik"
                     repo = ""
+                else:
+                    if repo.startswith("oci"):
+                        chart = repo + "/" + chart
+                        print(f"chart: {chart}")
+                        repo = None
 
                 HelmChart(
                     scope=self,

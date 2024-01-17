@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: bazarr-15.0.12
+    app: bazarr-17.1.10
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.1
+    app.kubernetes.io/version: 1.4.0
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.12
+    helm.sh/chart: bazarr-17.1.10
     release: bazarr
     service.name: main
   name: bazarr
@@ -26,17 +26,45 @@ spec:
     pod.name: main
   type: ClusterIP
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bazarr-17.1.10
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/version: 1.4.0
+    helm-revision: "1"
+    helm.sh/chart: bazarr-17.1.10
+    release: bazarr
+    service.name: metrics
+  name: bazarr-metrics
+  namespace: prod-media
+spec:
+  ports:
+    - name: metrics
+      port: 7879
+      protocol: TCP
+      targetPort: 7879
+  publishNotReadyAddresses: false
+  selector:
+    app.kubernetes.io/instance: bazarr
+    app.kubernetes.io/name: bazarr
+    pod.name: exportarr
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: bazarr-15.0.12
+    app: bazarr-17.1.10
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.1
+    app.kubernetes.io/version: 1.4.0
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.12
+    helm.sh/chart: bazarr-17.1.10
     release: bazarr
   name: bazarr
   namespace: prod-media
@@ -54,13 +82,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: bazarr-15.0.12
+        app: bazarr-17.1.10
         app.kubernetes.io/instance: bazarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: bazarr
-        app.kubernetes.io/version: 1.3.1
+        app.kubernetes.io/version: 1.4.0
         helm-revision: "1"
-        helm.sh/chart: bazarr-15.0.12
+        helm.sh/chart: bazarr-17.1.10
+        pod.lifecycle: permanent
         pod.name: main
         release: bazarr
     spec:
@@ -75,7 +104,7 @@ spec:
               value: "0022"
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: tccr.io/truecharts/bazarr:v1.3.1@sha256:f1167ba3f2764283563614f9f99d5ad88e5f3565319bf8b0b5cc31fc1d3bdaf4
+          image: ghcr.io/onedr0p/bazarr:1.4.0@sha256:c81c4d9cbec093d5a999cfa3cd1af01d3f00d6292d6f5c33608510cef0ed83c7
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -160,8 +189,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -172,24 +205,51 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: bazarr
+              app.kubernetes.io/name: bazarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: bazarr
+              app.kubernetes.io/name: bazarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: bazarr-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 200Mi
           name: devshm
         - name: media
           persistentVolumeClaim:
             claimName: media-library
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 200Mi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 200Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 200Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -197,15 +257,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: ""
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: bazarr-15.0.12
+    app: bazarr-17.1.10
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.3.1
+    app.kubernetes.io/version: 1.4.0
     helm-revision: "1"
-    helm.sh/chart: bazarr-15.0.12
+    helm.sh/chart: bazarr-17.1.10
     release: bazarr
   name: bazarr
   namespace: prod-media

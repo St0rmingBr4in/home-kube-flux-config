@@ -10,6 +10,11 @@ image:
 
 ingress:
   main:
+    integrations:
+      traefik:
+        fixedMiddlewares:
+          - name: chain-basic
+            namespace: prod-infra
     enabled: true
     hosts:
       - host: jackett.st0rmingbr4in.com

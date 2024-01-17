@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: truecharts
         namespace: flux-system
-      version: 15.0.12
+      version: 17.1.10
   interval: 1h0m0s
   releaseName: bazarr
   targetNamespace: prod-media

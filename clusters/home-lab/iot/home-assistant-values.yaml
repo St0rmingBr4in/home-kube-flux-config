@@ -12,6 +12,11 @@ persistence:
 
 ingress:
   main:
+    integrations:
+      traefik:
+        fixedMiddlewares:
+          - name: chain-basic
+            namespace: prod-infra
     enabled: true
     hosts:
       - host: home-assistant.st0rmingbr4in.com

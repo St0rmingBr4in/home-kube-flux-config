@@ -7,6 +7,11 @@ operator:
 
 ingress:
   main:
+    integrations:
+      traefik:
+        fixedMiddlewares:
+          - name: chain-basic
+            namespace: prod-infra
     enabled: true
     hosts:
       - host: qbittorrent.st0rmingbr4in.com
@@ -18,10 +23,10 @@ ingress:
 
 resources:
   limits:
-    memory: 500Mi
+    memory: 1Gi
   requests:
     cpu: 100m
-    memory: 500Mi
+    memory: 1Gi
 
 persistence:
   config:

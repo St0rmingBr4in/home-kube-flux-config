@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: qbittorrent-16.0.5
+    app: qbittorrent-18.1.6
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
-    app.kubernetes.io/version: 4.5.5
+    app.kubernetes.io/version: 4.6.2
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.5
+    helm.sh/chart: qbittorrent-18.1.6
     release: qbittorrent
     service.name: main
   name: qbittorrent
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: qbittorrent-16.0.5
+    app: qbittorrent-18.1.6
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
-    app.kubernetes.io/version: 4.5.5
+    app.kubernetes.io/version: 4.6.2
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.5
+    helm.sh/chart: qbittorrent-18.1.6
     release: qbittorrent
     service.name: torrent
   name: qbittorrent-torrent
@@ -62,13 +62,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: qbittorrent-16.0.5
+    app: qbittorrent-18.1.6
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
-    app.kubernetes.io/version: 4.5.5
+    app.kubernetes.io/version: 4.6.2
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.5
+    helm.sh/chart: qbittorrent-18.1.6
     release: qbittorrent
   name: qbittorrent
   namespace: prod-media
@@ -86,13 +86,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: qbittorrent-16.0.5
+        app: qbittorrent-18.1.6
         app.kubernetes.io/instance: qbittorrent
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: qbittorrent
-        app.kubernetes.io/version: 4.5.5
+        app.kubernetes.io/version: 4.6.2
         helm-revision: "1"
-        helm.sh/chart: qbittorrent-16.0.5
+        helm.sh/chart: qbittorrent-18.1.6
+        pod.lifecycle: permanent
         pod.name: main
         release: qbittorrent
     spec:
@@ -107,7 +108,7 @@ spec:
               value: "0022"
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: tccr.io/truecharts/qbittorrent:v4.5.5@sha256:a7b89f5a4259eb4914115ff6336a416fe92e3ebcd3a1aae4cbca5bbe3dd84fa1
+          image: ghcr.io/onedr0p/qbittorrent:4.6.2@sha256:fedb62126c82ae0c7192e9052633411294a27e9c233613c03b0a8d168d160040
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -143,10 +144,10 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 500Mi
+              memory: 1Gi
             requests:
               cpu: 100m
-              memory: 500Mi
+              memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -198,8 +199,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -210,24 +215,51 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: qbittorrent
+              app.kubernetes.io/name: qbittorrent
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: qbittorrent
+              app.kubernetes.io/name: qbittorrent
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: qbittorrent-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 1Gi
           name: devshm
         - name: downloads
           persistentVolumeClaim:
             claimName: media-downloads
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 1Gi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -235,15 +267,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: qbittorrent-16.0.5
+    app: qbittorrent-18.1.6
     app.kubernetes.io/instance: qbittorrent
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: qbittorrent
-    app.kubernetes.io/version: 4.5.5
+    app.kubernetes.io/version: 4.6.2
     helm-revision: "1"
-    helm.sh/chart: qbittorrent-16.0.5
+    helm.sh/chart: qbittorrent-18.1.6
     release: qbittorrent
   name: qbittorrent
   namespace: prod-media

@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
     service.name: main
   name: radarr
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
     service.name: metrics
   name: radarr-metrics
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
   name: radarr-exportarr
   namespace: prod-media
@@ -82,13 +82,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: radarr-17.0.8
+        app: radarr-19.1.6
         app.kubernetes.io/instance: radarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: radarr
-        app.kubernetes.io/version: 5.0.3.8127
+        app.kubernetes.io/version: 5.2.6.8376
         helm-revision: "1"
-        helm.sh/chart: radarr-17.0.8
+        helm.sh/chart: radarr-19.1.6
+        pod.lifecycle: permanent
         pod.name: exportarr
         release: radarr
     spec:
@@ -113,7 +114,7 @@ spec:
               value: "7879"
             - name: URL
               value: http://radarr:7878
-          image: tccr.io/truecharts/exportarr:v1.5.5@sha256:0dbba4994ac9926e284b5a24fe38e7ca546bcda4b20bbd1ab2444b8bc190d6cb
+          image: ghcr.io/onedr0p/exportarr:v1.6.0@sha256:b522e128509b766cf66f847190fccd225ff194dc76775fe6a215f2dd3010cac2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -197,8 +198,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -209,34 +214,61 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: radarr
+              app.kubernetes.io/name: radarr
+              pod.name: exportarr
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: radarr
+              app.kubernetes.io/name: radarr
+              pod.name: exportarr
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: radarr-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 300Mi
           name: devshm
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 300Mi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 300Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 300Mi
           name: varrun
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
   name: radarr
   namespace: prod-media
@@ -254,13 +286,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: radarr-17.0.8
+        app: radarr-19.1.6
         app.kubernetes.io/instance: radarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: radarr
-        app.kubernetes.io/version: 5.0.3.8127
+        app.kubernetes.io/version: 5.2.6.8376
         helm-revision: "1"
-        helm.sh/chart: radarr-17.0.8
+        helm.sh/chart: radarr-19.1.6
+        pod.lifecycle: permanent
         pod.name: main
         release: radarr
     spec:
@@ -277,7 +310,7 @@ spec:
               value: "1"
             - name: RADARR__PORT
               value: "7878"
-          image: tccr.io/truecharts/radarr:v5.0.3.8127@sha256:5a29f9be14aeefadda77ed69a45ff087e1f5227a125a78fd7f1b15291bd01918
+          image: ghcr.io/onedr0p/radarr:5.2.6.8376@sha256:2de39930de91ae698f9461bb959d93b9d59610f88e0c026e96bc5d9c99aeea89
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -368,8 +401,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -380,12 +417,34 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: radarr
+              app.kubernetes.io/name: radarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: radarr
+              app.kubernetes.io/name: radarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: radarr-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 300Mi
           name: devshm
         - name: downloads
           persistentVolumeClaim:
@@ -395,12 +454,17 @@ spec:
             claimName: media-library
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 300Mi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 300Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 300Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -408,15 +472,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: ""
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
   name: radarr
   namespace: prod-media
@@ -437,13 +502,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: radarr-17.0.8
+    app: radarr-19.1.6
     app.kubernetes.io/instance: radarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: radarr
-    app.kubernetes.io/version: 5.0.3.8127
+    app.kubernetes.io/version: 5.2.6.8376
     helm-revision: "1"
-    helm.sh/chart: radarr-17.0.8
+    helm.sh/chart: radarr-19.1.6
     release: radarr
   name: radarr
   namespace: prod-media
@@ -456,4 +521,4 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: radarr
       app.kubernetes.io/name: radarr
-      service.name: main
+      service.name: metrics

@@ -2,48 +2,38 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cloudnative-pg
   namespace: cloudnative-pg
-automountServiceAccountToken: false
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
-  name: cloudnative-pg-config
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
+  name: cnpg-controller-manager-config
   namespace: cloudnative-pg
-data:
-  CREATE_ANY_SERVICE: "true"
+data: {}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
-  name: cloudnative-pg-monitoring
+    app.kubernetes.io/version: 1.22.0
+    cnpg.io/reload: ""
+    helm.sh/chart: cloudnative-pg-0.20.0
+  name: cnpg-default-monitoring
   namespace: cloudnative-pg
 data:
   queries: |
@@ -147,14 +137,16 @@ data:
             description: "Time at which postgres started (based on epoch)"
 
     pg_replication:
-      query: "SELECT CASE WHEN NOT pg_catalog.pg_is_in_recovery()
+      query: "SELECT CASE WHEN (
+                NOT pg_catalog.pg_is_in_recovery()
+                OR pg_catalog.pg_last_wal_receive_lsn() = pg_catalog.pg_last_wal_replay_lsn())
               THEN 0
               ELSE GREATEST (0,
                 EXTRACT(EPOCH FROM (now() - pg_catalog.pg_last_xact_replay_timestamp())))
               END AS lag,
               pg_catalog.pg_is_in_recovery() AS in_recovery,
               EXISTS (TABLE pg_stat_wal_receiver) AS is_wal_receiver_up,
-              (SELECT count(*) FROM pg_stat_replication) AS streaming_replicas"
+              (SELECT count(*) FROM pg_catalog.pg_stat_replication) AS streaming_replicas"
       metrics:
         - lag:
             usage: "GAUGE"
@@ -175,7 +167,10 @@ data:
           slot_type,
           database,
           active,
-          pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), restart_lsn)
+          (CASE pg_catalog.pg_is_in_recovery()
+            WHEN TRUE THEN pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_last_wal_receive_lsn(), restart_lsn)
+            ELSE pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), restart_lsn)
+          END) as pg_wal_lsn_diff
         FROM pg_catalog.pg_replication_slots
         WHERE NOT temporary
       metrics:
@@ -356,6 +351,7 @@ data:
        SELECT usename
          , COALESCE(application_name, '') AS application_name
          , COALESCE(client_addr::text, '') AS client_addr
+         , COALESCE(client_port::text, '') AS client_port
          , EXTRACT(EPOCH FROM backend_start) AS backend_start
          , COALESCE(pg_catalog.age(backend_xmin), 0) AS backend_xmin_age
          , pg_catalog.pg_wal_lsn_diff(pg_catalog.pg_current_wal_lsn(), sent_lsn) AS sent_diff_bytes
@@ -376,6 +372,9 @@ data:
         - client_addr:
             usage: "LABEL"
             description: "Client IP address"
+        - client_port:
+            usage: "LABEL"
+            description: "Client TCP port"
         - backend_start:
             usage: "COUNTER"
             description: "Time when this process was started"
@@ -423,25 +422,25 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
+    app: cloudnative-pg-5.2.9
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
+    app.kubernetes.io/version: latest
     helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
+    helm.sh/chart: cloudnative-pg-5.2.9
     release: cloudnative-pg
   name: cloudnative-pg-tc-data
   namespace: cloudnative-pg
 data:
   tc-operator-name: cloudnative-pg
-  tc-operator-version: 2.0.2
+  tc-operator-version: 5.2.9
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.3
+    controller-gen.kubebuilder.io/version: v0.13.0
     helm.sh/resource-policy: keep
   name: backups.postgresql.cnpg.io
   namespace: cloudnative-pg
@@ -460,6 +459,9 @@ spec:
           type: date
         - jsonPath: .spec.cluster.name
           name: Cluster
+          type: string
+        - jsonPath: .spec.method
+          name: Method
           type: string
         - jsonPath: .status.phase
           name: Phase
@@ -492,12 +494,35 @@ spec:
                   required:
                     - name
                   type: object
+                method:
+                  default: barmanObjectStore
+                  description: "The backup method to be used, possible options are `barmanObjectStore` and `volumeSnapshot`. Defaults to: `barmanObjectStore`."
+                  enum:
+                    - barmanObjectStore
+                    - volumeSnapshot
+                  type: string
+                online:
+                  description: Whether the default type of backup with volume snapshots is online/hot (`true`, default) or offline/cold (`false`) Overrides the default setting specified in the cluster field '.spec.backup.volumeSnapshot.online'
+                  type: boolean
+                onlineConfiguration:
+                  description: Configuration parameters to control the online/hot backup with volume snapshots Overrides the default settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+                  properties:
+                    immediateCheckpoint:
+                      description: Control whether the I/O workload for the backup initial checkpoint will be limited, according to the `checkpoint_completion_target` setting on the PostgreSQL server. If set to true, an immediate checkpoint will be used, meaning PostgreSQL will complete the checkpoint as soon as possible. `false` by default.
+                      type: boolean
+                    waitForArchive:
+                      default: true
+                      description: If false, the function will return immediately after the backup is completed, without waiting for WAL to be archived. This behavior is only useful with backup software that independently monitors WAL archiving. Otherwise, WAL required to make the backup consistent might be missing and make the backup useless. By default, or when this parameter is true, pg_backup_stop will wait for WAL to be archived when archiving is enabled. On a standby, this means that it will wait only when archive_mode = always. If write activity on the primary is low, it may be useful to run pg_switch_wal on the primary in order to trigger an immediate segment switch.
+                      type: boolean
+                  type: object
                 target:
                   description: The policy to decide which instance should perform this backup. If empty, it defaults to `cluster.spec.backup.target`. Available options are empty string, `primary` and `prefer-standby`. `primary` to have backups run always on primary instances, `prefer-standby` to have backups run preferably on the most updated standby, if available.
                   enum:
                     - primary
                     - prefer-standby
                   type: string
+              required:
+                - cluster
               type: object
             status:
               description: "Most recently observed status of the backup. This data may not be up to date. Populated by the system. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status"
@@ -563,6 +588,10 @@ spec:
                   type: object
                 backupId:
                   description: The ID of the Barman backup
+                  type: string
+                backupLabelFile:
+                  description: Backup label file content as returned by Postgres in case of online (hot) backups
+                  format: byte
                   type: string
                 backupName:
                   description: The Name of the Barman backup
@@ -640,6 +669,12 @@ spec:
                       description: The pod name
                       type: string
                   type: object
+                method:
+                  description: The backup method being used
+                  type: string
+                online:
+                  description: Whether the backup was online/hot (`true`) or offline/cold (`false`)
+                  type: boolean
                 phase:
                   description: The last backup status
                   type: string
@@ -705,6 +740,29 @@ spec:
                 serverName:
                   description: The server name on S3, the cluster name is used if this parameter is omitted
                   type: string
+                snapshotBackupStatus:
+                  description: Status of the volumeSnapshot backup
+                  properties:
+                    elements:
+                      description: The elements list, populated with the gathered volume snapshots
+                      items:
+                        description: BackupSnapshotElementStatus is a volume snapshot that is part of a volume snapshot method backup
+                        properties:
+                          name:
+                            description: Name is the snapshot resource name
+                            type: string
+                          tablespaceName:
+                            description: TablespaceName is the name of the snapshotted tablespace. Only set when type is PG_TABLESPACE
+                            type: string
+                          type:
+                            description: Type is tho role of the snapshot in the cluster, such as PG_DATA, PG_WAL and PG_TABLESPACE
+                            type: string
+                        required:
+                          - name
+                          - type
+                        type: object
+                      type: array
+                  type: object
                 startedAt:
                   description: When the backup was started
                   format: date-time
@@ -713,7 +771,14 @@ spec:
                   description: When the backup was terminated
                   format: date-time
                   type: string
+                tablespaceMapFile:
+                  description: Tablespace map file content as returned by Postgres in case of online (hot) backups
+                  format: byte
+                  type: string
               type: object
+          required:
+            - metadata
+            - spec
           type: object
       served: true
       storage: true
@@ -724,7 +789,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.3
+    controller-gen.kubebuilder.io/version: v0.13.0
     helm.sh/resource-policy: keep
   name: clusters.postgresql.cnpg.io
   namespace: cloudnative-pg
@@ -1509,7 +1574,7 @@ spec:
                         - destinationPath
                       type: object
                     retentionPolicy:
-                      description: RetentionPolicy is the retention policy to be used for backups and WALs (i.e. '60d'). The retention policy is expressed in the form of `XXu` where `XX` is a positive integer and `u` is in `[dwm]` - days, weeks, months.
+                      description: RetentionPolicy is the retention policy to be used for backups and WALs (i.e. '60d'). The retention policy is expressed in the form of `XXu` where `XX` is a positive integer and `u` is in `[dwm]` - days, weeks, months. It's currently only applicable when using the BarmanObjectStore method.
                       pattern: ^[1-9][0-9]*[dwm]$
                       type: string
                     target:
@@ -1519,6 +1584,57 @@ spec:
                         - primary
                         - prefer-standby
                       type: string
+                    volumeSnapshot:
+                      description: VolumeSnapshot provides the configuration for the execution of volume snapshot backups.
+                      properties:
+                        annotations:
+                          additionalProperties:
+                            type: string
+                          description: Annotations key-value pairs that will be added to .metadata.annotations snapshot resources.
+                          type: object
+                        className:
+                          description: ClassName specifies the Snapshot Class to be used for PG_DATA PersistentVolumeClaim. It is the default class for the other types if no specific class is present
+                          type: string
+                        labels:
+                          additionalProperties:
+                            type: string
+                          description: Labels are key-value pairs that will be added to .metadata.labels snapshot resources.
+                          type: object
+                        online:
+                          default: true
+                          description: Whether the default type of backup with volume snapshots is online/hot (`true`, default) or offline/cold (`false`)
+                          type: boolean
+                        onlineConfiguration:
+                          default:
+                            immediateCheckpoint: false
+                            waitForArchive: true
+                          description: Configuration parameters to control the online/hot backup with volume snapshots
+                          properties:
+                            immediateCheckpoint:
+                              description: Control whether the I/O workload for the backup initial checkpoint will be limited, according to the `checkpoint_completion_target` setting on the PostgreSQL server. If set to true, an immediate checkpoint will be used, meaning PostgreSQL will complete the checkpoint as soon as possible. `false` by default.
+                              type: boolean
+                            waitForArchive:
+                              default: true
+                              description: If false, the function will return immediately after the backup is completed, without waiting for WAL to be archived. This behavior is only useful with backup software that independently monitors WAL archiving. Otherwise, WAL required to make the backup consistent might be missing and make the backup useless. By default, or when this parameter is true, pg_backup_stop will wait for WAL to be archived when archiving is enabled. On a standby, this means that it will wait only when archive_mode = always. If write activity on the primary is low, it may be useful to run pg_switch_wal on the primary in order to trigger an immediate segment switch.
+                              type: boolean
+                          type: object
+                        snapshotOwnerReference:
+                          default: none
+                          description: SnapshotOwnerReference indicates the type of owner reference the snapshot should have
+                          enum:
+                            - none
+                            - cluster
+                            - backup
+                          type: string
+                        tablespaceClassName:
+                          additionalProperties:
+                            type: string
+                          description: TablespaceClassName specifies the Snapshot Class to be used for the tablespaces. defaults to the PGDATA Snapshot Class, if set
+                          type: object
+                        walClassName:
+                          description: WalClassName specifies the Snapshot Class to be used for the PG_WAL PersistentVolumeClaim.
+                          type: string
+                      type: object
                   type: object
                 bootstrap:
                   description: Instructions to bootstrap this cluster
@@ -1553,6 +1669,9 @@ spec:
                               items:
                                 type: string
                               type: array
+                            schemaOnly:
+                              description: "When set to true, only the `pre-data` and `post-data` sections of `pg_restore` are invoked, avoiding data import. Default: `false`."
+                              type: boolean
                             source:
                               description: The source of the import
                               properties:
@@ -1682,7 +1801,7 @@ spec:
                       description: Bootstrap the cluster from a backup
                       properties:
                         backup:
-                          description: The backup we need to restore
+                          description: The backup object containing the physical base backup from which to initiate the recovery procedure. Mutually exclusive with `source` and `volumeSnapshots`.
                           properties:
                             endpointCA:
                               description: EndpointCA store the CA bundle of the barman endpoint. Useful when using self-signed certificates to avoid errors with certificate issuer and barman-cloud-wal-archive.
@@ -1716,7 +1835,7 @@ spec:
                               description: The ID of the backup from which to start the recovery process. If empty (default) the operator will automatically detect the backup based on targetTime or targetLSN if specified. Otherwise use the latest available backup in chronological order.
                               type: string
                             exclusive:
-                              description: Set the target to be exclusive (defaults to true)
+                              description: Set the target to be exclusive. If omitted, defaults to false, so that in Postgres, `recovery_target_inclusive` will be true
                               type: boolean
                             targetImmediate:
                               description: End recovery as soon as a consistent state is reached
@@ -1747,8 +1866,68 @@ spec:
                             - name
                           type: object
                         source:
-                          description: The external cluster whose backup we will restore. This is also used as the name of the folder under which the backup is stored, so it must be set to the name of the source cluster
+                          description: The external cluster whose backup we will restore. This is also used as the name of the folder under which the backup is stored, so it must be set to the name of the source cluster Mutually exclusive with `backup`.
                           type: string
+                        volumeSnapshots:
+                          description: The static PVC data source(s) from which to initiate the recovery procedure. Currently supporting `VolumeSnapshot` and `PersistentVolumeClaim` resources that map an existing PVC group, compatible with CloudNativePG, and taken with a cold backup copy on a fenced Postgres instance (limitation which will be removed in the future when online backup will be implemented). Mutually exclusive with `backup`.
+                          properties:
+                            storage:
+                              description: Configuration of the storage of the instances
+                              properties:
+                                apiGroup:
+                                  description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                  type: string
+                                kind:
+                                  description: Kind is the type of resource being referenced
+                                  type: string
+                                name:
+                                  description: Name is the name of resource being referenced
+                                  type: string
+                              required:
+                                - kind
+                                - name
+                              type: object
+                              x-kubernetes-map-type: atomic
+                            tablespaceStorage:
+                              additionalProperties:
+                                description: TypedLocalObjectReference contains enough information to let you locate the typed referenced object inside the same namespace.
+                                properties:
+                                  apiGroup:
+                                    description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                    type: string
+                                  kind:
+                                    description: Kind is the type of resource being referenced
+                                    type: string
+                                  name:
+                                    description: Name is the name of resource being referenced
+                                    type: string
+                                required:
+                                  - kind
+                                  - name
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              description: Configuration of the storage for PostgreSQL tablespaces
+                              type: object
+                            walStorage:
+                              description: Configuration of the storage for PostgreSQL WAL (Write-Ahead Log)
+                              properties:
+                                apiGroup:
+                                  description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                  type: string
+                                kind:
+                                  description: Kind is the type of resource being referenced
+                                  type: string
+                                name:
+                                  description: Name is the name of resource being referenced
+                                  type: string
+                              required:
+                                - kind
+                                - name
+                              type: object
+                              x-kubernetes-map-type: atomic
+                          required:
+                            - storage
+                          type: object
                       type: object
                   type: object
                 certificates:
@@ -1776,8 +1955,8 @@ spec:
                   description: Description of this PostgreSQL cluster
                   type: string
                 enableSuperuserAccess:
-                  default: true
-                  description: When this option is enabled, the operator will use the `SuperuserSecret` to update the `postgres` user password (if the secret is not present, the operator will automatically create one). When this option is disabled, the operator will ignore the `SuperuserSecret` content, delete it when automatically created, and then blank the password of the `postgres` user by setting it to `NULL`. Enabled by default.
+                  default: false
+                  description: When this option is enabled, the operator will use the `SuperuserSecret` to update the `postgres` user password (if the secret is not present, the operator will automatically create one). When this option is disabled, the operator will ignore the `SuperuserSecret` content, delete it when automatically created, and then blank the password of the `postgres` user by setting it to `NULL`. Disabled by default.
                   type: boolean
                 env:
                   description: Env follows the Env format to pass environment variables to the pods created in the cluster
@@ -1895,6 +2074,24 @@ spec:
                         x-kubernetes-map-type: atomic
                     type: object
                   type: array
+                ephemeralVolumesSizeLimit:
+                  description: EphemeralVolumesSizeLimit allows the user to set the limits for the ephemeral volumes
+                  properties:
+                    shm:
+                      anyOf:
+                        - type: integer
+                        - type: string
+                      description: Shm is the size limit of the shared memory volume
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    temporaryData:
+                      anyOf:
+                        - type: integer
+                        - type: string
+                      description: TemporaryData is the size limit of the temporary data volume
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                  type: object
                 externalClusters:
                   description: The list of external clusters which are used in the configuration
                   items:
@@ -2132,7 +2329,7 @@ spec:
                         description: The server name, required
                         type: string
                       password:
-                        description: The reference to the password to be used to connect to the server
+                        description: The reference to the password to be used to connect to the server. If a password is provided, CloudNativePG creates a PostgreSQL passfile at `/controller/external/NAME/pass` (where "NAME" is the cluster's name). This passfile is automatically referenced in the connection string when establishing a connection to the remote PostgreSQL server from the current PostgreSQL `Cluster`. This ensures secure and efficient password management for external clusters.
                         properties:
                           key:
                             description: The key of the secret to select from.  Must be a valid secret key.
@@ -2276,6 +2473,9 @@ spec:
                           createrole:
                             description: Whether the role will be permitted to create, alter, drop, comment on, change the security label for, and grant or revoke membership in other roles. Default is `false`.
                             type: boolean
+                          disablePassword:
+                            description: DisablePassword indicates that a role's password should be set to NULL in Postgres
+                            type: boolean
                           ensure:
                             default: present
                             description: Ensure the role is `present` or `absent` - defaults to "present"
@@ -2299,7 +2499,7 @@ spec:
                             description: Name of the role
                             type: string
                           passwordSecret:
-                            description: Secret containing the password of the role (if present)
+                            description: Secret containing the password of the role (if present) If null, the password will be ignored unless DisablePassword is set
                             properties:
                               name:
                                 description: Name of the referent.
@@ -2375,6 +2575,144 @@ spec:
                       default: false
                       description: Enable or disable the `PodMonitor`
                       type: boolean
+                    podMonitorMetricRelabelings:
+                      description: The list of metric relabelings for the `PodMonitor`. Applied to samples before ingestion.
+                      items:
+                        description: |-
+                          RelabelConfig allows dynamic rewriting of the label set for targets, alerts, scraped samples and remote write samples. 
+                           More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                        properties:
+                          action:
+                            default: replace
+                            description: |-
+                              Action to perform based on the regex matching. 
+                               `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0. `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0. 
+                               Default: "Replace"
+                            enum:
+                              - replace
+                              - Replace
+                              - keep
+                              - Keep
+                              - drop
+                              - Drop
+                              - hashmod
+                              - HashMod
+                              - labelmap
+                              - LabelMap
+                              - labeldrop
+                              - LabelDrop
+                              - labelkeep
+                              - LabelKeep
+                              - lowercase
+                              - Lowercase
+                              - uppercase
+                              - Uppercase
+                              - keepequal
+                              - KeepEqual
+                              - dropequal
+                              - DropEqual
+                            type: string
+                          modulus:
+                            description: |-
+                              Modulus to take of the hash of the source label values. 
+                               Only applicable when the action is `HashMod`.
+                            format: int64
+                            type: integer
+                          regex:
+                            description: Regular expression against which the extracted value is matched.
+                            type: string
+                          replacement:
+                            description: |-
+                              Replacement value against which a Replace action is performed if the regular expression matches. 
+                               Regex capture groups are available.
+                            type: string
+                          separator:
+                            description: Separator is the string between concatenated SourceLabels.
+                            type: string
+                          sourceLabels:
+                            description: The source labels select values from existing labels. Their content is concatenated using the configured Separator and matched against the configured regular expression.
+                            items:
+                              description: LabelName is a valid Prometheus label name which may only contain ASCII letters, numbers, as well as underscores.
+                              pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                              type: string
+                            type: array
+                          targetLabel:
+                            description: |-
+                              Label to which the resulting string is written in a replacement. 
+                               It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`, `KeepEqual` and `DropEqual` actions. 
+                               Regex capture groups are available.
+                            type: string
+                        type: object
+                      type: array
+                    podMonitorRelabelings:
+                      description: The list of relabelings for the `PodMonitor`. Applied to samples before scraping.
+                      items:
+                        description: |-
+                          RelabelConfig allows dynamic rewriting of the label set for targets, alerts, scraped samples and remote write samples. 
+                           More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                        properties:
+                          action:
+                            default: replace
+                            description: |-
+                              Action to perform based on the regex matching. 
+                               `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0. `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0. 
+                               Default: "Replace"
+                            enum:
+                              - replace
+                              - Replace
+                              - keep
+                              - Keep
+                              - drop
+                              - Drop
+                              - hashmod
+                              - HashMod
+                              - labelmap
+                              - LabelMap
+                              - labeldrop
+                              - LabelDrop
+                              - labelkeep
+                              - LabelKeep
+                              - lowercase
+                              - Lowercase
+                              - uppercase
+                              - Uppercase
+                              - keepequal
+                              - KeepEqual
+                              - dropequal
+                              - DropEqual
+                            type: string
+                          modulus:
+                            description: |-
+                              Modulus to take of the hash of the source label values. 
+                               Only applicable when the action is `HashMod`.
+                            format: int64
+                            type: integer
+                          regex:
+                            description: Regular expression against which the extracted value is matched.
+                            type: string
+                          replacement:
+                            description: |-
+                              Replacement value against which a Replace action is performed if the regular expression matches. 
+                               Regex capture groups are available.
+                            type: string
+                          separator:
+                            description: Separator is the string between concatenated SourceLabels.
+                            type: string
+                          sourceLabels:
+                            description: The source labels select values from existing labels. Their content is concatenated using the configured Separator and matched against the configured regular expression.
+                            items:
+                              description: LabelName is a valid Prometheus label name which may only contain ASCII letters, numbers, as well as underscores.
+                              pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                              type: string
+                            type: array
+                          targetLabel:
+                            description: |-
+                              Label to which the resulting string is written in a replacement. 
+                               It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`, `KeepEqual` and `DropEqual` actions. 
+                               Regex capture groups are available.
+                            type: string
+                        type: object
+                      type: array
                   type: object
                 nodeMaintenanceWindow:
                   description: Define a maintenance window for the Kubernetes nodes
@@ -2387,8 +2725,6 @@ spec:
                       default: true
                       description: Reuse the existing PVC (wait for the node to come up again) or not (recreate it elsewhere - when `instances` >1)
                       type: boolean
-                  required:
-                    - inProgress
                   type: object
                 postgresGID:
                   default: 26
@@ -2403,6 +2739,9 @@ spec:
                 postgresql:
                   description: Configuration of the PostgreSQL server
                   properties:
+                    enableAlterSystem:
+                      description: If this parameter is true, the user will be able to invoke `ALTER SYSTEM` on this CloudNativePG Cluster. This should only be used for debugging and troubleshooting. Defaults to false.
+                      type: boolean
                     ldap:
                       description: Options to specify LDAP configuration
                       properties:
@@ -2507,10 +2846,13 @@ spec:
                   type: string
                 primaryUpdateStrategy:
                   default: unsupervised
-                  description: "Strategy to follow to upgrade the primary server during a rolling update procedure, after all replicas have been successfully updated: it can be automated (`unsupervised` - default) or manual (`supervised`)"
+                  description: "Deployment strategy to follow to upgrade the primary server during a rolling update procedure, after all replicas have been successfully updated: it can be automated (`unsupervised` - default) or manual (`supervised`)"
                   enum:
                     - unsupervised
                     - supervised
+                  type: string
+                priorityClassName:
+                  description: Name of the priority class which will be used in every generated Pod, if the PriorityClass specified does not exist, the pod will not be able to schedule.  Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass for more information
                   type: string
                 projectedVolumeTemplate:
                   description: Template to be used to define projected volumes, projected volumes will be mounted under `/projected` base folder
@@ -2662,24 +3004,30 @@ spec:
                   description: Replica cluster configuration
                   properties:
                     enabled:
-                      description: If replica mode is enabled, this cluster will be a replica of an existing cluster. Replica cluster can be created from a recovery object store or via streaming through pg_basebackup. Refer to the Replication page of the documentation for more information.
+                      description: If replica mode is enabled, this cluster will be a replica of an existing cluster. Replica cluster can be created from a recovery object store or via streaming through pg_basebackup. Refer to the Replica clusters page of the documentation for more information.
                       type: boolean
                     source:
                       description: The name of the external cluster which is the replication origin
                       minLength: 1
                       type: string
                   required:
+                    - enabled
                     - source
                   type: object
                 replicationSlots:
+                  default:
+                    highAvailability:
+                      enabled: true
                   description: Replication slots management configuration
                   properties:
                     highAvailability:
+                      default:
+                        enabled: true
                       description: Replication slots for high availability configuration
                       properties:
                         enabled:
-                          default: false
-                          description: If enabled, the operator will automatically manage replication slots on the primary instance and use them in streaming replication connections with all the standby instances that are part of the HA cluster. If disabled (default), the operator will not take advantage of replication slots in streaming connections with the replicas. This feature also controls replication slots in replica cluster, from the designated primary to its cascading replicas. This can only be set at creation time.
+                          default: true
+                          description: If enabled (default), the operator will automatically manage replication slots on the primary instance and use them in streaming replication connections with all the standby instances that are part of the HA cluster. If disabled, the operator will not take advantage of replication slots in streaming connections with the replicas. This feature also controls replication slots in replica cluster, from the designated primary to its cascading replicas.
                           type: boolean
                         slotPrefix:
                           default: _cnpg_
@@ -2730,14 +3078,17 @@ spec:
                           - type: string
                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                         x-kubernetes-int-or-string: true
-                      description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                      description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                       type: object
                   type: object
+                schedulerName:
+                  description: "If specified, the pod will be dispatched by specified Kubernetes scheduler. If not specified, the pod will be dispatched by the default scheduler. More info: https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/"
+                  type: string
                 seccompProfile:
                   description: "The SeccompProfile applied to every Pod and Container. Defaults to: `RuntimeDefault`"
                   properties:
                     localhostProfile:
-                      description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+                      description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is "Localhost". Must NOT be set for any other type.
                       type: string
                     type:
                       description: |-
@@ -2767,14 +3118,19 @@ spec:
                   required:
                     - metadata
                   type: object
+                smartShutdownTimeout:
+                  default: 180
+                  description: "The time in seconds that controls the window of time reserved for the smart shutdown of Postgres to complete. Make sure you reserve enough time for the operator to request a fast shutdown of Postgres (that is: `stopDelay` - `smartShutdownTimeout`)."
+                  format: int32
+                  type: integer
                 startDelay:
-                  default: 30
-                  description: The time in seconds that is allowed for a PostgreSQL instance to successfully start up (default 30)
+                  default: 3600
+                  description: "The time in seconds that is allowed for a PostgreSQL instance to successfully start up (default 3600). The startup probe failure threshold is derived from this value using the formula: ceiling(startDelay / 10)."
                   format: int32
                   type: integer
                 stopDelay:
-                  default: 30
-                  description: The time in seconds that is allowed for a PostgreSQL instance to gracefully shutdown (default 30)
+                  default: 1800
+                  description: The time in seconds that is allowed for a PostgreSQL instance to gracefully shutdown (default 1800)
                   format: int32
                   type: integer
                 storage:
@@ -2861,7 +3217,7 @@ spec:
                                   - type: string
                                 pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                 x-kubernetes-int-or-string: true
-                              description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                              description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                               type: object
                           type: object
                         selector:
@@ -2913,7 +3269,7 @@ spec:
                       description: Size of the storage. Required if not already specified in the PVC template. Changes to this field are automatically reapplied to the created PVCs. Size cannot be decreased.
                       type: string
                     storageClass:
-                      description: StorageClass to use for database data (`PGDATA`). Applied after evaluating the PVC template, if available. If not specified, generated PVCs will be satisfied by the default storage class
+                      description: StorageClass to use for PVCs. Applied after evaluating the PVC template, if available. If not specified, the generated PVCs will use the default storage class
                       type: string
                   type: object
                 superuserSecret:
@@ -2926,10 +3282,249 @@ spec:
                     - name
                   type: object
                 switchoverDelay:
-                  default: 40000000
-                  description: The time in seconds that is allowed for a primary PostgreSQL instance to gracefully shutdown during a switchover. Default value is 40000000, greater than one year in seconds, big enough to simulate an infinite delay
+                  default: 3600
+                  description: The time in seconds that is allowed for a primary PostgreSQL instance to gracefully shutdown during a switchover. Default value is 3600 seconds (1 hour).
                   format: int32
                   type: integer
+                tablespaces:
+                  description: The tablespaces configuration
+                  items:
+                    description: TablespaceConfiguration is the configuration of a tablespace, and includes the storage specification for the tablespace
+                    properties:
+                      name:
+                        description: The name of the tablespace
+                        type: string
+                      owner:
+                        description: Owner is the PostgreSQL user owning the tablespace
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                      storage:
+                        description: The storage configuration for the tablespace
+                        properties:
+                          pvcTemplate:
+                            description: Template to be used to generate the Persistent Volume Claim
+                            properties:
+                              accessModes:
+                                description: "accessModes contains the desired access modes the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
+                                items:
+                                  type: string
+                                type: array
+                              dataSource:
+                                description: "dataSource field can be used to specify either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or an external controller can support the specified data source, it will create a new volume based on the contents of the specified data source. When the AnyVolumeDataSource feature gate is enabled, dataSource contents will be copied to dataSourceRef, and dataSourceRef contents will be copied to dataSource when dataSourceRef.namespace is not specified. If the namespace is specified, then dataSourceRef will not be copied to dataSource."
+                                properties:
+                                  apiGroup:
+                                    description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                    type: string
+                                  kind:
+                                    description: Kind is the type of resource being referenced
+                                    type: string
+                                  name:
+                                    description: Name is the name of resource being referenced
+                                    type: string
+                                required:
+                                  - kind
+                                  - name
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              dataSourceRef:
+                                description: "dataSourceRef specifies the object from which to populate the volume with data, if a non-empty volume is desired. This may be any object from a non-empty API group (non core object) or a PersistentVolumeClaim object. When this field is specified, volume binding will only succeed if the type of the specified object matches some installed volume populator or dynamic provisioner. This field will replace the functionality of the dataSource field and as such if both fields are non-empty, they must have the same value. For backwards compatibility, when namespace isn't specified in dataSourceRef, both fields (dataSource and dataSourceRef) will be set to the same value automatically if one of them is empty and the other is non-empty. When namespace is specified in dataSourceRef, dataSource isn't set to the same value and must be empty. There are three important differences between dataSource and dataSourceRef: * While dataSource only allows two specific types of objects, dataSourceRef allows any non-core object, as well as PersistentVolumeClaim objects. * While dataSource ignores disallowed values (dropping them), dataSourceRef preserves all values, and generates an error if a disallowed value is specified. * While dataSource only allows local objects, dataSourceRef allows objects in any namespaces. (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled. (Alpha) Using the namespace field of dataSourceRef requires the CrossNamespaceVolumeDataSource feature gate to be enabled."
+                                properties:
+                                  apiGroup:
+                                    description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+                                    type: string
+                                  kind:
+                                    description: Kind is the type of resource being referenced
+                                    type: string
+                                  name:
+                                    description: Name is the name of resource being referenced
+                                    type: string
+                                  namespace:
+                                    description: Namespace is the namespace of resource being referenced Note that when a namespace is specified, a gateway.networking.k8s.io/ReferenceGrant object is required in the referent namespace to allow that namespace's owner to accept the reference. See the ReferenceGrant documentation for details. (Alpha) This field requires the CrossNamespaceVolumeDataSource feature gate to be enabled.
+                                    type: string
+                                required:
+                                  - kind
+                                  - name
+                                type: object
+                              resources:
+                                description: "resources represents the minimum resources the volume should have. If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements that are lower than previous value but must still be higher than capacity recorded in the status field of the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources"
+                                properties:
+                                  claims:
+                                    description: |-
+                                      Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container. 
+                                       This is an alpha field and requires enabling the DynamicResourceAllocation feature gate. 
+                                       This field is immutable. It can only be set for containers.
+                                    items:
+                                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                                      properties:
+                                        name:
+                                          description: Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.
+                                          type: string
+                                      required:
+                                        - name
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-map-keys:
+                                      - name
+                                    x-kubernetes-list-type: map
+                                  limits:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: integer
+                                        - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    description: "Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                    type: object
+                                  requests:
+                                    additionalProperties:
+                                      anyOf:
+                                        - type: integer
+                                        - type: string
+                                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                      x-kubernetes-int-or-string: true
+                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                    type: object
+                                type: object
+                              selector:
+                                description: selector is a label query over volumes to consider for binding.
+                                properties:
+                                  matchExpressions:
+                                    description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                                    items:
+                                      description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: key is the label key that the selector applies to.
+                                          type: string
+                                        operator:
+                                          description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                          type: string
+                                        values:
+                                          description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                        - key
+                                        - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    description: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+                                    type: object
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              storageClassName:
+                                description: "storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1"
+                                type: string
+                              volumeMode:
+                                description: volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not included in claim spec.
+                                type: string
+                              volumeName:
+                                description: volumeName is the binding reference to the PersistentVolume backing this claim.
+                                type: string
+                            type: object
+                          resizeInUseVolumes:
+                            default: true
+                            description: Resize existent PVCs, defaults to true
+                            type: boolean
+                          size:
+                            description: Size of the storage. Required if not already specified in the PVC template. Changes to this field are automatically reapplied to the created PVCs. Size cannot be decreased.
+                            type: string
+                          storageClass:
+                            description: StorageClass to use for PVCs. Applied after evaluating the PVC template, if available. If not specified, the generated PVCs will use the default storage class
+                            type: string
+                        type: object
+                      temporary:
+                        default: false
+                        description: When set to true, the tablespace will be added as a `temp_tablespaces` entry in PostgreSQL, and will be available to automatically house temp database objects, or other temporary files. Please refer to PostgreSQL documentation for more information on the `temp_tablespaces` GUC.
+                        type: boolean
+                    required:
+                      - name
+                      - storage
+                    type: object
+                  type: array
+                topologySpreadConstraints:
+                  description: "TopologySpreadConstraints specifies how to spread matching pods among the given topology. More info: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/"
+                  items:
+                    description: TopologySpreadConstraint specifies how to spread matching pods among the given topology.
+                    properties:
+                      labelSelector:
+                        description: LabelSelector is used to find matching pods. Pods that match this label selector are counted to determine the number of pods in their corresponding topology domain.
+                        properties:
+                          matchExpressions:
+                            description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                            items:
+                              description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                              properties:
+                                key:
+                                  description: key is the label key that the selector applies to.
+                                  type: string
+                                operator:
+                                  description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                  type: string
+                                values:
+                                  description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                                - key
+                                - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            description: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+                            type: object
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      matchLabelKeys:
+                        description: |-
+                          MatchLabelKeys is a set of pod label keys to select the pods over which spreading will be calculated. The keys are used to lookup values from the incoming pod labels, those key-value labels are ANDed with labelSelector to select the group of existing pods over which spreading will be calculated for the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector. MatchLabelKeys cannot be set when LabelSelector isn't set. Keys that don't exist in the incoming pod labels will be ignored. A null or empty list means only match against labelSelector. 
+                           This is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).
+                        items:
+                          type: string
+                        type: array
+                        x-kubernetes-list-type: atomic
+                      maxSkew:
+                        description: "MaxSkew describes the degree to which pods may be unevenly distributed. When `whenUnsatisfiable=DoNotSchedule`, it is the maximum permitted difference between the number of matching pods in the target topology and the global minimum. The global minimum is the minimum number of matching pods in an eligible domain or zero if the number of eligible domains is less than MinDomains. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 2/2/1: In this case, the global minimum is 1. | zone1 | zone2 | zone3 | |  P P  |  P P  |   P   | - if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 2/2/2; scheduling it onto zone1(zone2) would make the ActualSkew(3-1) on zone1(zone2) violate MaxSkew(1). - if MaxSkew is 2, incoming pod can be scheduled onto any zone. When `whenUnsatisfiable=ScheduleAnyway`, it is used to give higher precedence to topologies that satisfy it. It's a required field. Default value is 1 and 0 is not allowed."
+                        format: int32
+                        type: integer
+                      minDomains:
+                        description: |-
+                          MinDomains indicates a minimum number of eligible domains. When the number of eligible domains with matching topology keys is less than minDomains, Pod Topology Spread treats "global minimum" as 0, and then the calculation of Skew is performed. And when the number of eligible domains with matching topology keys equals or greater than minDomains, this value has no effect on scheduling. As a result, when the number of eligible domains is less than minDomains, scheduler won't schedule more than maxSkew Pods to those domains. If value is nil, the constraint behaves as if MinDomains is equal to 1. Valid values are integers greater than 0. When value is not nil, WhenUnsatisfiable must be DoNotSchedule. 
+                           For example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same labelSelector spread as 2/2/2: | zone1 | zone2 | zone3 | |  P P  |  P P  |  P P  | The number of domains is less than 5(MinDomains), so "global minimum" is treated as 0. In this situation, new pod with the same labelSelector cannot be scheduled, because computed skew will be 3(3 - 0) if new Pod is scheduled to any of the three zones, it will violate MaxSkew. 
+                           This is a beta field and requires the MinDomainsInPodTopologySpread feature gate to be enabled (enabled by default).
+                        format: int32
+                        type: integer
+                      nodeAffinityPolicy:
+                        description: |-
+                          NodeAffinityPolicy indicates how we will treat Pod's nodeAffinity/nodeSelector when calculating pod topology spread skew. Options are: - Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations. - Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations. 
+                           If this value is nil, the behavior is equivalent to the Honor policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
+                        type: string
+                      nodeTaintsPolicy:
+                        description: |-
+                          NodeTaintsPolicy indicates how we will treat node taints when calculating pod topology spread skew. Options are: - Honor: nodes without taints, along with tainted nodes for which the incoming pod has a toleration, are included. - Ignore: node taints are ignored. All nodes are included. 
+                           If this value is nil, the behavior is equivalent to the Ignore policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
+                        type: string
+                      topologyKey:
+                        description: TopologyKey is the key of node labels. Nodes that have a label with this key and identical values are considered to be in the same topology. We consider each <key, value> as a "bucket", and try to put balanced number of pods into each bucket. We define a domain as a particular instance of a topology. Also, we define an eligible domain as a domain whose nodes meet the requirements of nodeAffinityPolicy and nodeTaintsPolicy. e.g. If TopologyKey is "kubernetes.io/hostname", each Node is a domain of that topology. And, if TopologyKey is "topology.kubernetes.io/zone", each zone is a domain of that topology. It's a required field.
+                        type: string
+                      whenUnsatisfiable:
+                        description: "WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy the spread constraint. - DoNotSchedule (default) tells the scheduler not to schedule it. - ScheduleAnyway tells the scheduler to schedule the pod in any location, but giving higher precedence to topologies that would help reduce the skew. A constraint is considered \"Unsatisfiable\" for an incoming pod if and only if every possible node assignment for that pod would violate \"MaxSkew\" on some topology. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 3/1/1: | zone1 | zone2 | zone3 | | P P P |   P   |   P   | If WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled to zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies MaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler won't make it *more* imbalanced. It's a required field."
+                        type: string
+                    required:
+                      - maxSkew
+                      - topologyKey
+                      - whenUnsatisfiable
+                    type: object
+                  type: array
                 walStorage:
                   description: Configuration of the storage for PostgreSQL WAL (Write-Ahead Log)
                   properties:
@@ -3014,7 +3609,7 @@ spec:
                                   - type: string
                                 pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                 x-kubernetes-int-or-string: true
-                              description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                              description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                               type: object
                           type: object
                         selector:
@@ -3066,7 +3661,7 @@ spec:
                       description: Size of the storage. Required if not already specified in the PVC template. Changes to this field are automatically reapplied to the created PVCs. Size cannot be decreased.
                       type: string
                     storageClass:
-                      description: StorageClass to use for database data (`PGDATA`). Applied after evaluating the PVC template, if available. If not specified, generated PVCs will be satisfied by the default storage class
+                      description: StorageClass to use for PVCs. Applied after evaluating the PVC template, if available. If not specified, the generated PVCs will use the default storage class
                       type: string
                   type: object
               required:
@@ -3170,7 +3765,7 @@ spec:
                   description: Current primary instance
                   type: string
                 currentPrimaryFailingSinceTimestamp:
-                  description: The timestamp when the primary was detected to be unhealthy This field is reported when spec.failoverDelay is populated or during online upgrades
+                  description: The timestamp when the primary was detected to be unhealthy This field is reported when `.spec.failoverDelay` is populated or during online upgrades
                   type: string
                 currentPrimaryTimestamp:
                   description: The timestamp when the last actual promotion to primary has occurred
@@ -3181,8 +3776,14 @@ spec:
                     type: string
                   type: array
                 firstRecoverabilityPoint:
-                  description: The first recoverability point, stored as a date in RFC3339 format
+                  description: The first recoverability point, stored as a date in RFC3339 format. This field is calculated from the content of FirstRecoverabilityPointByMethod
                   type: string
+                firstRecoverabilityPointByMethod:
+                  additionalProperties:
+                    format: date-time
+                    type: string
+                  description: The first recoverability point, stored as a date in RFC3339 format, per backup method type
+                  type: object
                 healthyPVC:
                   description: List of all the PVCs not dangling nor initializing
                   items:
@@ -3231,8 +3832,14 @@ spec:
                   description: Stored as a date in RFC3339 format
                   type: string
                 lastSuccessfulBackup:
-                  description: Stored as a date in RFC3339 format
+                  description: Last successful backup, stored as a date in RFC3339 format This field is calculated from the content of LastSuccessfulBackupByMethod
                   type: string
+                lastSuccessfulBackupByMethod:
+                  additionalProperties:
+                    format: date-time
+                    type: string
+                  description: Last successful backup, stored as a date in RFC3339 format, per backup method type
+                  type: object
                 latestGeneratedNode:
                   description: ID of the latest generated node (used to avoid node name clashing)
                   type: integer
@@ -3319,6 +3926,11 @@ spec:
                     clientCaSecretVersion:
                       description: The resource version of the PostgreSQL client-side CA secret version
                       type: string
+                    externalClusterSecretVersion:
+                      additionalProperties:
+                        type: string
+                      description: The resource versions of the external cluster secrets
+                      type: object
                     managedRoleSecretVersion:
                       additionalProperties:
                         type: string
@@ -3342,6 +3954,28 @@ spec:
                       description: The resource version of the "postgres" user secret
                       type: string
                   type: object
+                tablespacesStatus:
+                  description: TablespacesStatus reports the state of the declarative tablespaces in the cluster
+                  items:
+                    description: TablespaceState represents the state of a tablespace in a cluster
+                    properties:
+                      error:
+                        description: Error is the reconciliation error, if any
+                        type: string
+                      name:
+                        description: Name is the name of the tablespace
+                        type: string
+                      owner:
+                        description: Owner is the PostgreSQL user owning the tablespace
+                        type: string
+                      state:
+                        description: State is the latest reconciliation state
+                        type: string
+                    required:
+                      - name
+                      - state
+                    type: object
+                  type: array
                 targetPrimary:
                   description: Target primary instance, this is different from the previous one during a switchover or a failover
                   type: string
@@ -3362,6 +3996,10 @@ spec:
                         type: object
                       description: Instances contains the pod topology of the instances
                       type: object
+                    nodesUsed:
+                      description: NodesUsed represents the count of distinct nodes accommodating the instances. A value of '1' suggests that all instances are hosted on a single node, implying the absence of High Availability (HA). Ideally, this value should be the same as the number of instances in the Postgres HA cluster, implying shared nothing architecture on the compute side.
+                      format: int32
+                      type: integer
                     successfullyExtracted:
                       description: SuccessfullyExtracted indicates if the topology data was extract. It is useful to enact fallback behaviors in synchronous replica election in case of failures
                       type: boolean
@@ -3375,6 +4013,9 @@ spec:
                   description: Current write pod
                   type: string
               type: object
+          required:
+            - metadata
+            - spec
           type: object
       served: true
       storage: true
@@ -3388,7 +4029,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.3
+    controller-gen.kubebuilder.io/version: v0.13.0
     helm.sh/resource-policy: keep
   name: poolers.postgresql.cnpg.io
   namespace: cloudnative-pg
@@ -3425,7 +4066,7 @@ spec:
             metadata:
               type: object
             spec:
-              description: PoolerSpec defines the desired state of Pooler
+              description: "Specification of the desired behavior of the Pooler. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status"
               properties:
                 cluster:
                   description: This is the cluster reference on which the Pooler will work. Pooler name should never match with any cluster name within the same namespace.
@@ -3436,11 +4077,180 @@ spec:
                   required:
                     - name
                   type: object
+                deploymentStrategy:
+                  description: The deployment strategy to use for pgbouncer to replace existing pods with new ones
+                  properties:
+                    rollingUpdate:
+                      description: "Rolling update config params. Present only if DeploymentStrategyType = RollingUpdate. --- TODO: Update this to follow our convention for oneOf, whatever we decide it to be."
+                      properties:
+                        maxSurge:
+                          anyOf:
+                            - type: integer
+                            - type: string
+                          description: "The maximum number of pods that can be scheduled above the desired number of pods. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). This can not be 0 if MaxUnavailable is 0. Absolute number is calculated from percentage by rounding up. Defaults to 25%. Example: when this is set to 30%, the new ReplicaSet can be scaled up immediately when the rolling update starts, such that the total number of old and new pods do not exceed 130% of desired pods. Once old pods have been killed, new ReplicaSet can be scaled up further, ensuring that total number of pods running at any time during the update is at most 130% of desired pods."
+                          x-kubernetes-int-or-string: true
+                        maxUnavailable:
+                          anyOf:
+                            - type: integer
+                            - type: string
+                          description: "The maximum number of pods that can be unavailable during the update. Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%). Absolute number is calculated from percentage by rounding down. This can not be 0 if MaxSurge is 0. Defaults to 25%. Example: when this is set to 30%, the old ReplicaSet can be scaled down to 70% of desired pods immediately when the rolling update starts. Once new pods are ready, old ReplicaSet can be scaled down further, followed by scaling up the new ReplicaSet, ensuring that the total number of pods available at all times during the update is at least 70% of desired pods."
+                          x-kubernetes-int-or-string: true
+                      type: object
+                    type:
+                      description: Type of deployment. Can be "Recreate" or "RollingUpdate". Default is RollingUpdate.
+                      type: string
+                  type: object
                 instances:
                   default: 1
-                  description: The number of replicas we want
+                  description: "The number of replicas we want. Default: 1."
                   format: int32
                   type: integer
+                monitoring:
+                  description: The configuration of the monitoring infrastructure of this pooler.
+                  properties:
+                    enablePodMonitor:
+                      default: false
+                      description: Enable or disable the `PodMonitor`
+                      type: boolean
+                    podMonitorMetricRelabelings:
+                      description: The list of metric relabelings for the `PodMonitor`. Applied to samples before ingestion.
+                      items:
+                        description: |-
+                          RelabelConfig allows dynamic rewriting of the label set for targets, alerts, scraped samples and remote write samples. 
+                           More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                        properties:
+                          action:
+                            default: replace
+                            description: |-
+                              Action to perform based on the regex matching. 
+                               `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0. `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0. 
+                               Default: "Replace"
+                            enum:
+                              - replace
+                              - Replace
+                              - keep
+                              - Keep
+                              - drop
+                              - Drop
+                              - hashmod
+                              - HashMod
+                              - labelmap
+                              - LabelMap
+                              - labeldrop
+                              - LabelDrop
+                              - labelkeep
+                              - LabelKeep
+                              - lowercase
+                              - Lowercase
+                              - uppercase
+                              - Uppercase
+                              - keepequal
+                              - KeepEqual
+                              - dropequal
+                              - DropEqual
+                            type: string
+                          modulus:
+                            description: |-
+                              Modulus to take of the hash of the source label values. 
+                               Only applicable when the action is `HashMod`.
+                            format: int64
+                            type: integer
+                          regex:
+                            description: Regular expression against which the extracted value is matched.
+                            type: string
+                          replacement:
+                            description: |-
+                              Replacement value against which a Replace action is performed if the regular expression matches. 
+                               Regex capture groups are available.
+                            type: string
+                          separator:
+                            description: Separator is the string between concatenated SourceLabels.
+                            type: string
+                          sourceLabels:
+                            description: The source labels select values from existing labels. Their content is concatenated using the configured Separator and matched against the configured regular expression.
+                            items:
+                              description: LabelName is a valid Prometheus label name which may only contain ASCII letters, numbers, as well as underscores.
+                              pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                              type: string
+                            type: array
+                          targetLabel:
+                            description: |-
+                              Label to which the resulting string is written in a replacement. 
+                               It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`, `KeepEqual` and `DropEqual` actions. 
+                               Regex capture groups are available.
+                            type: string
+                        type: object
+                      type: array
+                    podMonitorRelabelings:
+                      description: The list of relabelings for the `PodMonitor`. Applied to samples before scraping.
+                      items:
+                        description: |-
+                          RelabelConfig allows dynamic rewriting of the label set for targets, alerts, scraped samples and remote write samples. 
+                           More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+                        properties:
+                          action:
+                            default: replace
+                            description: |-
+                              Action to perform based on the regex matching. 
+                               `Uppercase` and `Lowercase` actions require Prometheus >= v2.36.0. `DropEqual` and `KeepEqual` actions require Prometheus >= v2.41.0. 
+                               Default: "Replace"
+                            enum:
+                              - replace
+                              - Replace
+                              - keep
+                              - Keep
+                              - drop
+                              - Drop
+                              - hashmod
+                              - HashMod
+                              - labelmap
+                              - LabelMap
+                              - labeldrop
+                              - LabelDrop
+                              - labelkeep
+                              - LabelKeep
+                              - lowercase
+                              - Lowercase
+                              - uppercase
+                              - Uppercase
+                              - keepequal
+                              - KeepEqual
+                              - dropequal
+                              - DropEqual
+                            type: string
+                          modulus:
+                            description: |-
+                              Modulus to take of the hash of the source label values. 
+                               Only applicable when the action is `HashMod`.
+                            format: int64
+                            type: integer
+                          regex:
+                            description: Regular expression against which the extracted value is matched.
+                            type: string
+                          replacement:
+                            description: |-
+                              Replacement value against which a Replace action is performed if the regular expression matches. 
+                               Regex capture groups are available.
+                            type: string
+                          separator:
+                            description: Separator is the string between concatenated SourceLabels.
+                            type: string
+                          sourceLabels:
+                            description: The source labels select values from existing labels. Their content is concatenated using the configured Separator and matched against the configured regular expression.
+                            items:
+                              description: LabelName is a valid Prometheus label name which may only contain ASCII letters, numbers, as well as underscores.
+                              pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$
+                              type: string
+                            type: array
+                          targetLabel:
+                            description: |-
+                              Label to which the resulting string is written in a replacement. 
+                               It is mandatory for `Replace`, `HashMod`, `Lowercase`, `Uppercase`, `KeepEqual` and `DropEqual` actions. 
+                               Regex capture groups are available.
+                            type: string
+                        type: object
+                      type: array
+                  type: object
                 pgbouncer:
                   description: The PgBouncer configuration
                   properties:
@@ -3472,13 +4282,11 @@ spec:
                       type: array
                     poolMode:
                       default: session
-                      description: The pool mode
+                      description: "The pool mode. Default: `session`."
                       enum:
                         - session
                         - transaction
                       type: string
-                  required:
-                    - poolMode
                   type: object
                 template:
                   description: The template of the Pod to be created
@@ -4143,7 +4951,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -4208,7 +5016,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -4267,7 +5075,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -4293,7 +5101,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -4405,7 +5213,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -4431,7 +5239,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -4492,6 +5300,23 @@ spec:
                                     format: int32
                                     type: integer
                                 type: object
+                              resizePolicy:
+                                description: Resources resize policy for the container.
+                                items:
+                                  description: ContainerResizePolicy represents resource resize policy for the container.
+                                  properties:
+                                    resourceName:
+                                      description: "Name of the resource to which this resource resize policy applies. Supported values: cpu, memory."
+                                      type: string
+                                    restartPolicy:
+                                      description: Restart policy to apply when specified resource is resized. If not specified, it defaults to NotRequired.
+                                      type: string
+                                  required:
+                                    - resourceName
+                                    - restartPolicy
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                               resources:
                                 description: "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                 properties:
@@ -4529,9 +5354,12 @@ spec:
                                         - type: string
                                       pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                       x-kubernetes-int-or-string: true
-                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                     type: object
                                 type: object
+                              restartPolicy:
+                                description: "RestartPolicy defines the restart behavior of individual containers in a pod. This field may only be set for init containers, and the only allowed value is \"Always\". For non-init containers or when this field is not specified, the restart behavior is defined by the Pod's restart policy and the container type. Setting the RestartPolicy as \"Always\" for the init container will have the following effect: this init container will be continually restarted on exit until all regular containers have terminated. Once all regular containers have completed, all init containers with restartPolicy \"Always\" will be shut down. This lifecycle differs from normal init containers and is often referred to as a \"sidecar\" container. Although this init container still starts in the init container sequence, it does not wait for the container to complete before proceeding to the next init container. Instead, the next init container starts immediately after this init container is started, or after any startupProbe has successfully completed."
+                                type: string
                               securityContext:
                                 description: "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
                                 properties:
@@ -4594,7 +5422,7 @@ spec:
                                     description: The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options. Note that this field cannot be set when spec.os.name is windows.
                                     properties:
                                       localhostProfile:
-                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is "Localhost". Must NOT be set for any other type.
                                         type: string
                                       type:
                                         description: |-
@@ -4614,7 +5442,7 @@ spec:
                                         description: GMSACredentialSpecName is the name of the GMSA credential spec to use.
                                         type: string
                                       hostProcess:
-                                        description: HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+                                        description: HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.
                                         type: boolean
                                       runAsUserName:
                                         description: The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
@@ -4638,7 +5466,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -4664,7 +5492,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -4989,7 +5817,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -5054,7 +5882,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -5113,7 +5941,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -5139,7 +5967,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -5251,7 +6079,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -5277,7 +6105,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -5338,6 +6166,23 @@ spec:
                                     format: int32
                                     type: integer
                                 type: object
+                              resizePolicy:
+                                description: Resources resize policy for the container.
+                                items:
+                                  description: ContainerResizePolicy represents resource resize policy for the container.
+                                  properties:
+                                    resourceName:
+                                      description: "Name of the resource to which this resource resize policy applies. Supported values: cpu, memory."
+                                      type: string
+                                    restartPolicy:
+                                      description: Restart policy to apply when specified resource is resized. If not specified, it defaults to NotRequired.
+                                      type: string
+                                  required:
+                                    - resourceName
+                                    - restartPolicy
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                               resources:
                                 description: Resources are not allowed for ephemeral containers. Ephemeral containers use spare resources already allocated to the pod.
                                 properties:
@@ -5375,9 +6220,12 @@ spec:
                                         - type: string
                                       pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                       x-kubernetes-int-or-string: true
-                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                     type: object
                                 type: object
+                              restartPolicy:
+                                description: Restart policy for the container to manage the restart behavior of each container within a pod. This may only be set for init containers. You cannot set this field on ephemeral containers.
+                                type: string
                               securityContext:
                                 description: "Optional: SecurityContext defines the security options the ephemeral container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext."
                                 properties:
@@ -5440,7 +6288,7 @@ spec:
                                     description: The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options. Note that this field cannot be set when spec.os.name is windows.
                                     properties:
                                       localhostProfile:
-                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is "Localhost". Must NOT be set for any other type.
                                         type: string
                                       type:
                                         description: |-
@@ -5460,7 +6308,7 @@ spec:
                                         description: GMSACredentialSpecName is the name of the GMSA credential spec to use.
                                         type: string
                                       hostProcess:
-                                        description: HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+                                        description: HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.
                                         type: boolean
                                       runAsUserName:
                                         description: The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
@@ -5484,7 +6332,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -5510,7 +6358,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -5847,7 +6695,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -5912,7 +6760,7 @@ spec:
                                               description: HTTPHeader describes a custom header to be used in HTTP probes
                                               properties:
                                                 name:
-                                                  description: The header field name
+                                                  description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                                   type: string
                                                 value:
                                                   description: The header field value
@@ -5971,7 +6819,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -5997,7 +6845,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -6109,7 +6957,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -6135,7 +6983,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -6196,6 +7044,23 @@ spec:
                                     format: int32
                                     type: integer
                                 type: object
+                              resizePolicy:
+                                description: Resources resize policy for the container.
+                                items:
+                                  description: ContainerResizePolicy represents resource resize policy for the container.
+                                  properties:
+                                    resourceName:
+                                      description: "Name of the resource to which this resource resize policy applies. Supported values: cpu, memory."
+                                      type: string
+                                    restartPolicy:
+                                      description: Restart policy to apply when specified resource is resized. If not specified, it defaults to NotRequired.
+                                      type: string
+                                  required:
+                                    - resourceName
+                                    - restartPolicy
+                                  type: object
+                                type: array
+                                x-kubernetes-list-type: atomic
                               resources:
                                 description: "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                 properties:
@@ -6233,9 +7098,12 @@ spec:
                                         - type: string
                                       pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                       x-kubernetes-int-or-string: true
-                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                    description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                     type: object
                                 type: object
+                              restartPolicy:
+                                description: "RestartPolicy defines the restart behavior of individual containers in a pod. This field may only be set for init containers, and the only allowed value is \"Always\". For non-init containers or when this field is not specified, the restart behavior is defined by the Pod's restart policy and the container type. Setting the RestartPolicy as \"Always\" for the init container will have the following effect: this init container will be continually restarted on exit until all regular containers have terminated. Once all regular containers have completed, all init containers with restartPolicy \"Always\" will be shut down. This lifecycle differs from normal init containers and is often referred to as a \"sidecar\" container. Although this init container still starts in the init container sequence, it does not wait for the container to complete before proceeding to the next init container. Instead, the next init container starts immediately after this init container is started, or after any startupProbe has successfully completed."
+                                type: string
                               securityContext:
                                 description: "SecurityContext defines the security options the container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
                                 properties:
@@ -6298,7 +7166,7 @@ spec:
                                     description: The seccomp options to use by this container. If seccomp options are provided at both the pod & container level, the container options override the pod options. Note that this field cannot be set when spec.os.name is windows.
                                     properties:
                                       localhostProfile:
-                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+                                        description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is "Localhost". Must NOT be set for any other type.
                                         type: string
                                       type:
                                         description: |-
@@ -6318,7 +7186,7 @@ spec:
                                         description: GMSACredentialSpecName is the name of the GMSA credential spec to use.
                                         type: string
                                       hostProcess:
-                                        description: HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+                                        description: HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.
                                         type: boolean
                                       runAsUserName:
                                         description: The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
@@ -6342,7 +7210,7 @@ spec:
                                     format: int32
                                     type: integer
                                   grpc:
-                                    description: GRPC specifies an action involving a GRPC port. This is a beta field and requires enabling GRPCContainerProbe feature gate.
+                                    description: GRPC specifies an action involving a GRPC port.
                                     properties:
                                       port:
                                         description: Port number of the gRPC service. Number must be in the range 1 to 65535.
@@ -6368,7 +7236,7 @@ spec:
                                           description: HTTPHeader describes a custom header to be used in HTTP probes
                                           properties:
                                             name:
-                                              description: The header field name
+                                              description: The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.
                                               type: string
                                             value:
                                               description: The header field value
@@ -6567,8 +7435,7 @@ spec:
                                   resourceClaimTemplateName:
                                     description: |-
                                       ResourceClaimTemplateName is the name of a ResourceClaimTemplate object in the same namespace as this pod. 
-                                       The template will be used to create a new ResourceClaim, which will be bound to this pod. When this pod is deleted, the ResourceClaim will also be deleted. The name of the ResourceClaim will be <pod name>-<resource name>, where <resource name> is the PodResourceClaim.Name. Pod validation will reject the pod if the concatenated name is not valid for a ResourceClaim (e.g. too long). 
-                                       An existing ResourceClaim with that name that is not owned by the pod will not be used for the pod to avoid using an unrelated resource by mistake. Scheduling and pod startup are then blocked until the unrelated ResourceClaim is removed. 
+                                       The template will be used to create a new ResourceClaim, which will be bound to this pod. When this pod is deleted, the ResourceClaim will also be deleted. The pod name and resource name, along with a generated component, will be used to form a unique name for the ResourceClaim, which will be recorded in pod.status.resourceClaimStatuses. 
                                        This field is immutable and no changes will be made to the corresponding ResourceClaim by the control plane after creating the ResourceClaim.
                                     type: string
                                 type: object
@@ -6580,7 +7447,7 @@ spec:
                             - name
                           x-kubernetes-list-type: map
                         restartPolicy:
-                          description: "Restart policy for all containers within the pod. One of Always, OnFailure, Never. Default to Always. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy"
+                          description: "Restart policy for all containers within the pod. One of Always, OnFailure, Never. In some contexts, only a subset of those values may be permitted. Default to Always. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy"
                           type: string
                         runtimeClassName:
                           description: 'RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used to run this pod.  If no RuntimeClass resource matches the named class, the pod will not be run. If unset or empty, the "legacy" RuntimeClass will be used, which is an implicit class with an empty definition that uses the default runtime handler. More info: https://git.k8s.io/enhancements/keps/sig-node/585-runtime-class'
@@ -6590,8 +7457,9 @@ spec:
                           type: string
                         schedulingGates:
                           description: |-
-                            SchedulingGates is an opaque list of values that if specified will block scheduling the pod. More info:  https://git.k8s.io/enhancements/keps/sig-scheduling/3521-pod-scheduling-readiness. 
-                             This is an alpha-level feature enabled by PodSchedulingReadiness feature gate.
+                            SchedulingGates is an opaque list of values that if specified will block scheduling the pod. If schedulingGates is not empty, the pod will stay in the SchedulingGated state and the scheduler will not attempt to schedule the pod. 
+                             SchedulingGates can only be set at pod creation time, and be removed only afterwards. 
+                             This is a beta feature enabled by the PodSchedulingReadiness feature gate.
                           items:
                             description: PodSchedulingGate is associated to a Pod to guard its scheduling.
                             properties:
@@ -6649,7 +7517,7 @@ spec:
                               description: The seccomp options to use by the containers in this pod. Note that this field cannot be set when spec.os.name is windows.
                               properties:
                                 localhostProfile:
-                                  description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must only be set if type is "Localhost".
+                                  description: localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is "Localhost". Must NOT be set for any other type.
                                   type: string
                                 type:
                                   description: |-
@@ -6691,7 +7559,7 @@ spec:
                                   description: GMSACredentialSpecName is the name of the GMSA credential spec to use.
                                   type: string
                                 hostProcess:
-                                  description: HostProcess determines if a container should be run as a 'Host Process' container. This field is alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature flag. Setting this field without the feature flag will result in errors when validating the Pod. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then HostNetwork must also be set to true.
+                                  description: HostProcess determines if a container should be run as a 'Host Process' container. All of a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of HostProcess containers and non-HostProcess containers). In addition, if HostProcess is true then HostNetwork must also be set to true.
                                   type: boolean
                                 runAsUserName:
                                   description: The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
@@ -6777,7 +7645,9 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                               matchLabelKeys:
-                                description: MatchLabelKeys is a set of pod label keys to select the pods over which spreading will be calculated. The keys are used to lookup values from the incoming pod labels, those key-value labels are ANDed with labelSelector to select the group of existing pods over which spreading will be calculated for the incoming pod. Keys that don't exist in the incoming pod labels will be ignored. A null or empty list means only match against labelSelector.
+                                description: |-
+                                  MatchLabelKeys is a set of pod label keys to select the pods over which spreading will be calculated. The keys are used to lookup values from the incoming pod labels, those key-value labels are ANDed with labelSelector to select the group of existing pods over which spreading will be calculated for the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector. MatchLabelKeys cannot be set when LabelSelector isn't set. Keys that don't exist in the incoming pod labels will be ignored. A null or empty list means only match against labelSelector. 
+                                   This is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).
                                 items:
                                   type: string
                                 type: array
@@ -7068,7 +7938,7 @@ spec:
                                     anyOf:
                                       - type: integer
                                       - type: string
-                                    description: "sizeLimit is the total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir"
+                                    description: "sizeLimit is the total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
                                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                     x-kubernetes-int-or-string: true
                                 type: object
@@ -7171,7 +8041,7 @@ spec:
                                                     - type: string
                                                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                                   x-kubernetes-int-or-string: true
-                                                description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                                                description: "Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                                                 type: object
                                             type: object
                                           selector:
@@ -7788,19 +8658,17 @@ spec:
                   type: object
                 type:
                   default: rw
-                  description: Which instances we must forward traffic to?
+                  description: "Type of service to forward traffic to. Default: `rw`."
                   enum:
                     - rw
                     - ro
                   type: string
               required:
                 - cluster
-                - instances
                 - pgbouncer
-                - type
               type: object
             status:
-              description: PoolerStatus defines the observed state of Pooler
+              description: "Most recently observed status of the Pooler. This data may not be up to date. Populated by the system. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status"
               properties:
                 instances:
                   description: The number of pods trying to be scheduled
@@ -7855,6 +8723,9 @@ spec:
                       type: object
                   type: object
               type: object
+          required:
+            - metadata
+            - spec
           type: object
       served: true
       storage: true
@@ -7868,7 +8739,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.3
+    controller-gen.kubebuilder.io/version: v0.13.0
     helm.sh/resource-policy: keep
   name: scheduledbackups.postgresql.cnpg.io
   namespace: cloudnative-pg
@@ -7927,6 +8798,27 @@ spec:
                 immediate:
                   description: If the first backup has to be immediately start after creation or not
                   type: boolean
+                method:
+                  default: barmanObjectStore
+                  description: "The backup method to be used, possible options are `barmanObjectStore` and `volumeSnapshot`. Defaults to: `barmanObjectStore`."
+                  enum:
+                    - barmanObjectStore
+                    - volumeSnapshot
+                  type: string
+                online:
+                  description: Whether the default type of backup with volume snapshots is online/hot (`true`, default) or offline/cold (`false`) Overrides the default setting specified in the cluster field '.spec.backup.volumeSnapshot.online'
+                  type: boolean
+                onlineConfiguration:
+                  description: Configuration parameters to control the online/hot backup with volume snapshots Overrides the default settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+                  properties:
+                    immediateCheckpoint:
+                      description: Control whether the I/O workload for the backup initial checkpoint will be limited, according to the `checkpoint_completion_target` setting on the PostgreSQL server. If set to true, an immediate checkpoint will be used, meaning PostgreSQL will complete the checkpoint as soon as possible. `false` by default.
+                      type: boolean
+                    waitForArchive:
+                      default: true
+                      description: If false, the function will return immediately after the backup is completed, without waiting for WAL to be archived. This behavior is only useful with backup software that independently monitors WAL archiving. Otherwise, WAL required to make the backup consistent might be missing and make the backup useless. By default, or when this parameter is true, pg_backup_stop will wait for WAL to be archived when archiving is enabled. On a standby, this means that it will wait only when archive_mode = always. If write activity on the primary is low, it may be useful to run pg_switch_wal on the primary in order to trigger an immediate segment switch.
+                      type: boolean
+                  type: object
                 schedule:
                   description: The schedule does not follow the same format used in Kubernetes CronJobs as it includes an additional seconds specifier, see https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
                   type: string
@@ -7940,6 +8832,7 @@ spec:
                     - prefer-standby
                   type: string
               required:
+                - cluster
                 - schedule
               type: object
             status:
@@ -7958,6 +8851,9 @@ spec:
                   format: date-time
                   type: string
               type: object
+          required:
+            - metadata
+            - spec
           type: object
       served: true
       storage: true
@@ -7968,14 +8864,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cloudnative-pg
   namespace: cloudnative-pg
 rules:
@@ -8300,19 +9193,76 @@ rules:
       - patch
       - update
       - watch
+  - apiGroups:
+      - snapshot.storage.k8s.io
+    resources:
+      - volumesnapshots
+    verbs:
+      - create
+      - get
+      - list
+      - patch
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: cloudnative-pg
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
+  name: cloudnative-pg-view
+  namespace: cloudnative-pg
+rules:
+  - apiGroups:
+      - postgresql.cnpg.io
+    resources:
+      - backups
+      - clusters
+      - poolers
+      - scheduledbackups
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: cloudnative-pg
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
+  name: cloudnative-pg-edit
+  namespace: cloudnative-pg
+rules:
+  - apiGroups:
+      - postgresql.cnpg.io
+    resources:
+      - backups
+      - clusters
+      - poolers
+      - scheduledbackups
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cloudnative-pg
   namespace: cloudnative-pg
 roleRef:
@@ -8327,244 +9277,114 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    traefik.ingress.kubernetes.io/service.serversscheme: https
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
-    service.name: cnpg-webhook-service
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cnpg-webhook-service
   namespace: cloudnative-pg
 spec:
   ports:
-    - name: webhook
+    - name: webhook-server
       port: 443
-      protocol: TCP
-      targetPort: 9443
-  publishNotReadyAddresses: false
+      targetPort: webhook-server
   selector:
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/name: cloudnative-pg
-    pod.name: main
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: cloudnative-pg-2.0.2
-    app.kubernetes.io/instance: cloudnative-pg
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
-    service.name: main
-  name: cloudnative-pg
-  namespace: cloudnative-pg
-spec:
-  ports:
-    - name: main
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-  publishNotReadyAddresses: false
-  selector:
-    app.kubernetes.io/instance: cloudnative-pg
-    app.kubernetes.io/name: cloudnative-pg
-    pod.name: main
   type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cloudnative-pg
   namespace: cloudnative-pg
 spec:
   replicas: 1
-  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/instance: cloudnative-pg
       app.kubernetes.io/name: cloudnative-pg
-      pod.name: main
-  strategy:
-    type: Recreate
   template:
     metadata:
-      annotations: {}
       labels:
-        app: cloudnative-pg-2.0.2
         app.kubernetes.io/instance: cloudnative-pg
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: cloudnative-pg
-        app.kubernetes.io/version: 1.20.0
-        helm-revision: "1"
-        helm.sh/chart: cloudnative-pg-2.0.2
-        pod.name: main
-        release: cloudnative-pg
     spec:
-      automountServiceAccountToken: true
       containers:
         - args:
             - controller
             - --leader-elect
-            - --config-map-name=cloudnative-pg-config
-            - --secret-name=cloudnative-pg-config
+            - --config-map-name=cnpg-controller-manager-config
             - --webhook-port=9443
           command:
             - /manager
           env:
-            - name: TZ
-              value: UTC
-            - name: UMASK
-              value: "0022"
-            - name: UMASK_SET
-              value: "0022"
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
-            - name: MONITORING_QUERIES_CONFIGMAP
-              value: cloudnative-pg-monitoring
             - name: OPERATOR_IMAGE_NAME
-              value: tccr.io/truecharts/cloudnative-pg:v1.20.2@sha256:07121d674c1de587044746f92cc3bccb4576f2fc125f6f2f5bcaa582dad3e3ad
+              value: ghcr.io/cloudnative-pg/cloudnative-pg:1.22.0
             - name: OPERATOR_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-          image: tccr.io/truecharts/cloudnative-pg:v1.20.2@sha256:07121d674c1de587044746f92cc3bccb4576f2fc125f6f2f5bcaa582dad3e3ad
+            - name: MONITORING_QUERIES_CONFIGMAP
+              value: cnpg-default-monitoring
+          image: ghcr.io/cloudnative-pg/cloudnative-pg:1.22.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
-            failureThreshold: 5
             httpGet:
               path: /readyz
-              port: webhook
+              port: 9443
               scheme: HTTPS
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 5
-          name: cloudnative-pg
+            initialDelaySeconds: 3
+          name: manager
           ports:
-            - containerPort: 9443
-              name: webhook
-              protocol: TCP
             - containerPort: 8080
-              name: main
+              name: metrics
+              protocol: TCP
+            - containerPort: 9443
+              name: webhook-server
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
             httpGet:
               path: /readyz
-              port: webhook
+              port: 9443
               scheme: HTTPS
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 2
-            timeoutSeconds: 5
-          resources:
-            limits:
-              cpu: 4000m
-              memory: 500Mi
-            requests:
-              cpu: 1
-              memory: 500Mi
+            initialDelaySeconds: 3
+          resources: {}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              add: []
               drop:
                 - ALL
-            privileged: false
             readOnlyRootFilesystem: true
-            runAsGroup: 568
-            runAsNonRoot: true
-            runAsUser: 568
+            runAsGroup: 10001
+            runAsUser: 10001
             seccompProfile:
               type: RuntimeDefault
-          startupProbe:
-            failureThreshold: 60
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            successThreshold: 1
-            tcpSocket:
-              port: webhook
-            timeoutSeconds: 2
-          stdin: false
-          tty: false
           volumeMounts:
-            - mountPath: /dev/shm
-              name: devshm
-              readOnly: false
             - mountPath: /controller
               name: scratch-data
-              readOnly: false
-            - mountPath: /shared
-              name: shared
-              readOnly: false
-            - mountPath: /tmp
-              name: tmp
-              readOnly: false
-            - mountPath: /var/logs
-              name: varlogs
-              readOnly: false
-            - mountPath: /var/run
-              name: varrun
-              readOnly: false
             - mountPath: /run/secrets/cnpg.io/webhook
               name: webhook-certificates
-              readOnly: true
-      dnsConfig:
-        options:
-          - name: ndots
-            value: "1"
-      dnsPolicy: ClusterFirst
-      enableServiceLinks: false
-      hostNetwork: false
-      hostPID: false
-      restartPolicy: Always
       securityContext:
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups:
-          - 568
-        sysctls: []
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: cloudnative-pg
-      shareProcessNamespace: false
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 10
       volumes:
-        - emptyDir:
-            medium: Memory
-          name: devshm
         - emptyDir: {}
           name: scratch-data
-        - emptyDir: {}
-          name: shared
-        - emptyDir: {}
-          name: tmp
-        - emptyDir: {}
-          name: varlogs
-        - emptyDir:
-            medium: Memory
-          name: varrun
         - name: webhook-certificates
           secret:
-            defaultMode: 272
+            defaultMode: 420
             optional: true
             secretName: cnpg-webhook-cert
 ---
@@ -8572,14 +9392,11 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cnpg-mutating-webhook-configuration
   namespace: cloudnative-pg
 webhooks:
@@ -8592,7 +9409,7 @@ webhooks:
         path: /mutate-postgresql-cnpg-io-v1-backup
         port: 443
     failurePolicy: Fail
-    name: mbackup.kb.io
+    name: mbackup.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8613,7 +9430,7 @@ webhooks:
         path: /mutate-postgresql-cnpg-io-v1-cluster
         port: 443
     failurePolicy: Fail
-    name: mcluster.kb.io
+    name: mcluster.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8634,7 +9451,7 @@ webhooks:
         path: /mutate-postgresql-cnpg-io-v1-scheduledbackup
         port: 443
     failurePolicy: Fail
-    name: mscheduledbackup.kb.io
+    name: mscheduledbackup.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8651,14 +9468,11 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   labels:
-    app: cloudnative-pg-2.0.2
     app.kubernetes.io/instance: cloudnative-pg
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: cloudnative-pg
-    app.kubernetes.io/version: 1.20.0
-    helm-revision: "1"
-    helm.sh/chart: cloudnative-pg-2.0.2
-    release: cloudnative-pg
+    app.kubernetes.io/version: 1.22.0
+    helm.sh/chart: cloudnative-pg-0.20.0
   name: cnpg-validating-webhook-configuration
   namespace: cloudnative-pg
 webhooks:
@@ -8669,9 +9483,9 @@ webhooks:
         name: cnpg-webhook-service
         namespace: cloudnative-pg
         path: /validate-postgresql-cnpg-io-v1-backup
-        port: 9443
+        port: 443
     failurePolicy: Fail
-    name: vbackup.kb.io
+    name: vbackup.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8692,7 +9506,7 @@ webhooks:
         path: /validate-postgresql-cnpg-io-v1-cluster
         port: 443
     failurePolicy: Fail
-    name: vcluster.kb.io
+    name: vcluster.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8713,7 +9527,7 @@ webhooks:
         path: /validate-postgresql-cnpg-io-v1-scheduledbackup
         port: 443
     failurePolicy: Fail
-    name: vscheduledbackup.kb.io
+    name: vscheduledbackup.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io
@@ -8734,7 +9548,7 @@ webhooks:
         path: /validate-postgresql-cnpg-io-v1-pooler
         port: 443
     failurePolicy: Fail
-    name: vpooler.kb.io
+    name: vpooler.cnpg.io
     rules:
       - apiGroups:
           - postgresql.cnpg.io

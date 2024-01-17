@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-15.0.15
+    app: jellyfin-17.1.9
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.11
+    app.kubernetes.io/version: 10.8.13
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.15
+    helm.sh/chart: jellyfin-17.1.9
     release: jellyfin
     service.name: autodiscovery
   name: jellyfin-autodiscovery
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-15.0.15
+    app: jellyfin-17.1.9
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.11
+    app.kubernetes.io/version: 10.8.13
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.15
+    helm.sh/chart: jellyfin-17.1.9
     release: jellyfin
     service.name: main
   name: jellyfin
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jellyfin-15.0.15
+    app: jellyfin-17.1.9
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.11
+    app.kubernetes.io/version: 10.8.13
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.15
+    helm.sh/chart: jellyfin-17.1.9
     release: jellyfin
   name: jellyfin
   namespace: prod-media
@@ -82,13 +82,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: jellyfin-15.0.15
+        app: jellyfin-17.1.9
         app.kubernetes.io/instance: jellyfin
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jellyfin
-        app.kubernetes.io/version: 10.8.11
+        app.kubernetes.io/version: 10.8.13
         helm-revision: "1"
-        helm.sh/chart: jellyfin-15.0.15
+        helm.sh/chart: jellyfin-17.1.9
+        pod.lifecycle: permanent
         pod.name: main
         release: jellyfin
     spec:
@@ -105,7 +106,7 @@ spec:
               value: "1"
             - name: JELLYFIN_PublishedServerUrl
               value: https://jellyfin.st0rmingbr4in.com
-          image: tccr.io/truecharts/jellyfin:v10.8.11@sha256:586eebeb787d89028b7891e189bc4bbf82141d67235252781ba72088708734f9
+          image: docker.io/jellyfin/jellyfin:10.8.13@sha256:05a9734d7e83086b957c5b7a16cbb5a60b5bb8d113ffb953e57547359dd05140
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -199,8 +200,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -211,6 +216,27 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: jellyfin
+              app.kubernetes.io/name: jellyfin
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: jellyfin
+              app.kubernetes.io/name: jellyfin
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - emptyDir: {}
           name: cache
@@ -219,20 +245,26 @@ spec:
             claimName: jellyfin-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 2Gi
           name: devshm
         - name: media
           persistentVolumeClaim:
             claimName: media-library
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
           name: tmp
         - emptyDir: {}
           name: transcode
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 2Gi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -240,15 +272,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: ""
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: jellyfin-15.0.15
+    app: jellyfin-17.1.9
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.11
+    app.kubernetes.io/version: 10.8.13
     helm-revision: "1"
-    helm.sh/chart: jellyfin-15.0.15
+    helm.sh/chart: jellyfin-17.1.9
     release: jellyfin
   name: jellyfin
   namespace: prod-media

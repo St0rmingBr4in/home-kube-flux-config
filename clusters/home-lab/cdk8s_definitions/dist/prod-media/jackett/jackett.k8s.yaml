@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jackett-15.0.19
+    app: jackett-18.1.6
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1033
+    app.kubernetes.io/version: 0.21.1155
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.19
+    helm.sh/chart: jackett-18.1.6
     release: jackett
     service.name: main
   name: jackett
@@ -30,13 +30,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jackett-15.0.19
+    app: jackett-18.1.6
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1033
+    app.kubernetes.io/version: 0.21.1155
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.19
+    helm.sh/chart: jackett-18.1.6
     release: jackett
   name: jackett
   namespace: prod-media
@@ -54,13 +54,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: jackett-15.0.19
+        app: jackett-18.1.6
         app.kubernetes.io/instance: jackett
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jackett
-        app.kubernetes.io/version: 0.21.1033
+        app.kubernetes.io/version: 0.21.1155
         helm-revision: "1"
-        helm.sh/chart: jackett-15.0.19
+        helm.sh/chart: jackett-18.1.6
+        pod.lifecycle: permanent
         pod.name: main
         release: jackett
     spec:
@@ -73,9 +74,19 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
-            - name: S6_READ_ONLY_ROOT
-              value: "1"
-          image: tccr.io/truecharts/jackett:v0.20.2297
+            - name: PUID
+              value: "568"
+            - name: USER_ID
+              value: "568"
+            - name: UID
+              value: "568"
+            - name: PGID
+              value: "568"
+            - name: GROUP_ID
+              value: "568"
+            - name: GID
+              value: "568"
+          image: ghcr.io/linuxserver/jackett:v0.20.2297
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -112,14 +123,19 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              add: []
+              add:
+                - CHOWN
+                - SETUID
+                - SETGID
+                - FOWNER
+                - DAC_OVERRIDE
               drop:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: false
-            runAsGroup: 568
-            runAsNonRoot: true
-            runAsUser: 568
+            runAsGroup: 0
+            runAsNonRoot: false
+            runAsUser: 0
             seccompProfile:
               type: RuntimeDefault
           startupProbe:
@@ -161,8 +177,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -173,24 +193,51 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: jackett
+              app.kubernetes.io/name: jackett
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: jackett
+              app.kubernetes.io/name: jackett
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: jackett-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 500Mi
           name: devshm
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 500Mi
           name: tmp
         - name: torrentblackhole
           persistentVolumeClaim:
             claimName: media-downloads
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 500Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 500Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -198,15 +245,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: jackett-15.0.19
+    app: jackett-18.1.6
     app.kubernetes.io/instance: jackett
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jackett
-    app.kubernetes.io/version: 0.21.1033
+    app.kubernetes.io/version: 0.21.1155
     helm-revision: "1"
-    helm.sh/chart: jackett-15.0.19
+    helm.sh/chart: jackett-18.1.6
     release: jackett
   name: jackett
   namespace: prod-media

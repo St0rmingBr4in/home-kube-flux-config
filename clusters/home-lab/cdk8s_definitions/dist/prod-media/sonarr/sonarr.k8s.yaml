@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
     service.name: main
   name: sonarr
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
     service.name: metrics
   name: sonarr-metrics
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
   name: sonarr-exportarr
   namespace: prod-media
@@ -82,13 +82,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: sonarr-16.0.2
+        app: sonarr-19.0.26
         app.kubernetes.io/instance: sonarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: sonarr
-        app.kubernetes.io/version: 3.0.10.156
+        app.kubernetes.io/version: 4.0.0.748
         helm-revision: "1"
-        helm.sh/chart: sonarr-16.0.2
+        helm.sh/chart: sonarr-19.0.26
+        pod.lifecycle: permanent
         pod.name: exportarr
         release: sonarr
     spec:
@@ -113,7 +114,7 @@ spec:
               value: "8990"
             - name: URL
               value: http://sonarr:8989
-          image: tccr.io/truecharts/exportarr:v1.5.5@sha256:0dbba4994ac9926e284b5a24fe38e7ca546bcda4b20bbd1ab2444b8bc190d6cb
+          image: ghcr.io/onedr0p/exportarr:v1.6.0@sha256:b522e128509b766cf66f847190fccd225ff194dc76775fe6a215f2dd3010cac2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -197,8 +198,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -209,34 +214,61 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: sonarr
+              app.kubernetes.io/name: sonarr
+              pod.name: exportarr
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: sonarr
+              app.kubernetes.io/name: sonarr
+              pod.name: exportarr
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: sonarr-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 250Mi
           name: devshm
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 250Mi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 250Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 250Mi
           name: varrun
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
   name: sonarr
   namespace: prod-media
@@ -254,13 +286,14 @@ spec:
     metadata:
       annotations: {}
       labels:
-        app: sonarr-16.0.2
+        app: sonarr-19.0.26
         app.kubernetes.io/instance: sonarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: sonarr
-        app.kubernetes.io/version: 3.0.10.156
+        app.kubernetes.io/version: 4.0.0.748
         helm-revision: "1"
-        helm.sh/chart: sonarr-16.0.2
+        helm.sh/chart: sonarr-19.0.26
+        pod.lifecycle: permanent
         pod.name: main
         release: sonarr
     spec:
@@ -279,7 +312,7 @@ spec:
               value: ""
             - name: SONARR__PORT
               value: "8989"
-          image: tccr.io/truecharts/sonarr:3.0.10.1567@sha256:f420ed0b9341a5241c2278d51a7f4f59635a9c3a5670ac893542fa59052e61b2
+          image: ghcr.io/onedr0p/sonarr:4.0.0.748@sha256:f1b1826ccbea3868ff6b30690417fdc1a0f3329ebad0909d0d11ddd856f9f4dd
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -370,8 +403,12 @@ spec:
             value: "1"
       dnsPolicy: ClusterFirst
       enableServiceLinks: false
+      hostIPC: false
       hostNetwork: false
       hostPID: false
+      hostUsers: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
       restartPolicy: Always
       securityContext:
         fsGroup: 568
@@ -382,12 +419,34 @@ spec:
       serviceAccountName: default
       shareProcessNamespace: false
       terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: sonarr
+              app.kubernetes.io/name: sonarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: truecharts.org/rack
+          whenUnsatisfiable: ScheduleAnyway
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: sonarr
+              app.kubernetes.io/name: sonarr
+              pod.name: main
+          maxSkew: 1
+          nodeAffinityPolicy: Honor
+          nodeTaintsPolicy: Honor
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: sonarr-config
         - emptyDir:
             medium: Memory
+            sizeLimit: 250Mi
           name: devshm
         - name: downloads
           persistentVolumeClaim:
@@ -397,12 +456,17 @@ spec:
             claimName: media-library
         - emptyDir: {}
           name: shared
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 250Mi
           name: tmp
-        - emptyDir: {}
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 250Mi
           name: varlogs
         - emptyDir:
             medium: Memory
+            sizeLimit: 250Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
@@ -410,15 +474,16 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: ""
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
   name: sonarr
   namespace: prod-media
@@ -439,13 +504,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: sonarr-16.0.2
+    app: sonarr-19.0.26
     app.kubernetes.io/instance: sonarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: sonarr
-    app.kubernetes.io/version: 3.0.10.156
+    app.kubernetes.io/version: 4.0.0.748
     helm-revision: "1"
-    helm.sh/chart: sonarr-16.0.2
+    helm.sh/chart: sonarr-19.0.26
     release: sonarr
   name: sonarr
   namespace: prod-media
@@ -458,4 +523,4 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: sonarr
       app.kubernetes.io/name: sonarr
-      service.name: main
+      service.name: metrics
