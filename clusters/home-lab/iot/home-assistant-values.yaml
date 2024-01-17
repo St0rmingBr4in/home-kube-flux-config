@@ -1,29 +1,37 @@
 ---
-operator:
-  verify:
-    enabled: false
-
 hostNetwork: true
 dnsPolicy: ClusterFirstWithHostNet
 
 persistence:
   config:
+    enabled: true
     existingClaim: home-assistant
 
 ingress:
   main:
-    integrations:
-      traefik:
-        enableFixedMiddlewares: false
-        middlewares:
-          - name: basic-auth
-            namespace: prod-infra
     enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
       - host: home-assistant.st0rmingbr4in.com
         paths:
           - path: /
             pathType: Prefix
+
+postgresql:
+  enabled: true
+  auth:
+    existingSecret: home-assistant-postgresql
+  persistence:
+    primary:
+      enabled: true
+  primary:
+    resources:
+      limits:
+        memory: 300Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
 
 resources:
   limits:
@@ -31,11 +39,3 @@ resources:
   requests:
     cpu: 200m
     memory: 300Mi
-
-postgresql:
-  resources:
-    limits:
-      memory: 300Mi
-    requests:
-      cpu: 200m
-      memory: 300Mi

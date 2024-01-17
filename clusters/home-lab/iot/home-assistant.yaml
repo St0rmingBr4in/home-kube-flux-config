@@ -9,9 +9,9 @@ spec:
       chart: home-assistant
       sourceRef:
         kind: HelmRepository
-        name: truecharts
+        name: k8s-home-lab
         namespace: flux-system
-      version: 23.0.5
+      version: 14.0.1
   interval: 1h0m0s
   releaseName: home-assistant
   targetNamespace: prod-iot
