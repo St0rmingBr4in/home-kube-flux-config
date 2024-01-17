@@ -267,7 +267,7 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-chain-basic@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
     app: qbittorrent-18.1.6

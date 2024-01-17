@@ -14,8 +14,9 @@ ingress:
   main:
     integrations:
       traefik:
-        fixedMiddlewares:
-          - name: chain-basic
+        enableFixedMiddlewares: false
+        middlewares:
+          - name: basic-auth
             namespace: prod-infra
     enabled: true
     hosts:

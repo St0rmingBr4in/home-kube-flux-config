@@ -9,16 +9,15 @@ ingress:
   main:
     integrations:
       traefik:
-        fixedMiddlewares:
-          - name: chain-basic
+        enableFixedMiddlewares: false
+        middlewares:
+          - name: basic-auth
             namespace: prod-infra
     enabled: true
     hosts:
       - host: bazarr.st0rmingbr4in.com
         paths:
           - path: /
-    enableFixedMiddlewares: true
-    fixedMiddlewares: []
 
 securityContext:
   runAsUser: 1025
