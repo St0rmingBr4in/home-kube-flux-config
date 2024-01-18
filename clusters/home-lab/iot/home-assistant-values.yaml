@@ -10,8 +10,8 @@ persistence:
 ingress:
   main:
     enabled: true
-    annotations:
-      traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
+    # annotations:
+    #   traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     hosts:
       - host: home-assistant.st0rmingbr4in.com
         paths:
