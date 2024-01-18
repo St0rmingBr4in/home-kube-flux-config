@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - home-assistant-config-pvc.yaml
+  - home-assistant-postgresql-pvc.yaml
   - ../common/
 
 namespace: prod-iot
