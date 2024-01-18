@@ -26,6 +26,13 @@ resources:
     cpu: 100m
     memory: 250Mi
 
+exportarrResources:
+  limits:
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
+
 securityContext:
   runAsUser: 1031
   runAsGroup: 100

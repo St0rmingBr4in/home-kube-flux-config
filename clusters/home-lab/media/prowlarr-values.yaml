@@ -21,10 +21,17 @@ ingress:
 
 resources:
   limits:
-    memory: 500Mi
+    memory: 200Mi
   requests:
-    cpu: 1000m
-    memory: 500Mi
+    cpu: 100m
+    memory: 200Mi
+
+exportarrResources:
+  limits:
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
 
 persistence:
   config:

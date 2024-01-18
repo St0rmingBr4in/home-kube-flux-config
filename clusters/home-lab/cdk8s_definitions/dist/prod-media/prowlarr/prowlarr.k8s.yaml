@@ -144,10 +144,10 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 500Mi
+              memory: 200Mi
             requests:
-              cpu: 1000m
-              memory: 500Mi
+              cpu: 100m
+              memory: 200Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -241,21 +241,21 @@ spec:
             claimName: prowlarr-config
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: devshm
         - emptyDir: {}
           name: shared
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: tmp
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: varlogs
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: varrun
 ---
 apiVersion: apps/v1
@@ -342,10 +342,10 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 500Mi
+              memory: 200Mi
             requests:
-              cpu: 1000m
-              memory: 500Mi
+              cpu: 100m
+              memory: 200Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -437,21 +437,21 @@ spec:
             claimName: prowlarr-config
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: devshm
         - emptyDir: {}
           name: shared
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: tmp
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: varlogs
         - emptyDir:
             medium: Memory
-            sizeLimit: 500Mi
+            sizeLimit: 200Mi
           name: varrun
 ---
 apiVersion: networking.k8s.io/v1
