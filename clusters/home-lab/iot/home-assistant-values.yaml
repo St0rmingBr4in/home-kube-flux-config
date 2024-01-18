@@ -5,7 +5,7 @@ dnsPolicy: ClusterFirstWithHostNet
 persistence:
   config:
     enabled: true
-    existingClaim: home-assistant
+    existingClaim: home-assistant-config
 
 ingress:
   main:

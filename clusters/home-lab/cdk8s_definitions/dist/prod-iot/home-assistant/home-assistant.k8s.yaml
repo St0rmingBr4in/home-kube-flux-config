@@ -144,7 +144,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: home-assistant
+            claimName: home-assistant-config
 ---
 apiVersion: apps/v1
 kind: StatefulSet
