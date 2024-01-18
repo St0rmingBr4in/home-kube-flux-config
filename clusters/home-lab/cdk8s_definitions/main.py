@@ -3,7 +3,17 @@
 import cdk8s_plus_27 as kplus
 import yaml
 import os
-from cdk8s import App, Chart, Names, ApiObject, Helm, Yaml, JsonPatch, Include
+from cdk8s import (
+    App,
+    Chart,
+    Names,
+    ApiObject,
+    Helm,
+    Yaml,
+    JsonPatch,
+    Include,
+    ApiObjectMetadata,
+)
 from constructs import Construct
 
 from imports.io.fluxcd.toolkit.kustomize import (
@@ -191,7 +201,32 @@ class CertificateApp(FluxApp):
         )
 
 
+class NamespacesApp(FluxApp):
+    def __init__(self, namespaces):
+        super().__init__(name="namespaces", namespace="flux-system")
+
+        chart = Chart(
+            scope=self,
+            id="namespaces",
+            disable_resource_name_hashes=True,
+        )
+
+        for namespace in namespaces:
+            namespace = kplus.Namespace(
+                chart, namespace, metadata=ApiObjectMetadata(name=namespace)
+            )
+
+
 apps = [
+    NamespacesApp(
+        namespaces=[
+            "prod-infra",
+            "prod-media",
+            "prod-iot",
+            "prod-aphorya",
+            "renovate",
+        ]
+    ),
     HelmApp(
         name="dynmap-db",
         root_dir="../aphorya",
@@ -277,10 +312,6 @@ apps = [
         name="home-assistant",
         root_dir="../iot",
         additionnal_objs=["home-assistant-postgresql-secret.yaml"],
-    ),
-    HelmApp(
-        name="cloudnative-pg",
-        root_dir="../cloudnative-pg",
     ),
     HelmApp(
         name="external-service",

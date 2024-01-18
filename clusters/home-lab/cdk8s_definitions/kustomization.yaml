@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - dist/flux-system/namespaces/namespaces-flux-system-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/dynmap-db/dynmap-db-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-media/basicauth-traefik-secret/basicauth-traefik-secret-prod-media-flux-kustomization.k8s.yaml
   - dist/renovate/renovate/renovate-renovate-flux-kustomization.k8s.yaml
@@ -21,7 +22,6 @@ resources:
   - dist/prod-infra/datadog/datadog-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/cert-manager/cert-manager-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-iot/home-assistant/home-assistant-prod-iot-flux-kustomization.k8s.yaml
-  - dist/cloudnative-pg/cloudnative-pg/cloudnative-pg-cloudnative-pg-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/external-service/external-service-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/minecraft-aphorya/minecraft-aphorya-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-infra/st0rmingbr4in-com/st0rmingbr4in-com-prod-infra-flux-kustomization.k8s.yaml

@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-infra
+spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-media
+spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-iot
+spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-aphorya
+spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: renovate
+spec: {}
