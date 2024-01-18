@@ -22,10 +22,9 @@ postgresql:
   enabled: true
   auth:
     existingSecret: home-assistant-postgresql
-  persistence:
-    primary:
-      enabled: true
   primary:
+    persistence:
+      existingClaim: home-assistant-postgresql
     resources:
       limits:
         memory: 300Mi

@@ -272,18 +272,12 @@ spec:
         - emptyDir:
             medium: Memory
           name: dshm
+        - name: data
+          persistentVolumeClaim:
+            claimName: home-assistant-postgresql
   updateStrategy:
     rollingUpdate: {}
     type: RollingUpdate
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 8Gi
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

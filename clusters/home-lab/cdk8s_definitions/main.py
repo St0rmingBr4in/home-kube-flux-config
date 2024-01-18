@@ -311,7 +311,7 @@ apps = [
     HelmApp(
         name="home-assistant",
         root_dir="../iot",
-        additionnal_objs=["home-assistant-postgresql-secret.yaml"],
+        additionnal_objs=["home-assistant-postgresql-secret.yaml", "home-assistant-postgresql-pvc.yaml"],
     ),
     HelmApp(
         name="external-service",
