@@ -11,8 +11,6 @@ ingress:
       traefik:
         enableFixedMiddlewares: false
         middlewares:
-          - name: basic-auth
-            namespace: prod-infra
     enabled: true
     hosts:
       - host: jellyfin.st0rmingbr4in.com
