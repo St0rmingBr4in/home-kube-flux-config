@@ -217,6 +217,43 @@ class NamespacesApp(FluxApp):
             )
 
 
+class PalworldApp(FluxApp):
+    def __init__(self, name, namespace):
+        super().__init__(name=name, namespace=namespace)
+
+        chart = Chart(
+            scope=self,
+            id=name,
+            disable_resource_name_hashes=True,
+            namespace=namespace,
+        )
+
+        deployment = kplus.Deployment(
+            chart,
+            "Deployment",
+            replicas=1,
+            containers=[
+                kplus.ContainerProps(
+                    image="thijsvanloef/palworld-server-docker:v0.8.0",
+                    ports=[
+                        kplus.ContainerPort(number=8211),
+                        kplus.ContainerPort(number=27015),
+                    ],
+                )
+            ],
+        )
+
+        service = kplus.Service(
+            chart,
+            "palworld-server",
+            metadata=ApiObjectMetadata(name="palworld-server"),
+            selector=deployment,
+        )
+
+        service.bind(port=8211)
+        service.bind(port=27015)
+
+
 apps = [
     NamespacesApp(
         namespaces=[
@@ -225,6 +262,7 @@ apps = [
             "prod-iot",
             "prod-aphorya",
             "renovate",
+            "prod-palworld",
         ]
     ),
     HelmApp(
@@ -311,7 +349,10 @@ apps = [
     HelmApp(
         name="home-assistant",
         root_dir="../iot",
-        additionnal_objs=["home-assistant-postgresql-secret.yaml", "home-assistant-postgresql-pvc.yaml"],
+        additionnal_objs=[
+            "home-assistant-postgresql-secret.yaml",
+            "home-assistant-postgresql-pvc.yaml",
+        ],
     ),
     HelmApp(
         name="external-service",
@@ -324,6 +365,7 @@ apps = [
     ),
     CertificateApp(name="st0rmingbr4in-com"),
     CertificateApp(name="aphorya-fr"),
+    PalworldApp(name="palworld-server", namespace="prod-palworld"),
 ]
 
 for app in apps:

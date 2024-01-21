@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: palworld-server-deployment
+  namespace: prod-palworld
+spec:
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: thijsvanloef/palworld-server-docker:v0.8.0
+          imagePullPolicy: Always
+          name: main
+          ports:
+            - containerPort: 8211
+            - containerPort: 27015
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 2048Mi
+            requests:
+              cpu: 1000m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: false
+      restartPolicy: Always
+      securityContext:
+        fsGroupChangePolicy: Always
+        runAsNonRoot: true
+      setHostnameAsFQDN: false
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: palworld-server
+  namespace: prod-palworld
+spec:
+  externalIPs: []
+  ports:
+    - port: 8211
+    - port: 27015
+  selector:
+    cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+  type: ClusterIP

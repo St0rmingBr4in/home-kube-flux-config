@@ -27,3 +27,9 @@ kind: Namespace
 metadata:
   name: renovate
 spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-palworld
+spec: {}

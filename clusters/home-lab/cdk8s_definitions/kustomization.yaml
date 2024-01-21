@@ -26,3 +26,4 @@ resources:
   - dist/prod-aphorya/minecraft-aphorya/minecraft-aphorya-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-infra/st0rmingbr4in-com/st0rmingbr4in-com-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/aphorya-fr/aphorya-fr-prod-infra-flux-kustomization.k8s.yaml
+  - dist/prod-palworld/palworld-server/palworld-server-prod-palworld-flux-kustomization.k8s.yaml
