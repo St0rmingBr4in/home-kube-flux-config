@@ -1,7 +1,39 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: palworld-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  capacity:
+    storage: 10Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: pvc-palworld-server
+    namespace: prod-palworld
+  iscsi:
+    fsType: ext4
+    iqn: iqn.2000-01.com.synology:palworld-server
+    lun: 1
+    targetPortal: 192.168.42.42
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-palworld-server
+  namespace: prod-palworld
+spec:
+  volumeMode: Filesystem
+  volumeName: palworld-server
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: palworld-server-deployment
+  name: palworld-server
   namespace: prod-palworld
 spec:
   minReadySeconds: 0
@@ -9,7 +41,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+      cdk8s.io/metadata.addr: palworld-server-deployment-c84d13cf
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -18,7 +50,7 @@ spec:
   template:
     metadata:
       labels:
-        cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+        cdk8s.io/metadata.addr: palworld-server-deployment-c84d13cf
     spec:
       automountServiceAccountToken: false
       containers:
@@ -27,7 +59,9 @@ spec:
           name: main
           ports:
             - containerPort: 8211
+              name: palworld
             - containerPort: 27015
+              name: rcon
           resources:
             limits:
               cpu: 1500m
@@ -40,6 +74,9 @@ spec:
             privileged: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
+          volumeMounts:
+            - mountPath: /data
+              name: data
       dnsPolicy: ClusterFirst
       hostNetwork: false
       restartPolicy: Always
@@ -48,6 +85,11 @@ spec:
         runAsNonRoot: true
       setHostnameAsFQDN: false
       terminationGracePeriodSeconds: 30
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-palworld-server
+            readOnly: false
 ---
 apiVersion: v1
 kind: Service
@@ -60,5 +102,5 @@ spec:
     - port: 8211
     - port: 27015
   selector:
-    cdk8s.io/metadata.addr: palworld-server-Deployment-c8447784
+    cdk8s.io/metadata.addr: palworld-server-deployment-c84d13cf
   type: ClusterIP

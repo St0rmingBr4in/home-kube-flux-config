@@ -13,6 +13,8 @@ from cdk8s import (
     JsonPatch,
     Include,
     ApiObjectMetadata,
+    Size,
+    ApiObject,
 )
 from constructs import Construct
 
@@ -228,24 +230,71 @@ class PalworldApp(FluxApp):
             namespace=namespace,
         )
 
+        pv = kplus.PersistentVolume(
+            chart,
+            "pv",
+            metadata=ApiObjectMetadata(name=name),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=Size.gibibytes(10),
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+            reclaim_policy=kplus.PersistentVolumeReclaimPolicy.RETAIN,
+        )
+
+        pvc = pv.reserve()
+
+        # Add the iSCSI volume to the PV
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add(
+                "/spec/iscsi",
+                {
+                    "targetPortal": "192.168.42.42",
+                    "iqn": f"iqn.2000-01.com.synology:{name}",
+                    "lun": 1,
+                    "fsType": "ext4",
+                },
+            )
+        )
+
+        # PVs are not namespaced, so we need to remove the namespace from the PV
+        ApiObject.of(pv).add_json_patch(JsonPatch.remove("/metadata/namespace"))
+
+        # Fix the namespace of the PVC claimRef
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add("/spec/claimRef/namespace", namespace)
+        )
+
         deployment = kplus.Deployment(
             chart,
-            "Deployment",
+            "deployment",
             replicas=1,
-            containers=[
-                kplus.ContainerProps(
-                    image="thijsvanloef/palworld-server-docker:v0.8.0",
-                    ports=[
-                        kplus.ContainerPort(number=8211),
-                        kplus.ContainerPort(number=27015),
-                    ],
-                )
-            ],
+            metadata=ApiObjectMetadata(name=name),
         )
+
+        data = kplus.Volume.from_persistent_volume_claim(
+            scope=chart,
+            id="data",
+            claim=pvc,
+            name="data",
+            read_only=False,
+        )
+
+        deployment.add_volume(vol=data)
+
+        container = deployment.add_container(
+            image="thijsvanloef/palworld-server-docker:v0.8.0"
+        )
+
+        container.add_port(name="palworld", number=8211)
+        container.add_port(name="rcon", number=27015)
+
+        container.mount(path="/data", storage=data)
 
         service = kplus.Service(
             chart,
-            "palworld-server",
+            "service",
             metadata=ApiObjectMetadata(name="palworld-server"),
             selector=deployment,
         )
@@ -255,6 +304,7 @@ class PalworldApp(FluxApp):
 
 
 apps = [
+    PalworldApp(name="palworld-server", namespace="prod-palworld"),
     NamespacesApp(
         namespaces=[
             "prod-infra",
@@ -365,7 +415,6 @@ apps = [
     ),
     CertificateApp(name="st0rmingbr4in-com"),
     CertificateApp(name="aphorya-fr"),
-    PalworldApp(name="palworld-server", namespace="prod-palworld"),
 ]
 
 for app in apps:

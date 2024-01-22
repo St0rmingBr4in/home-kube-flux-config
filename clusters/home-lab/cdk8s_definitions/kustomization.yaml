@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - dist/prod-palworld/palworld-server/palworld-server-prod-palworld-flux-kustomization.k8s.yaml
   - dist/flux-system/namespaces/namespaces-flux-system-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/dynmap-db/dynmap-db-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-media/basicauth-traefik-secret/basicauth-traefik-secret-prod-media-flux-kustomization.k8s.yaml
@@ -26,4 +27,3 @@ resources:
   - dist/prod-aphorya/minecraft-aphorya/minecraft-aphorya-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-infra/st0rmingbr4in-com/st0rmingbr4in-com-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/aphorya-fr/aphorya-fr-prod-infra-flux-kustomization.k8s.yaml
-  - dist/prod-palworld/palworld-server/palworld-server-prod-palworld-flux-kustomization.k8s.yaml
