@@ -301,7 +301,8 @@ class PalworldApp(FluxApp):
         deployment.add_volume(vol=data)
 
         container = deployment.add_container(
-            image="thijsvanloef/palworld-server-docker:v0.8.0"
+            image="thijsvanloef/palworld-server-docker:v0.8.0",
+            security_context=kplus.ContainerSecurityContextProps(ensure_non_root=False),
         )
 
         container.add_port(name="palworld", number=8211)

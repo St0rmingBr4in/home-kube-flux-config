@@ -79,7 +79,7 @@ spec:
             allowPrivilegeEscalation: false
             privileged: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
+            runAsNonRoot: false
           volumeMounts:
             - mountPath: /data
               name: data
