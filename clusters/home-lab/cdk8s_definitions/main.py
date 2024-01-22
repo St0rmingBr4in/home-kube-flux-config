@@ -308,7 +308,7 @@ class PalworldApp(FluxApp):
         container.add_port(name="palworld", number=8211)
         container.add_port(name="rcon", number=27015)
 
-        container.mount(path="/data", storage=data)
+        container.mount(path="/palworld", storage=data)
 
         service = kplus.Service(
             chart,

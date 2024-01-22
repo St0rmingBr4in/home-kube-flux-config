@@ -81,7 +81,7 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: false
           volumeMounts:
-            - mountPath: /data
+            - mountPath: /palworld
               name: data
       dnsPolicy: ClusterFirst
       hostNetwork: false
