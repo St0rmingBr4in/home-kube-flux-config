@@ -230,6 +230,18 @@ class PalworldApp(FluxApp):
             namespace=namespace,
         )
 
+        pvc = kplus.PersistentVolumeClaim(
+            chart,
+            "pvc",
+            metadata=ApiObjectMetadata(name=name),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=Size.gibibytes(10),
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+        )
+
         pv = kplus.PersistentVolume(
             chart,
             "pv",
@@ -243,7 +255,7 @@ class PalworldApp(FluxApp):
             reclaim_policy=kplus.PersistentVolumeReclaimPolicy.RETAIN,
         )
 
-        pvc = pv.reserve()
+        pv.bind(pvc)
 
         # Add the iSCSI volume to the PV
         ApiObject.of(pv).add_json_patch(
@@ -264,6 +276,11 @@ class PalworldApp(FluxApp):
         # Fix the namespace of the PVC claimRef
         ApiObject.of(pv).add_json_patch(
             JsonPatch.add("/spec/claimRef/namespace", namespace)
+        )
+
+        # VolumeName
+        ApiObject.of(pvc).add_json_patch(
+            JsonPatch.add("/spec/volumeName", name)
         )
 
         deployment = kplus.Deployment(
