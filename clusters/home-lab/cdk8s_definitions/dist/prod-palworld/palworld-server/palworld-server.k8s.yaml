@@ -99,8 +99,10 @@ metadata:
 spec:
   externalIPs: []
   ports:
-    - port: 8211
-    - port: 27015
+    - name: palworld
+      port: 8211
+    - name: rcon
+      port: 27015
   selector:
     cdk8s.io/metadata.addr: palworld-server-deployment-c84d13cf
   type: ClusterIP

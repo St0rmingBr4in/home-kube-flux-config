@@ -299,8 +299,8 @@ class PalworldApp(FluxApp):
             selector=deployment,
         )
 
-        service.bind(port=8211)
-        service.bind(port=27015)
+        service.bind(port=8211, name="palworld")
+        service.bind(port=27015, name="rcon")
 
 
 apps = [
