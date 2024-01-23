@@ -303,7 +303,7 @@ class PalworldApp(FluxApp):
 
         container = deployment.add_container(
                 image="thijsvanloef/palworld-server-docker:v0.12.0",
-            security_context=kplus.ContainerSecurityContextProps(ensure_non_root=False),
+            security_context=kplus.ContainerSecurityContextProps(ensure_non_root=False, read_only_root_filesystem=False),
         )
 
         container.env.add_variable("PUID", kplus.EnvValue.from_value('1000'))
