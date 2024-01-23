@@ -60,13 +60,36 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: thijsvanloef/palworld-server-docker:v0.8.0
+        - env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: PORT
+              value: "8211"
+            - name: PLAYERS
+              value: "16"
+            - name: MULTITHREADING
+              value: "true"
+            - name: RCON_ENABLED
+              value: "true"
+            - name: RCON_PORT
+              value: "25575"
+            - name: ADMIN_PASSWORD
+              value: adminPasswordHere
+            - name: COMMUNITY
+              value: "false"
+            - name: SERVER_PASSWORD
+              value: worldofpals
+            - name: SERVER_NAME
+              value: World of Pals
+          image: thijsvanloef/palworld-server-docker:v0.12.0
           imagePullPolicy: Always
           name: main
           ports:
             - containerPort: 8211
               name: palworld
-            - containerPort: 27015
+            - containerPort: 25575
               name: rcon
           resources:
             limits:
@@ -108,7 +131,7 @@ spec:
     - name: palworld
       port: 8211
     - name: rcon
-      port: 27015
+      port: 25575
   selector:
     cdk8s.io/metadata.addr: palworld-server-deployment-c84d13cf
   type: ClusterIP

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import cdk8s
 import cdk8s_plus_27 as kplus
 import yaml
 import os
@@ -230,6 +231,8 @@ class PalworldApp(FluxApp):
             namespace=namespace,
         )
 
+        rcon_port = 25575
+
         pvc = kplus.PersistentVolumeClaim(
             chart,
             "pvc",
@@ -279,9 +282,7 @@ class PalworldApp(FluxApp):
         )
 
         # VolumeName
-        ApiObject.of(pvc).add_json_patch(
-            JsonPatch.add("/spec/volumeName", name)
-        )
+        ApiObject.of(pvc).add_json_patch(JsonPatch.add("/spec/volumeName", name))
 
         deployment = kplus.Deployment(
             chart,
@@ -301,12 +302,26 @@ class PalworldApp(FluxApp):
         deployment.add_volume(vol=data)
 
         container = deployment.add_container(
-            image="thijsvanloef/palworld-server-docker:v0.8.0",
+                image="thijsvanloef/palworld-server-docker:v0.12.0",
             security_context=kplus.ContainerSecurityContextProps(ensure_non_root=False),
         )
 
+        container.env.add_variable("PUID", kplus.EnvValue.from_value('1000'))
+        container.env.add_variable("PGID", kplus.EnvValue.from_value('1000'))
+        container.env.add_variable("PORT", kplus.EnvValue.from_value('8211'))
+        container.env.add_variable("PLAYERS", kplus.EnvValue.from_value('16'))
+        container.env.add_variable("MULTITHREADING", kplus.EnvValue.from_value('true'))
+        container.env.add_variable("RCON_ENABLED", kplus.EnvValue.from_value('true'))
+        container.env.add_variable("RCON_PORT", kplus.EnvValue.from_value(str(rcon_port)))
+        container.env.add_variable("ADMIN_PASSWORD", kplus.EnvValue.from_value('adminPasswordHere'))
+        container.env.add_variable("COMMUNITY", kplus.EnvValue.from_value('false'))
+        container.env.add_variable('SERVER_PASSWORD', kplus.EnvValue.from_value('worldofpals'))
+        container.env.add_variable('SERVER_NAME', kplus.EnvValue.from_value('World of Pals'))
+
+
+
         container.add_port(name="palworld", number=8211)
-        container.add_port(name="rcon", number=27015)
+        container.add_port(name="rcon", number=rcon_port)
 
         container.mount(path="/palworld", storage=data)
 
@@ -318,7 +333,7 @@ class PalworldApp(FluxApp):
         )
 
         service.bind(port=8211, name="palworld")
-        service.bind(port=27015, name="rcon")
+        service.bind(port=rcon_port, name="rcon")
 
 
 apps = [
