@@ -460,6 +460,14 @@ apps = [
                     "existingClaim": "palworld-server",
                 },
             },
+            "service": {
+                "main": {
+                    "type": "LoadBalancer",
+                    "LoadBalancerIP": "192.168.62.17",
+                    "externalTrafficPolicy": "Cluster",
+                    "externalIPs": ["192.168.62.17", "192.168.62.18"],
+                }
+            }
         },
         create_claim=[
             Claim(name="palworld-server", size=Size.gibibytes(10)),
