@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: palworld-server
+  namespace: prod-palworld
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+  volumeName: palworld-server
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: palworld-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  capacity:
+    storage: 10Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: palworld-server
+    namespace: prod-palworld
+  iscsi:
+    fsType: ext4
+    iqn: iqn.2000-01.com.synology:palworld-server
+    lun: 1
+    targetPortal: 192.168.42.42
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem

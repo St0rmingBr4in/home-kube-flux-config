@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: palworld-steamcmd
+  namespace: prod-palworld
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+  volumeName: palworld-steamcmd
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: palworld-steamcmd
+spec:
+  accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
+  capacity:
+    storage: 10Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: palworld-steamcmd
+    namespace: prod-palworld
+  iscsi:
+    fsType: ext4
+    iqn: iqn.2000-01.com.synology:palworld-steamcmd
+    lun: 1
+    targetPortal: 192.168.42.42
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem

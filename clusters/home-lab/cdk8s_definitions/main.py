@@ -89,6 +89,66 @@ class KustomizationChart(Chart):
         Kustomization(self, f"{identifier}-kustomization", **kwargs)
 
 
+class IscsiPersistenceChart(Chart):
+    def __init__(self, scope, identifier, namespace, size, **kwargs):
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=True,
+            namespace=namespace,
+        )
+
+        pvc = kplus.PersistentVolumeClaim(
+            self,
+            "pvc",
+            metadata=ApiObjectMetadata(name=identifier),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=size,
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+        )
+
+        pv = kplus.PersistentVolume(
+            self,
+            "pv",
+            metadata=ApiObjectMetadata(name=identifier),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=size,
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+            reclaim_policy=kplus.PersistentVolumeReclaimPolicy.RETAIN,
+        )
+
+        pv.bind(pvc)
+
+        # Add the iSCSI volume to the PV
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add(
+                "/spec/iscsi",
+                {
+                    "targetPortal": "192.168.42.42",
+                    "iqn": f"iqn.2000-01.com.synology:{identifier}",
+                    "lun": 1,
+                    "fsType": "ext4",
+                },
+            )
+        )
+
+        # PVs are not namespaced, so we need to remove the namespace from the PV
+        ApiObject.of(pv).add_json_patch(JsonPatch.remove("/metadata/namespace"))
+
+        # Fix the namespace of the PVC claimRef
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add("/spec/claimRef/namespace", namespace)
+        )
+
+        ApiObject.of(pvc).add_json_patch(JsonPatch.add("/spec/volumeName", identifier))
+
+
 class FluxApp(App):
     def __init__(self, name, namespace, root_dir=None, additionnal_objs=[], **kwarg):
         self.name = name
@@ -144,6 +204,38 @@ class FluxApp(App):
 
     def dist_dir(self):
         return os.path.join("dist", self.namespace, self.name)
+
+
+class TrueChartsApp(FluxApp):
+    def __init__(
+        self,
+        name,
+        namespace,
+        version,
+        values,
+        channel="stable",
+        create_claim=[],
+        **kwargs,
+    ):
+        super().__init__(name=name, namespace=namespace, **kwargs)
+
+        HelmChart(
+            scope=self,
+            identifier=name,
+            version=version,
+            chart=f"oci://tccr.io/truecharts/{name}",
+            namespace=namespace,
+            values=values,
+            **kwargs,
+        )
+
+        for claim in create_claim:
+            IscsiPersistenceChart(
+                scope=self,
+                identifier=claim.name,
+                namespace=namespace,
+                size=claim.size,
+            )
 
 
 class HelmApp(FluxApp):
@@ -302,23 +394,31 @@ class PalworldApp(FluxApp):
         deployment.add_volume(vol=data)
 
         container = deployment.add_container(
-                image="thijsvanloef/palworld-server-docker:v0.12.0",
-            security_context=kplus.ContainerSecurityContextProps(ensure_non_root=False, read_only_root_filesystem=False),
+            image="thijsvanloef/palworld-server-docker:v0.12.0",
+            security_context=kplus.ContainerSecurityContextProps(
+                ensure_non_root=False, read_only_root_filesystem=False
+            ),
         )
 
-        container.env.add_variable("PUID", kplus.EnvValue.from_value('1000'))
-        container.env.add_variable("PGID", kplus.EnvValue.from_value('1000'))
-        container.env.add_variable("PORT", kplus.EnvValue.from_value('8211'))
-        container.env.add_variable("PLAYERS", kplus.EnvValue.from_value('16'))
-        container.env.add_variable("MULTITHREADING", kplus.EnvValue.from_value('true'))
-        container.env.add_variable("RCON_ENABLED", kplus.EnvValue.from_value('true'))
-        container.env.add_variable("RCON_PORT", kplus.EnvValue.from_value(str(rcon_port)))
-        container.env.add_variable("ADMIN_PASSWORD", kplus.EnvValue.from_value('adminPasswordHere'))
-        container.env.add_variable("COMMUNITY", kplus.EnvValue.from_value('false'))
-        container.env.add_variable('SERVER_PASSWORD', kplus.EnvValue.from_value('worldofpals'))
-        container.env.add_variable('SERVER_NAME', kplus.EnvValue.from_value('World of Pals'))
-
-
+        container.env.add_variable("PUID", kplus.EnvValue.from_value("1000"))
+        container.env.add_variable("PGID", kplus.EnvValue.from_value("1000"))
+        container.env.add_variable("PORT", kplus.EnvValue.from_value("8211"))
+        container.env.add_variable("PLAYERS", kplus.EnvValue.from_value("16"))
+        container.env.add_variable("MULTITHREADING", kplus.EnvValue.from_value("true"))
+        container.env.add_variable("RCON_ENABLED", kplus.EnvValue.from_value("true"))
+        container.env.add_variable(
+            "RCON_PORT", kplus.EnvValue.from_value(str(rcon_port))
+        )
+        container.env.add_variable(
+            "ADMIN_PASSWORD", kplus.EnvValue.from_value("adminPasswordHere")
+        )
+        container.env.add_variable("COMMUNITY", kplus.EnvValue.from_value("false"))
+        container.env.add_variable(
+            "SERVER_PASSWORD", kplus.EnvValue.from_value("worldofpals")
+        )
+        container.env.add_variable(
+            "SERVER_NAME", kplus.EnvValue.from_value("World of Pals")
+        )
 
         container.add_port(name="palworld", number=8211)
         container.add_port(name="rcon", number=rcon_port)
@@ -336,8 +436,36 @@ class PalworldApp(FluxApp):
         service.bind(port=rcon_port, name="rcon")
 
 
+class Claim:
+    def __init__(self, name: str, size: cdk8s.Size):
+        self.name = name
+        self.size = size
+
+
 apps = [
-    PalworldApp(name="palworld-server", namespace="prod-palworld"),
+    # PalworldApp(name="palworld-server", namespace="prod-palworld"),
+    TrueChartsApp(
+        name="palworld",
+        namespace="prod-palworld",
+        version="0.0.1",
+        values={
+            "resources": {
+                "limits": {"memory": "10Gi"},
+                "requests": {"cpu": "1", "memory": "1Gi"},
+            },
+            "persistence": {
+                "steamcmd": {"enabled": "true", "existingClaim": "palworld-steamcmd"},
+                "serverfiles": {
+                    "enabled": "true",
+                    "existingClaim": "palworld-server",
+                },
+            },
+        },
+        create_claim=[
+            Claim(name="palworld-server", size=Size.gibibytes(10)),
+            Claim(name="palworld-steamcmd", size=Size.gibibytes(10)),
+        ],
+    ),
     NamespacesApp(
         namespaces=[
             "prod-infra",
