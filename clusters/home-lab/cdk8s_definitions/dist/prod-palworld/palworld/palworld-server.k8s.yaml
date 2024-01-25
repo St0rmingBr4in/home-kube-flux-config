@@ -10,6 +10,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  storageClassName: local-storage
   volumeMode: Filesystem
   volumeName: palworld-server
 ---
@@ -28,10 +29,7 @@ spec:
     kind: PersistentVolumeClaim
     name: palworld-server
     namespace: prod-palworld
-  iscsi:
-    fsType: ext4
-    iqn: iqn.2000-01.com.synology:palworld-server
-    lun: 1
-    targetPortal: 192.168.42.42
+  local:
+    path: /var/lib/local-volumes/palworld-server
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem

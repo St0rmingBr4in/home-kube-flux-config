@@ -25,6 +25,10 @@ from imports.io.fluxcd.toolkit.kustomize import (
     KustomizationSpecDecryptionProvider,
 )
 
+from imports.k8s import (
+        KubeStorageClass,
+        )
+
 KUSTOMIZE_API_VERSION = "kustomize.config.k8s.io/v1beta1"
 
 
@@ -88,6 +92,18 @@ class KustomizationChart(Chart):
         )
         Kustomization(self, f"{identifier}-kustomization", **kwargs)
 
+class StorageClassChart(Chart):
+    def __init__(self, scope, identifier, **kwargs):
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=True,
+        )
+        KubeStorageClass(
+            self,
+            "local-storage",
+            **kwargs,
+        )
 
 class IscsiPersistenceChart(Chart):
     def __init__(self, scope, identifier, namespace, size, **kwargs):
@@ -147,6 +163,63 @@ class IscsiPersistenceChart(Chart):
         )
 
         ApiObject.of(pvc).add_json_patch(JsonPatch.add("/spec/volumeName", identifier))
+
+
+
+class LocalPersistenceChart(Chart):
+    def __init__(self, scope, identifier, namespace, size, **kwargs):
+        super().__init__(
+            scope=scope,
+            id=identifier,
+            disable_resource_name_hashes=True,
+            namespace=namespace,
+        )
+
+        pvc = kplus.PersistentVolumeClaim(
+            self,
+            "pvc",
+            metadata=ApiObjectMetadata(name=identifier),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=size,
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+            storage_class_name="local-storage",
+        )
+
+        pv = kplus.PersistentVolume(
+            self,
+            "pv",
+            metadata=ApiObjectMetadata(name=identifier),
+            access_modes=[
+                kplus.PersistentVolumeAccessMode.READ_WRITE_ONCE,
+                kplus.PersistentVolumeAccessMode.READ_ONLY_MANY,
+            ],
+            storage=size,
+            volume_mode=kplus.PersistentVolumeMode.FILE_SYSTEM,
+            reclaim_policy=kplus.PersistentVolumeReclaimPolicy.RETAIN,
+        )
+
+        pv.bind(pvc)
+
+        # PVs are not namespaced, so we need to remove the namespace from the PV
+        ApiObject.of(pv).add_json_patch(JsonPatch.remove("/metadata/namespace"))
+
+        # Fix the namespace of the PVC claimRef
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add("/spec/claimRef/namespace", namespace)
+        )
+
+        ApiObject.of(pvc).add_json_patch(JsonPatch.add("/spec/volumeName", identifier))
+
+        # Add the local volume to the PV
+        ApiObject.of(pv).add_json_patch(
+            JsonPatch.add(
+                "/spec/local",
+                {"path": f"/var/lib/local-volumes/{identifier}"},
+            )
+        )
 
 
 class FluxApp(App):
@@ -230,7 +303,7 @@ class TrueChartsApp(FluxApp):
         )
 
         for claim in create_claim:
-            IscsiPersistenceChart(
+            LocalPersistenceChart(
                 scope=self,
                 identifier=claim.name,
                 namespace=namespace,
@@ -310,6 +383,18 @@ class NamespacesApp(FluxApp):
             namespace = kplus.Namespace(
                 chart, namespace, metadata=ApiObjectMetadata(name=namespace)
             )
+
+class LocalStorageClassApp(FluxApp):
+    def __init__(self):
+        super().__init__(name="local-storage-class", namespace="default")
+
+        StorageClassChart(
+            self,
+            "local-storage",
+            metadata={"name":"local-storage"},
+            provisioner="kubernetes.io/no-provisioner",
+            volume_binding_mode="WaitForFirstConsumer",
+        )
 
 
 class PalworldApp(FluxApp):
@@ -444,6 +529,7 @@ class Claim:
 
 apps = [
     # PalworldApp(name="palworld-server", namespace="prod-palworld"),
+    LocalStorageClassApp(),
     TrueChartsApp(
         name="palworld",
         namespace="prod-palworld",
