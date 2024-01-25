@@ -206,6 +206,25 @@ class LocalPersistenceChart(Chart):
         # PVs are not namespaced, so we need to remove the namespace from the PV
         ApiObject.of(pv).add_json_patch(JsonPatch.remove("/metadata/namespace"))
 
+        # Add the nodeAffinity to the PVC
+        ApiObject.of(pv).add_json_patch(JsonPatch.add("/spec/nodeAffinity", {
+            "required": {
+                "nodeSelectorTerms": [
+                    {
+                        "matchExpressions": [
+                            {
+                                "key": "kubernetes.io/hostname",
+                                "operator": "In",
+                                "values": [
+                                    "k3s-clusterv2-node1",
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }))
+
         # Fix the namespace of the PVC claimRef
         ApiObject.of(pv).add_json_patch(
             JsonPatch.add("/spec/claimRef/namespace", namespace)

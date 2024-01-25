@@ -31,5 +31,13 @@ spec:
     namespace: prod-palworld
   local:
     path: /var/lib/local-volumes/palworld-steamcmd
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - k3s-clusterv2-node1
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
