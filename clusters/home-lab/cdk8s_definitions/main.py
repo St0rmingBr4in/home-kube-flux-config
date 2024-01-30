@@ -555,8 +555,8 @@ apps = [
         version="0.0.1",
         values={
             "resources": {
-                "limits": {"memory": "10Gi"},
-                "requests": {"cpu": "1", "memory": "1Gi"},
+                "limits": {"memory": "5500Mi"},
+                "requests": {"cpu": "1", "memory": "5500Mi"},
             },
             "persistence": {
                 "steamcmd": {"enabled": "true", "existingClaim": "palworld-steamcmd"},

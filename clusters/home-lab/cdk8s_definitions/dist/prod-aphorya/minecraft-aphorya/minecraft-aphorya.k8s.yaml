@@ -183,7 +183,7 @@ spec:
             - name: MODRINTH_ALLOWED_VERSION_TYPE
               value: release
             - name: MEMORY
-              value: 6G
+              value: 4G
             - name: OVERRIDE_SERVER_PROPERTIES
               value: "false"
             - name: ENABLE_RCON
@@ -233,10 +233,10 @@ spec:
             timeoutSeconds: 1
           resources:
             limits:
-              memory: 10G
+              memory: 5500Mi
             requests:
               cpu: "4"
-              memory: 10G
+              memory: 5500Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

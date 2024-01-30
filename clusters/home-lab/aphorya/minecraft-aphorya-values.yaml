@@ -10,7 +10,7 @@ minecraftServer:
   version: "1.20.2"
   motd: "Aphorya"
   pvp: true
-  memory: 6G
+  memory: 4G
   ops: "juldoc,RaKk0o"
   whitelist: "juldoc,RaKk0o"
   type: "PAPER"
@@ -58,10 +58,10 @@ livenessProbe:
   failureThreshold: 100
 resources:
   limits:
-    memory: 10G
+    memory: 5500Mi
   requests:
     cpu: "4"
-    memory: 10G
+    memory: 5500Mi
 tolerations:
   - key: ram
     operator: Exists

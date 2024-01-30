@@ -170,10 +170,10 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 10Gi
+              memory: 5500Mi
             requests:
               cpu: 1
-              memory: 1Gi
+              memory: 5500Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -283,10 +283,10 @@ spec:
           resources:
             limits:
               cpu: 4000m
-              memory: 10Gi
+              memory: 5500Mi
             requests:
               cpu: 1
-              memory: 1Gi
+              memory: 5500Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -362,7 +362,7 @@ spec:
       volumes:
         - emptyDir:
             medium: Memory
-            sizeLimit: 10Gi
+            sizeLimit: 5500Mi
           name: devshm
         - name: serverfiles
           persistentVolumeClaim:
@@ -374,13 +374,13 @@ spec:
             claimName: palworld-steamcmd
         - emptyDir:
             medium: Memory
-            sizeLimit: 10Gi
+            sizeLimit: 5500Mi
           name: tmp
         - emptyDir:
             medium: Memory
-            sizeLimit: 10Gi
+            sizeLimit: 5500Mi
           name: varlogs
         - emptyDir:
             medium: Memory
-            sizeLimit: 10Gi
+            sizeLimit: 5500Mi
           name: varrun
