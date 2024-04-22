@@ -9,7 +9,7 @@ python_version = "3"
 [packages]
 constructs = "~=10.3.0"
 cdk8s = "~=2.68.2"
-cdk8s-plus-27 = "~=2.7.36"
+cdk8s-plus-27 = "~=2.9.0"
 pyyaml = "~=6.0.1"
 exceptiongroup = "*"
 
