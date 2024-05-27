@@ -1,11 +1,11 @@
 {
   "extends": [
-    "config:base"
+    "config:best-practices"
   ],
   "flux": {
     "fileMatch": ["\\.yaml$"]
   },
-  "postUpgradeTasks": {
-    "commands": ["touch test"]
+  "kubernetes": {
+    "fileMatch": ["clusters/home-lab/cdk8s_definitions/dist/.+\\.yaml$"]
   }
 }
