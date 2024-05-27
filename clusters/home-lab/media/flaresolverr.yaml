@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: truecharts
         namespace: flux-system
-      version: 12.1.5
+      version: 12.3.0
   interval: 1h0m0s
   releaseName: flaresolverr
   targetNamespace: prod-media
