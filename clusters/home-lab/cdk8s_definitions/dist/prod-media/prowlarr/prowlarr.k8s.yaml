@@ -1,14 +1,32 @@
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
+    grafana_dashboard: "1"
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
+    release: prowlarr
+  name: prowlarr-dashboard
+  namespace: prod-media
+data:
+  prowlarr.json: '        { "annotations": { "list": [ { "builtIn": 1, "datasource": { "type": "grafana", "uid": "-- Grafana --" }, "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "target": { "limit": 100, "matchAny": false, "tags": [], "type": "dashboard" }, "type": "dashboard" } ] }, "editable": true, "fiscalYearStartMonth": 0, "graphTooltip": 0, "id": 267, "links": [], "liveNow": false, "panels": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [ { "options": { "0": { "color": "red", "index": 1, "text": "Down" }, "1": { "color": "green", "index": 0, "text": "Up" } }, "type": "value" } ], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unitScale": true }, "overrides": [] }, "gridPos": { "h": 4, "w": 3, "x": 0, "y": 0 }, "id": 34, "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": {}, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "prowlarr_system_status{instance=~\"${prowlarr_instance}\"}", "instant": true, "legendFormat": "Status", "range": false, "refId": "A" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [ { "options": { "0": { "color": "red", "index": 1, "text": "Down" }, "1": { "color": "green", "index": 0, "text": "Up" } }, "type": "value" } ], "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "semi-dark-orange", "value": 600 }, { "color": "yellow", "value": 3600 }, { "color": "green", "value": 86400 } ] }, "unit": "s", "unitScale": true }, "overrides": [] }, "gridPos": { "h": 4, "w": 3, "x": 3, "y": 0 }, "id": 35, "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": {}, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "time() - container_start_time_seconds{container=\"prowlarr\"}", "instant": true, "legendFormat": "Uptime", "range": false, "refId": "A" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "continuous-BlPu" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unit": "none", "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Health Issues" }, "properties": [ { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 2 } ] } }, { "id": "color" } ] }, { "matcher": { "id": "byName", "options": "Disabled Indexers" }, "properties": [ { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, { "id": "color" } ] } ] }, "gridPos": { "h": 4, "w": 5, "x": 6, "y": 0 }, "id": 37, "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": { "valueSize": 60 }, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "max(prowlarr_system_health_issues{instance=~\"${prowlarr_instance}\"})", "hide": false, "legendFormat": "Health Issues", "range": true, "refId": "A" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "max(prowlarr_indexer_enabled_total{instance=~\"${prowlarr_instance}\"})", "hide": false, "legendFormat": "Enabled Indexers", "range": true, "refId": "B" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "max(prowlarr_indexer_total{instance=~\"${prowlarr_instance}\"} - prowlarr_indexer_enabled_total{instance=~\"${prowlarr_instance}\"})", "hide": false, "legendFormat": "Disabled Indexers", "range": true, "refId": "D" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "continuous-BlPu" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unit": "none", "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Query Failures" }, "properties": [ { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 15 }, { "color": "red", "value": 100 } ] } }, { "id": "color" } ] } ] }, "gridPos": { "h": 4, "w": 6, "x": 11, "y": 0 }, "id": 36, "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": {}, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_queries_total{instance=~\"${prowlarr_instance}\"}[$__range]))", "hide": false, "instant": true, "legendFormat": "Queries", "range": false, "refId": "B" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_grabs_total{instance=~\"${prowlarr_instance}\"}[$__range]))", "hide": false, "instant": true, "legendFormat": "Grabs", "range": false, "refId": "C" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_failed_queries_total{instance=~\"${prowlarr_instance}\"}[$__range]))", "hide": false, "instant": true, "legendFormat": "Query Failures", "range": false, "refId": "D" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "continuous-BlPu" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unit": "none", "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Response Time" }, "properties": [ { "id": "unit", "value": "ms" } ] }, { "matcher": { "id": "byName", "options": "Failed Queries" }, "properties": [ { "id": "unit", "value": "percentunit" }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.1 }, { "color": "red", "value": 0.2 } ] } }, { "id": "color" } ] } ] }, "gridPos": { "h": 4, "w": 4, "x": 17, "y": 0 }, "id": 38, "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": {}, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "avg(prowlarr_indexer_average_response_time_ms{instance=~\"${prowlarr_instance}\"})", "hide": false, "instant": true, "legendFormat": "Response Time", "range": false, "refId": "B" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_failed_queries_total{instance=~\"${prowlarr_instance}\"}[$__range])) / sum(prowlarr_indexer_queries_total{instance=~\"${prowlarr_instance}\"})", "hide": false, "instant": true, "legendFormat": "Failed Queries", "range": false, "refId": "D" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 604800 }, { "color": "green", "value": 2592000 } ] }, "unit": "none", "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Nearest VIP Expiration" }, "properties": [ { "id": "unit", "value": "s" } ] }, { "matcher": { "id": "byName", "options": "Disk Used" }, "properties": [ { "id": "unit", "value": "bytes" } ] } ] }, "gridPos": { "h": 4, "w": 3, "x": 21, "y": 0 }, "id": 39, "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "text": {}, "textMode": "auto", "wideLayout": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "min(prowlarr_indexer_vip_expires_in_seconds)", "hide": false, "legendFormat": "Nearest VIP Expiration", "range": true, "refId": "D" } ], "type": "stat" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unit": "ms", "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 12, "x": 0, "y": 4 }, "id": 44, "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } }, "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "max(prowlarr_indexer_average_response_time_ms{instance=~\"${prowlarr_instance}\"}) by (indexer)", "legendFormat": "__auto", "range": true, "refId": "A" } ], "title": "Indexer Latency", "type": "timeseries" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unit": "ms", "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 12, "x": 12, "y": 4 }, "id": 45, "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } }, "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "expr": "max(increase(prowlarr_user_agent_queries_total{instance=~\"${prowlarr_instance}\"}[$__rate_interval])) by (user_agent)", "legendFormat": "__auto", "range": true, "refId": "A" } ], "title": "User Agent Queries", "type": "timeseries" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [], "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 6, "x": 0, "y": 13 }, "id": 29, "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["percent"] }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } }, "pluginVersion": "9.3.6", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_queries_total{instance=~\"${prowlarr_instance}\"}[$__range])) by (indexer)\n", "instant": false, "legendFormat": "__auto", "range": true, "refId": "A" } ], "title": "Queries by Indexer", "type": "piechart" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [], "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 6, "x": 6, "y": 13 }, "id": 33, "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } }, "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_indexer_grabs_total{instance=~\"${prowlarr_instance}\"}[$__range])) by (indexer)", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A" } ], "title": "Grabs by Indexer", "type": "piechart" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [], "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 6, "x": 12, "y": 13 }, "id": 30, "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["percent"] }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } }, "pluginVersion": "9.3.6", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_user_agent_queries_total{instance=~\"${prowlarr_instance}\"}[$__range])) by (user_agent)\n", "instant": false, "legendFormat": "__auto", "range": true, "refId": "A" } ], "title": "Queries by User Agent", "type": "piechart" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [], "unitScale": true }, "overrides": [] }, "gridPos": { "h": 9, "w": 6, "x": 18, "y": 13 }, "id": 32, "options": { "legend": { "displayMode": "table", "placement": "right", "showLegend": true }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } }, "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "sum(increase(prowlarr_user_agent_grabs_total{instance=~\"${prowlarr_instance}\"}[$__range])) by (user_agent)", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A" } ], "title": "Grabs by User Agent", "type": "piechart" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Expires In" }, "properties": [ { "id": "unit", "value": "s" }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 604800 }, { "color": "green", "value": 2592000 } ] } }, { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "custom.width", "value": 150 } ] }, { "matcher": { "id": "byName", "options": "Expiration Date" }, "properties": [ { "id": "unit", "value": "dateTimeAsLocal" }, { "id": "custom.width", "value": 250 } ] } ] }, "gridPos": { "h": 7, "w": 12, "x": 0, "y": 22 }, "id": 41, "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "frameIndex": 1, "showHeader": true, "sortBy": [ { "desc": false, "displayName": "indexer" } ] }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "prowlarr_indexer_vip_expires_in_seconds{instance=~\"${prowlarr_instance}\"}", "format": "table", "hide": false, "instant": true, "legendFormat": "__auto", "range": false, "refId": "A" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "(time() * 1000) + (prowlarr_indexer_vip_expires_in_seconds{instance=~\"${prowlarr_instance}\"} * 1000)", "format": "table", "hide": false, "instant": true, "legendFormat": "__auto", "range": false, "refId": "B" } ], "title": "VIP Expiration", "transformations": [ { "id": "concatenate", "options": {} }, { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "cluster": true, "cluster 1": true, "cluster 2": true, "endpoint": true, "endpoint 1": true, "endpoint 2": true, "indexer 2": true, "instance": true, "instance 1": true, "instance 2": true, "job": true, "job 1": true, "job 2": true, "namespace": true, "namespace 1": true, "namespace 2": true, "pod": true, "pod 1": true, "pod 2": true, "prometheus": true, "prometheus 1": true, "prometheus 2": true, "service": true, "service 1": true, "service 2": true, "url": true, "url 1": true, "url 2": true }, "indexByName": { "Time": 0, "Value #A": 12, "Value #B": 13, "__name__": 1, "cluster 1": 2, "cluster 2": 14, "endpoint 1": 3, "endpoint 2": 15, "indexer 1": 4, "indexer 2": 16, "instance 1": 5, "instance 2": 17, "job 1": 6, "job 2": 18, "namespace 1": 7, "namespace 2": 19, "pod 1": 8, "pod 2": 20, "prometheus 1": 9, "prometheus 2": 21, "service 1": 10, "service 2": 22, "url 1": 11, "url 2": 23 }, "renameByName": { "Value": "Expires In", "Value #A": "Expires In", "Value #B": "Expiration Date" } } } ], "type": "table" }, { "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 80 } ] }, "unitScale": true }, "overrides": [ { "matcher": { "id": "byName", "options": "Expires In" }, "properties": [ { "id": "unit", "value": "s" } ] }, { "matcher": { "id": "byName", "options": "Expiration Date" }, "properties": [ { "id": "unit", "value": "dateTimeAsUS" } ] } ] }, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 22 }, "id": 42, "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "frameIndex": 1, "showHeader": true }, "pluginVersion": "10.3.3", "targets": [ { "datasource": { "type": "prometheus", "uid": "prom" }, "editorMode": "code", "exemplar": false, "expr": "prowlarr_system_health_issues{instance=~\"${prowlarr_instance}\"}", "format": "table", "hide": false, "instant": true, "legendFormat": "__auto", "range": false, "refId": "A" } ], "title": "System Health Issues", "transformations": [ { "id": "organize", "options": { "excludeByName": { "Time": true, "Value": true, "__name__": true, "cluster": true, "cluster 1": true, "cluster 2": true, "endpoint": true, "endpoint 1": true, "endpoint 2": true, "indexer 2": true, "instance": true, "instance 1": true, "instance 2": true, "job": true, "job 1": true, "job 2": true, "namespace": true, "namespace 1": true, "namespace 2": true, "pod": true, "pod 1": true, "pod 2": true, "prometheus": true, "prometheus 1": true, "prometheus 2": true, "service": true, "service 1": true, "service 2": true, "source": true, "type": true, "url": true, "url 1": true, "url 2": true }, "indexByName": {}, "renameByName": { "Value": "", "Value #A": "Expires In", "Value #B": "Expiration Date" } } } ], "type": "table" } ], "refresh": "30s", "revision": 1, "schemaVersion": 39, "tags": ["prowlarr", "music", "movies", "tv", "media"], "templating": { "list": [ { "current": { "selected": false, "text": "Prometheus", "value": "prom" }, "hide": 0, "includeAll": false, "label": "Datasource", "multi": false, "name": "DS_PROMETHEUS", "options": [], "query": "prometheus", "queryValue": "", "refresh": 1, "regex": "", "skipUrlSync": false, "type": "datasource" }, { "current": { "selected": false, "text": "All", "value": "$__all" }, "datasource": { "type": "prometheus", "uid": "prom" }, "definition": "label_values({__name__=~\"prowlarr_.*\"},instance)", "hide": 0, "includeAll": true, "label": "Prowlarr Instance", "multi": true, "name": "prowlarr_instance", "options": [], "query": { "query": "label_values({__name__=~\"prowlarr_.*\"},instance)", "refId": "PrometheusVariableQueryEditor-VariableQuery" }, "refresh": 2, "regex": "", "skipUrlSync": false, "sort": 0, "type": "query" } ] }, "time": { "from": "now-24h", "to": "now" }, "timepicker": {}, "timezone": "browser", "title": "Prowlarr", "uid": "WURH98Y4k1", "version": 3, "weekStart": "" } '
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: prowlarr-17.1.5
+    app.kubernetes.io/instance: prowlarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/version: 1.17.2.4511
+    helm-revision: "1"
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
     service.name: main
   name: prowlarr
@@ -30,13 +48,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
     service.name: metrics
   name: prowlarr-metrics
@@ -58,13 +76,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
   name: prowlarr-exportarr
   namespace: prod-media
@@ -80,15 +98,24 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        checksum/cnpg: ffd338b55cc50a8b366097eec597eeb134dee46563555614453e28233d208d00
+        checksum/configmaps: e3a9697d882b62fa6f79bd3364b55f7a4b7b4f6cc374b6916075e5d59fef20c4
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: 218079e266ddbd43a84e09fb3465fe9494347d1ba309f9c314e29b41dce9eb9c
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 9f53d4410a4b96750ba6eff5ea6d9193e80f835e1fcbd8e999a5da70f5972f28
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
       labels:
-        app: prowlarr-14.2.2
+        app: prowlarr-17.1.5
         app.kubernetes.io/instance: prowlarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: prowlarr
-        app.kubernetes.io/version: 1.12.1.4201
+        app.kubernetes.io/version: 1.17.2.4511
         helm-revision: "1"
-        helm.sh/chart: prowlarr-14.2.2
+        helm.sh/chart: prowlarr-17.1.5
         pod.lifecycle: permanent
         pod.name: exportarr
         release: prowlarr
@@ -104,6 +131,8 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
             - name: CONFIG
@@ -114,7 +143,7 @@ spec:
               value: "9697"
             - name: URL
               value: http://prowlarr:9696
-          image: ghcr.io/onedr0p/exportarr:v1.6.0@sha256:b522e128509b766cf66f847190fccd225ff194dc76775fe6a215f2dd3010cac2
+          image: ghcr.io/onedr0p/exportarr:v2.0.1@sha256:727e7bc8f2f0934a2117978c59f4476b954018b849a010ea6cfb380bd6539644
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -122,8 +151,8 @@ spec:
               path: /healthz
               port: 9697
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 12
+            periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
           name: prowlarr
@@ -132,13 +161,13 @@ spec:
               name: metrics
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
+            failureThreshold: 4
             httpGet:
               path: /healthz
               port: 9697
               scheme: HTTP
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 12
             successThreshold: 2
             timeoutSeconds: 5
           resources:
@@ -170,7 +199,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             successThreshold: 1
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           stdin: false
           tty: false
           volumeMounts:
@@ -223,16 +252,6 @@ spec:
           maxSkew: 1
           nodeAffinityPolicy: Honor
           nodeTaintsPolicy: Honor
-          topologyKey: truecharts.org/rack
-          whenUnsatisfiable: ScheduleAnyway
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: prowlarr
-              app.kubernetes.io/name: prowlarr
-              pod.name: exportarr
-          maxSkew: 1
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
       volumes:
@@ -262,13 +281,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
   name: prowlarr
   namespace: prod-media
@@ -284,15 +303,24 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        checksum/cnpg: ffd338b55cc50a8b366097eec597eeb134dee46563555614453e28233d208d00
+        checksum/configmaps: e3a9697d882b62fa6f79bd3364b55f7a4b7b4f6cc374b6916075e5d59fef20c4
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: 218079e266ddbd43a84e09fb3465fe9494347d1ba309f9c314e29b41dce9eb9c
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 9f53d4410a4b96750ba6eff5ea6d9193e80f835e1fcbd8e999a5da70f5972f28
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
       labels:
-        app: prowlarr-14.2.2
+        app: prowlarr-17.1.5
         app.kubernetes.io/instance: prowlarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: prowlarr
-        app.kubernetes.io/version: 1.12.1.4201
+        app.kubernetes.io/version: 1.17.2.4511
         helm-revision: "1"
-        helm.sh/chart: prowlarr-14.2.2
+        helm.sh/chart: prowlarr-17.1.5
         pod.lifecycle: permanent
         pod.name: main
         release: prowlarr
@@ -306,13 +334,15 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
             - name: PROWLARR__AUTHENTICATION_METHOD
               value: ""
             - name: PROWLARR__PORT
               value: "9696"
-          image: ghcr.io/onedr0p/prowlarr-develop:1.12.1.4201@sha256:03a54ef60ba8d60b3457eb2a467fa6fab6dca2c06b6e5aacf997e30f613b2b12
+          image: ghcr.io/onedr0p/prowlarr-develop:1.17.2.4511@sha256:01dce2a9c0e29a2a5338a9457698ea3e027727bed6b9f0ab7ac4a259cafb991b
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -320,8 +350,8 @@ spec:
               path: /ping
               port: 9696
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 12
+            periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
           name: prowlarr
@@ -330,13 +360,13 @@ spec:
               name: main
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
+            failureThreshold: 4
             httpGet:
               path: /ping
               port: 9696
               scheme: HTTP
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 12
             successThreshold: 2
             timeoutSeconds: 5
           resources:
@@ -366,7 +396,7 @@ spec:
             successThreshold: 1
             tcpSocket:
               port: 9696
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           stdin: false
           tty: false
           volumeMounts:
@@ -419,16 +449,6 @@ spec:
           maxSkew: 1
           nodeAffinityPolicy: Honor
           nodeTaintsPolicy: Honor
-          topologyKey: truecharts.org/rack
-          whenUnsatisfiable: ScheduleAnyway
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: prowlarr
-              app.kubernetes.io/name: prowlarr
-              pod.name: main
-          maxSkew: 1
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
       volumes:
@@ -458,17 +478,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    checksum/services: 9f53d4410a4b96750ba6eff5ea6d9193e80f835e1fcbd8e999a5da70f5972f28
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
   name: prowlarr
   namespace: prod-media
@@ -489,13 +511,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: prowlarr-14.2.2
+    app: prowlarr-17.1.5
     app.kubernetes.io/instance: prowlarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: prowlarr
-    app.kubernetes.io/version: 1.12.1.4201
+    app.kubernetes.io/version: 1.17.2.4511
     helm-revision: "1"
-    helm.sh/chart: prowlarr-14.2.2
+    helm.sh/chart: prowlarr-17.1.5
     release: prowlarr
   name: prowlarr
   namespace: prod-media

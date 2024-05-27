@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: bazarr-17.1.10
+    app: bazarr-20.0.9
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.4.0
+    app.kubernetes.io/version: 1.4.2
     helm-revision: "1"
-    helm.sh/chart: bazarr-17.1.10
+    helm.sh/chart: bazarr-20.0.9
     release: bazarr
     service.name: main
   name: bazarr
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: bazarr-17.1.10
+    app: bazarr-20.0.9
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.4.0
+    app.kubernetes.io/version: 1.4.2
     helm-revision: "1"
-    helm.sh/chart: bazarr-17.1.10
+    helm.sh/chart: bazarr-20.0.9
     release: bazarr
     service.name: metrics
   name: bazarr-metrics
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: bazarr-17.1.10
+    app: bazarr-20.0.9
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.4.0
+    app.kubernetes.io/version: 1.4.2
     helm-revision: "1"
-    helm.sh/chart: bazarr-17.1.10
+    helm.sh/chart: bazarr-20.0.9
     release: bazarr
   name: bazarr
   namespace: prod-media
@@ -80,15 +80,24 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        checksum/cnpg: ffd338b55cc50a8b366097eec597eeb134dee46563555614453e28233d208d00
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: 7f897847145a5ceef3f8258366049a7654c79d4f884e8007a5643480cb932e77
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 7d774e5b391bdf894f7b42a519c4464847d9009711a45b141b164951cc43b748
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
       labels:
-        app: bazarr-17.1.10
+        app: bazarr-20.0.9
         app.kubernetes.io/instance: bazarr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: bazarr
-        app.kubernetes.io/version: 1.4.0
+        app.kubernetes.io/version: 1.4.2
         helm-revision: "1"
-        helm.sh/chart: bazarr-17.1.10
+        helm.sh/chart: bazarr-20.0.9
         pod.lifecycle: permanent
         pod.name: main
         release: bazarr
@@ -102,9 +111,11 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: ghcr.io/onedr0p/bazarr:1.4.0@sha256:c81c4d9cbec093d5a999cfa3cd1af01d3f00d6292d6f5c33608510cef0ed83c7
+          image: ghcr.io/onedr0p/bazarr:1.4.2@sha256:7f152a7b8f46707f5feb68a315d8989cb85ed9e8b6868608f80e6f5eb6cc2e8e
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -112,8 +123,8 @@ spec:
               path: /
               port: 6767
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 12
+            periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
           name: bazarr
@@ -122,13 +133,13 @@ spec:
               name: main
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
+            failureThreshold: 4
             httpGet:
               path: /
               port: 6767
               scheme: HTTP
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 12
             successThreshold: 2
             timeoutSeconds: 5
           resources:
@@ -153,12 +164,14 @@ spec:
               type: RuntimeDefault
           startupProbe:
             failureThreshold: 60
+            httpGet:
+              path: /
+              port: 6767
+              scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 5
             successThreshold: 1
-            tcpSocket:
-              port: 6767
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           stdin: false
           tty: false
           volumeMounts:
@@ -214,16 +227,6 @@ spec:
           maxSkew: 1
           nodeAffinityPolicy: Honor
           nodeTaintsPolicy: Honor
-          topologyKey: truecharts.org/rack
-          whenUnsatisfiable: ScheduleAnyway
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: bazarr
-              app.kubernetes.io/name: bazarr
-              pod.name: main
-          maxSkew: 1
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
       volumes:
@@ -256,17 +259,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    checksum/services: 7d774e5b391bdf894f7b42a519c4464847d9009711a45b141b164951cc43b748
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: bazarr-17.1.10
+    app: bazarr-20.0.9
     app.kubernetes.io/instance: bazarr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: bazarr
-    app.kubernetes.io/version: 1.4.0
+    app.kubernetes.io/version: 1.4.2
     helm-revision: "1"
-    helm.sh/chart: bazarr-17.1.10
+    helm.sh/chart: bazarr-20.0.9
     release: bazarr
   name: bazarr
   namespace: prod-media

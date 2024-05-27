@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-17.1.9
+    app: jellyfin-19.1.7
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.13
+    app.kubernetes.io/version: 10.9.2
     helm-revision: "1"
-    helm.sh/chart: jellyfin-17.1.9
+    helm.sh/chart: jellyfin-19.1.7
     release: jellyfin
     service.name: autodiscovery
   name: jellyfin-autodiscovery
@@ -30,13 +30,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyfin-17.1.9
+    app: jellyfin-19.1.7
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.13
+    app.kubernetes.io/version: 10.9.2
     helm-revision: "1"
-    helm.sh/chart: jellyfin-17.1.9
+    helm.sh/chart: jellyfin-19.1.7
     release: jellyfin
     service.name: main
   name: jellyfin
@@ -58,13 +58,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jellyfin-17.1.9
+    app: jellyfin-19.1.7
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.13
+    app.kubernetes.io/version: 10.9.2
     helm-revision: "1"
-    helm.sh/chart: jellyfin-17.1.9
+    helm.sh/chart: jellyfin-19.1.7
     release: jellyfin
   name: jellyfin
   namespace: prod-media
@@ -80,15 +80,24 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        checksum/cnpg: ffd338b55cc50a8b366097eec597eeb134dee46563555614453e28233d208d00
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: 8cbe76d67ad88d63d376c52157884bbce58f32a3cc1165e6df80748c9d002143
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 8bc7cf1c7b30a068a71f13f174f3d9754e6232bfa6096a5a6be4003b7ab81423
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
       labels:
-        app: jellyfin-17.1.9
+        app: jellyfin-19.1.7
         app.kubernetes.io/instance: jellyfin
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jellyfin
-        app.kubernetes.io/version: 10.8.13
+        app.kubernetes.io/version: 10.9.2
         helm-revision: "1"
-        helm.sh/chart: jellyfin-17.1.9
+        helm.sh/chart: jellyfin-19.1.7
         pod.lifecycle: permanent
         pod.name: main
         release: jellyfin
@@ -102,11 +111,13 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
             - name: JELLYFIN_PublishedServerUrl
               value: https://jellyfin.st0rmingbr4in.com
-          image: docker.io/jellyfin/jellyfin:10.8.13@sha256:05a9734d7e83086b957c5b7a16cbb5a60b5bb8d113ffb953e57547359dd05140
+          image: ghcr.io/jellyfin/jellyfin:10.9.2@sha256:21e49baac0a05efd4822269e3d8ba2f693e741006a2f81aa397cf5f8445e48a9
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -114,8 +125,8 @@ spec:
               path: /
               port: 8096
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 12
+            periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
           name: jellyfin
@@ -127,13 +138,13 @@ spec:
               name: main
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
+            failureThreshold: 4
             httpGet:
               path: /
               port: 8096
               scheme: HTTP
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 12
             successThreshold: 2
             timeoutSeconds: 5
           resources:
@@ -158,12 +169,14 @@ spec:
               type: RuntimeDefault
           startupProbe:
             failureThreshold: 60
+            httpGet:
+              path: /
+              port: 8096
+              scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 5
             successThreshold: 1
-            tcpSocket:
-              port: 8096
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           stdin: false
           tty: false
           volumeMounts:
@@ -225,16 +238,6 @@ spec:
           maxSkew: 1
           nodeAffinityPolicy: Honor
           nodeTaintsPolicy: Honor
-          topologyKey: truecharts.org/rack
-          whenUnsatisfiable: ScheduleAnyway
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: jellyfin
-              app.kubernetes.io/name: jellyfin
-              pod.name: main
-          maxSkew: 1
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
       volumes:
@@ -271,16 +274,18 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    checksum/services: 8bc7cf1c7b30a068a71f13f174f3d9754e6232bfa6096a5a6be4003b7ab81423
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: jellyfin-17.1.9
+    app: jellyfin-19.1.7
     app.kubernetes.io/instance: jellyfin
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyfin
-    app.kubernetes.io/version: 10.8.13
+    app.kubernetes.io/version: 10.9.2
     helm-revision: "1"
-    helm.sh/chart: jellyfin-17.1.9
+    helm.sh/chart: jellyfin-19.1.7
     release: jellyfin
   name: jellyfin
   namespace: prod-media
