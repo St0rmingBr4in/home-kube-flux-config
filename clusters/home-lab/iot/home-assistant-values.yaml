@@ -20,21 +20,10 @@ ingress:
 
 postgresql:
   enabled: false
-  auth:
-    existingSecret: home-assistant-postgresql
-  primary:
-    persistence:
-      existingClaim: home-assistant-postgresql
-    resources:
-      limits:
-        memory: 300Mi
-      requests:
-        cpu: 200m
-        memory: 300Mi
 
 resources:
   limits:
-    memory: 300Mi
+    memory: 450Mi
   requests:
     cpu: 200m
-    memory: 300Mi
+    memory: 450Mi
