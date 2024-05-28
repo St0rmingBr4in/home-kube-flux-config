@@ -114,7 +114,7 @@ spec:
               value: "7879"
             - name: URL
               value: http://radarr:7878
-          image: ghcr.io/onedr0p/exportarr:v1.6.0@sha256:b522e128509b766cf66f847190fccd225ff194dc76775fe6a215f2dd3010cac2
+          image: ghcr.io/onedr0p/exportarr:v1.6.2@sha256:4c4b2c401a2650c0c7cad6c1d35c9cf6a14e88420691ba540c0280e043755f78
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
