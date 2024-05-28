@@ -312,7 +312,7 @@ spec:
               value: ""
             - name: SONARR__PORT
               value: "8989"
-          image: ghcr.io/onedr0p/sonarr:4.0.0.748@sha256:f1b1826ccbea3868ff6b30690417fdc1a0f3329ebad0909d0d11ddd856f9f4dd
+          image: ghcr.io/onedr0p/sonarr:4.0.4.1491@sha256:b513d3836c5b86d3e5c2eb7cb4908e0002856d922b0a360f136781aaa89ef38a
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
