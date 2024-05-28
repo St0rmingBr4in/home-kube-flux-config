@@ -108,7 +108,7 @@ spec:
               value: "0022"
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: ghcr.io/onedr0p/qbittorrent:4.6.2@sha256:fedb62126c82ae0c7192e9052633411294a27e9c233613c03b0a8d168d160040
+          image: ghcr.io/onedr0p/qbittorrent:4.6.5@sha256:c019af23966ebafcaf1713d4553bc043246858b711a7d57d8bee358a89990a3e
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
