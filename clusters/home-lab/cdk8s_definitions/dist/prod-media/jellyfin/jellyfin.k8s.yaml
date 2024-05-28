@@ -117,7 +117,7 @@ spec:
               value: "1"
             - name: JELLYFIN_PublishedServerUrl
               value: https://jellyfin.st0rmingbr4in.com
-          image: ghcr.io/jellyfin/jellyfin:10.9.2@sha256:21e49baac0a05efd4822269e3d8ba2f693e741006a2f81aa397cf5f8445e48a9
+          image: ghcr.io/jellyfin/jellyfin:10.9.3@sha256:3022b48f18c810fe7a6a77ba3aef05bdbc9a05f253e856d2c96916fcdbcfc0f6
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
