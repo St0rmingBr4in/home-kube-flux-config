@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: truecharts
         namespace: flux-system
-      version: 19.4.0
+      version: 22.2.4
   interval: 1h0m0s
   releaseName: radarr
   targetNamespace: prod-media
