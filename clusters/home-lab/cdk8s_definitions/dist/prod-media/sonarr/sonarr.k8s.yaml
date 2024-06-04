@@ -114,7 +114,7 @@ spec:
               value: "8990"
             - name: URL
               value: http://sonarr:8989
-          image: ghcr.io/onedr0p/exportarr:v1.6.2@sha256:4c4b2c401a2650c0c7cad6c1d35c9cf6a14e88420691ba540c0280e043755f78
+          image: ghcr.io/onedr0p/exportarr:v2.0.1@sha256:727e7bc8f2f0934a2117978c59f4476b954018b849a010ea6cfb380bd6539644
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
