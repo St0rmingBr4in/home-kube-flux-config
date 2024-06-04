@@ -166,7 +166,7 @@ spec:
                   name: pihole-password
             - name: PIHOLE_DNS_
               value: 8.8.8.8;8.8.4.4
-          image: pihole/pihole:2023.05.2
+          image: pihole/pihole:2024.05.0@sha256:8b1f31f46d94c3c1b8f509b302f28b4028483009bd27a9cbfd9b80185dd0687d
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 10
