@@ -102,7 +102,7 @@ spec:
               value: "8191"
             - name: TEST_URL
               value: https://www.google.com
-          image: ghcr.io/flaresolverr/flaresolverr:v3.3.12@sha256:aa83c92aefc2512a8776e30b387df57573ca5688c5e4f07858e3db84670a76c9
+          image: ghcr.io/flaresolverr/flaresolverr:v3.3.19@sha256:0bdf9ed48f3c54c998bc160be46244ce3a88a7783b6cfd31eec9c1667786152f
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
