@@ -122,7 +122,7 @@ spec:
               value: error
             - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
               value: pgaudit
-          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r6
+          image: docker.io/bitnami/postgresql:16.3.0-debian-12-r12@sha256:9d7c8db688f0775a7fcbef547e88b31d193edc311788dcf8643780d69309800c
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
