@@ -43,7 +43,7 @@ spec:
               envFrom:
                 - secretRef:
                     name: renovate-secret
-              image: ghcr.io/renovatebot/renovate:37.50.2
+              image: ghcr.io/renovatebot/renovate:37.422.0@sha256:1c06b6def7f982f3d435cf746e25dac7c352c40fefeeb4663d6f14e2e14fe4d5
               imagePullPolicy: IfNotPresent
               name: renovate
               volumeMounts:
