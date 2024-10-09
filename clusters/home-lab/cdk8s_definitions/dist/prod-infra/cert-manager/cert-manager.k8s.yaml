@@ -5578,7 +5578,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-          image: quay.io/jetstack/cert-manager-cainjector:v1.9.1
+          image: quay.io/jetstack/cert-manager-cainjector:v1.16.1@sha256:3c49185718cf454bac559f71c4453b33f1086db48084604247d9acb7a4de2973
           imagePullPolicy: IfNotPresent
           name: cert-manager
           resources:
