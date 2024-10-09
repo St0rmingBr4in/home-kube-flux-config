@@ -5643,7 +5643,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-          image: quay.io/jetstack/cert-manager-controller:v1.9.1
+          image: quay.io/jetstack/cert-manager-controller:v1.16.1@sha256:ae5e14401cde4dec8bccce7594f829cd491044aa66944272e1d4fccc941ec77c
           imagePullPolicy: IfNotPresent
           name: cert-manager
           ports:
