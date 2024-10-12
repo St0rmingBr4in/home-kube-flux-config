@@ -310,7 +310,7 @@ spec:
               value: "1"
             - name: RADARR__PORT
               value: "7878"
-          image: ghcr.io/onedr0p/radarr:5.2.6.8376@sha256:2de39930de91ae698f9461bb959d93b9d59610f88e0c026e96bc5d9c99aeea89
+          image: ghcr.io/onedr0p/radarr:5.12.2.9335@sha256:d7ab75d9280e9067c9c7b4e3fc6366c030a5090dc842785d098f5967417cbac9
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
