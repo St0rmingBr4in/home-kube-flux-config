@@ -2069,7 +2069,7 @@ spec:
               value: "true"
             - name: DD_PROMETHEUS_SCRAPE_VERSION
               value: "2"
-          image: gcr.io/datadoghq/cluster-agent:7.48.0
+          image: gcr.io/datadoghq/cluster-agent:7.60.0@sha256:c1731b048ccee11747ce4c158ea5e97dc3fbc196455ee2b6213e23c850510922
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 6
@@ -2138,7 +2138,7 @@ spec:
           command:
             - bash
             - -c
-          image: gcr.io/datadoghq/cluster-agent:7.48.0
+          image: gcr.io/datadoghq/cluster-agent:7.60.0@sha256:c1731b048ccee11747ce4c158ea5e97dc3fbc196455ee2b6213e23c850510922
           imagePullPolicy: IfNotPresent
           name: init-volume
           volumeMounts:
