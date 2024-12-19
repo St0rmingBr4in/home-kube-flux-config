@@ -141,7 +141,7 @@ spec:
               value: ""
             - name: VALIDATE
               value: "false"
-          image: ghcr.io/ich777/steamcmd:palworld@sha256:c7ed87dfb13890f340d663ca0a97acb6a8b83a40ab81a9c94c8675cee03af325
+          image: ghcr.io/ich777/steamcmd:palworld@sha256:aea493da0d8773b1467c1b569dfdc72f70631599bbab169aa038f62975ce2115
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -277,7 +277,7 @@ spec:
               value: "568"
             - name: GID
               value: "568"
-          image: ghcr.io/ich777/steamcmd:palworld@sha256:c7ed87dfb13890f340d663ca0a97acb6a8b83a40ab81a9c94c8675cee03af325
+          image: ghcr.io/ich777/steamcmd:palworld@sha256:aea493da0d8773b1467c1b569dfdc72f70631599bbab169aa038f62975ce2115
           imagePullPolicy: IfNotPresent
           name: palworld-init-update-config-ini
           resources:
