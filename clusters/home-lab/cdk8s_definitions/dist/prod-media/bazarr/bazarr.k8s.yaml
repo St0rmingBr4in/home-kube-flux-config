@@ -115,7 +115,7 @@ spec:
               value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
-          image: ghcr.io/onedr0p/bazarr:1.4.3@sha256:d2b70813f7d636fb1ab3448e13ca4074630b63216c6c6d02d034cd5d9e938ea3
+          image: ghcr.io/onedr0p/bazarr:1.5.1@sha256:1c88830f3c51fc2f1230ad7040bcbe30f197449ae93f835448cf516d8b7e5e82
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
