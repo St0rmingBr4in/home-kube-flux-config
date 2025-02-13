@@ -13,6 +13,7 @@ resources:
 - iot
 #- cloudnative-pg
 - cdk8s_definitions
+- rakk0o-dev
 patches:
 - path: namespace-no-prune-patch.yaml
   target:

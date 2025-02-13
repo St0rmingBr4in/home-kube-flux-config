@@ -1,0 +1,20 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: external-service
+spec:
+  chart:
+    spec:
+      chart: external-service
+      sourceRef:
+        kind: HelmRepository
+        name: t3n
+        namespace: flux-system
+      version: 1.1.0
+  interval: 1h0m0s
+  releaseName: external-service
+  targetNamespace: prod-aphorya
+  valuesFrom:
+    - kind: ConfigMap
+      name: external-service-values
