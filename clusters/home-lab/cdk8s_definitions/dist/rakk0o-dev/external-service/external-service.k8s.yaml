@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: external-service
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: external-service
+    helm.sh/chart: external-service-1.1.0
+  name: external-service
+  namespace: rakk0o-dev
+spec:
+  ports:
+    - name: rakk0o-dev
+      port: 80
+      protocol: TCP
+      targetPort: rakk0o-dev
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/instance: external-service
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: external-service
+    helm.sh/chart: external-service-1.1.0
+  name: external-service
+  namespace: rakk0o-dev
+spec:
+  rules:
+    - host: www.aphorya.fr
+      http:
+        paths:
+          - backend:
+              service:
+                name: external-service
+                port:
+                  number: 80
+            path: /api/v1/
+            pathType: Prefix
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    app.kubernetes.io/instance: external-service
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: external-service
+    helm.sh/chart: external-service-1.1.0
+  name: external-service
+  namespace: rakk0o-dev
+subsets:
+  - addresses:
+      - ip: 192.168.62.27
+    ports:
+      - name: rakk0o-dev
+        port: 80
+        protocol: TCP
