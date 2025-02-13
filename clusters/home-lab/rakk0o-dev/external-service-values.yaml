@@ -10,4 +10,4 @@ ports:
       hosts:
         - host: www.aphorya.fr
           paths:
-            - '/api/v1'
+            - '/api/v1/'
