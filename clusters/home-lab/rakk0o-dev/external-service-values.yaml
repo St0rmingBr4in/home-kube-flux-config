@@ -2,12 +2,12 @@
 ingress:
   enabled: true
 addresses:
-  - ip: 192.168.62.21
+  - ip: 192.168.62.27
 ports:
   - port: 80
-    name: azuriom
+    name: rakk0o-dev
     ingress:
       hosts:
         - host: www.aphorya.fr
           paths:
-            - '/'
+            - '/api/v1'

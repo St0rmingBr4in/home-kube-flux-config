@@ -3,6 +3,5 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - ../common/
-- minecraft-aphorya-datadir-pvc.yaml
 
-namespace: prod-aphorya
+namespace: rakk0o-dev
