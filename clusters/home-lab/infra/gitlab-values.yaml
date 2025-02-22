@@ -1,0 +1,6 @@
+global:
+  hosts:
+    domain: gitlab.st0rmingbr4in.com
+    externalIP: 192.168.62.28
+certmanager-issuer:
+  email: julien.doche@gmail.com

@@ -10,6 +10,7 @@ resources:
   - basic-auth.yaml
   - basic-auth-middleware.yaml
   - metrics-redirect-middleware.yaml
+  - gitlab.yaml
 
 configurations:
   - kustomizeconfig.yaml

@@ -590,6 +590,10 @@ apps = [
         ]
     ),
     HelmApp(
+        name="gitlab",
+        root_dir="../infra",
+    ),
+    HelmApp(
         name="dynmap-db",
         root_dir="../aphorya",
         additionnal_objs=["dynmap-db-secret.yaml"],
