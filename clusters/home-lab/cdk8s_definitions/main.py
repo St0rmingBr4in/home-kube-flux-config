@@ -685,6 +685,10 @@ apps = [
     ),
     CertificateApp(name="st0rmingbr4in-com"),
     CertificateApp(name="aphorya-fr"),
+    HelmApp(
+        name="external-service",
+        root_dir="../rakk0o-dev",
+    ),
 ]
 
 for app in apps:
