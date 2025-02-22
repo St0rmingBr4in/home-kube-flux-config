@@ -12037,7 +12037,7 @@ spec:
             medium: Memory
           name: etc-pki-ca-trust-extracted-pem
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
@@ -12060,7 +12060,7 @@ spec:
     kind: Deployment
     name: gitlab-gitlab-shell
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
@@ -12083,7 +12083,7 @@ spec:
     kind: Deployment
     name: gitlab-kas
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
@@ -12106,7 +12106,7 @@ spec:
     kind: Deployment
     name: gitlab-sidekiq-all-in-1-v2
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
@@ -12130,7 +12130,7 @@ spec:
     kind: Deployment
     name: gitlab-webservice-default
 ---
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   labels:
