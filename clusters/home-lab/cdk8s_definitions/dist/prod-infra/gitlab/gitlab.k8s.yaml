@@ -12939,7 +12939,7 @@ metadata:
 spec:
   controller: k8s.io/ingress-nginx
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
@@ -12974,7 +12974,7 @@ spec:
         - kas.gitlab.st0rmingbr4in.com
       secretName: gitlab-kas-tls
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
@@ -13008,7 +13008,7 @@ spec:
         - gitlab.gitlab.st0rmingbr4in.com
       secretName: gitlab-gitlab-tls
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
@@ -13041,7 +13041,7 @@ spec:
         - minio.gitlab.st0rmingbr4in.com
       secretName: gitlab-minio-tls
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
