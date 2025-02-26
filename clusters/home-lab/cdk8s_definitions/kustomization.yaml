@@ -4,7 +4,6 @@ resources:
   - dist/default/local-storage-class/local-storage-class-default-flux-kustomization.k8s.yaml
   - dist/prod-palworld/palworld/palworld-prod-palworld-flux-kustomization.k8s.yaml
   - dist/flux-system/namespaces/namespaces-flux-system-flux-kustomization.k8s.yaml
-  - dist/prod-infra/gitlab/gitlab-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-aphorya/dynmap-db/dynmap-db-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-media/basicauth-traefik-secret/basicauth-traefik-secret-prod-media-flux-kustomization.k8s.yaml
   - dist/renovate/renovate/renovate-renovate-flux-kustomization.k8s.yaml

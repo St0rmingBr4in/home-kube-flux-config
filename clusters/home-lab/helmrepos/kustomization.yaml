@@ -17,4 +17,3 @@ resources:
   - traefik.yaml
   - truecharts.yaml
   - vmware-tanzu.yaml
-  - gitlab.yaml
