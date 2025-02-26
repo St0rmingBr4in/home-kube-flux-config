@@ -12037,6 +12037,122 @@ spec:
             medium: Memory
           name: etc-pki-ca-trust-extracted-pem
 ---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: gitlab-shell
+    chart: gitlab-shell-8.9.0
+    heritage: Helm
+    release: gitlab
+  name: gitlab-gitlab-shell
+  namespace: prod-infra
+spec:
+  maxReplicas: 10
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageValue: 100m
+      type: Resource
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gitlab-gitlab-shell
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: kas
+    chart: kas-8.9.0
+    heritage: Helm
+    release: gitlab
+  name: gitlab-kas
+  namespace: prod-infra
+spec:
+  maxReplicas: 10
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageValue: 100m
+      type: Resource
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gitlab-kas
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: sidekiq
+    chart: sidekiq-8.9.0
+    heritage: Helm
+    release: gitlab
+  name: gitlab-sidekiq-all-in-1-v2
+  namespace: prod-infra
+spec:
+  maxReplicas: 10
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageValue: 350m
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gitlab-sidekiq-all-in-1-v2
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: webservice
+    chart: webservice-8.9.0
+    gitlab.com/webservice-name: default
+    heritage: Helm
+    release: gitlab
+  name: gitlab-webservice-default
+  namespace: prod-infra
+spec:
+  maxReplicas: 10
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageValue: 1
+      type: Resource
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gitlab-webservice-default
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: registry
+    chart: registry-0.7.0
+    heritage: Helm
+    release: gitlab
+  name: gitlab-registry
+  namespace: prod-infra
+spec:
+  maxReplicas: 10
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 75
+      type: Resource
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gitlab-registry
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
