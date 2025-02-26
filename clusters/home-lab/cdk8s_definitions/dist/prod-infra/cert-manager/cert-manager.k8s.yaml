@@ -5943,7 +5943,7 @@ spec:
             - check
             - api
             - --wait=1m
-          image: quay.io/jetstack/cert-manager-ctl:v1.9.1
+          image: quay.io/jetstack/cert-manager-ctl:v1.14.7@sha256:89c0bf046855c4495917b6b0206be8033ca6276db64da53728352366c6461e03
           imagePullPolicy: IfNotPresent
           name: cert-manager
           securityContext:
