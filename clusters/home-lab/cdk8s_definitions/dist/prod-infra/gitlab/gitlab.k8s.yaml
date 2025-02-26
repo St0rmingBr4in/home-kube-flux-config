@@ -12965,12 +12965,10 @@ spec:
               serviceName: gitlab-kas
               servicePort: 8154
             path: /k8s-proxy/
-            pathType: Prefix
           - backend:
               serviceName: gitlab-kas
               servicePort: 8150
             path: /
-            pathType: Prefix
   tls:
     - hosts:
         - kas.gitlab.st0rmingbr4in.com
@@ -13005,7 +13003,6 @@ spec:
               serviceName: gitlab-webservice-default
               servicePort: 8181
             path: /
-            pathType: Prefix
   tls:
     - hosts:
         - gitlab.gitlab.st0rmingbr4in.com
@@ -13039,7 +13036,6 @@ spec:
               serviceName: gitlab-minio-svc
               servicePort: 9000
             path: /
-            pathType: Prefix
   tls:
     - hosts:
         - minio.gitlab.st0rmingbr4in.com
@@ -13073,7 +13069,6 @@ spec:
               serviceName: gitlab-registry
               servicePort: 5000
             path: /
-            pathType: Prefix
   tls:
     - hosts:
         - registry.gitlab.st0rmingbr4in.com
