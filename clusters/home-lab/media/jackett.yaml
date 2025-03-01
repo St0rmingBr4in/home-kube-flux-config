@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: truecharts
         namespace: flux-system
-      version: 21.0.36
+      version: 23.3.34
   interval: 1h0m0s
   releaseName: jackett
   targetNamespace: prod-media
