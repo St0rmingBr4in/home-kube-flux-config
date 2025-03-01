@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: jellyseerr-8.1.6
+    app: jellyseerr-10.1.0
     app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyseerr
-    app.kubernetes.io/version: 1.7.0
+    app.kubernetes.io/version: 1.9.0
     helm-revision: "1"
-    helm.sh/chart: jellyseerr-8.1.6
+    helm.sh/chart: jellyseerr-10.1.0
     release: jellyseerr
     service.name: main
   name: jellyseerr
@@ -30,13 +30,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: jellyseerr-8.1.6
+    app: jellyseerr-10.1.0
     app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyseerr
-    app.kubernetes.io/version: 1.7.0
+    app.kubernetes.io/version: 1.9.0
     helm-revision: "1"
-    helm.sh/chart: jellyseerr-8.1.6
+    helm.sh/chart: jellyseerr-10.1.0
     release: jellyseerr
   name: jellyseerr
   namespace: prod-media
@@ -52,15 +52,24 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        checksum/cnpg: ffd338b55cc50a8b366097eec597eeb134dee46563555614453e28233d208d00
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: e4551ece70ff5606a9a36b4aa5dc78375cc96bc945c9191d6006acf35b9d0331
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 7b7e69e850c5e9f4ba85dcf393ea566d5da0f4479c0496d55c51806914154b84
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
       labels:
-        app: jellyseerr-8.1.6
+        app: jellyseerr-10.1.0
         app.kubernetes.io/instance: jellyseerr
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: jellyseerr
-        app.kubernetes.io/version: 1.7.0
+        app.kubernetes.io/version: 1.9.0
         helm-revision: "1"
-        helm.sh/chart: jellyseerr-8.1.6
+        helm.sh/chart: jellyseerr-10.1.0
         pod.lifecycle: permanent
         pod.name: main
         release: jellyseerr
@@ -74,6 +83,8 @@ spec:
               value: "0022"
             - name: UMASK_SET
               value: "0022"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: void
             - name: S6_READ_ONLY_ROOT
               value: "1"
             - name: JELLYFIN_TYPE
@@ -82,7 +93,7 @@ spec:
               value: info
             - name: PORT
               value: "10241"
-          image: fallenbagel/jellyseerr:1.7.0@sha256:6dcdb5ba50913a14b2bd7df6388607ce175121f3416679c2746501256ac9f075
+          image: fallenbagel/jellyseerr:1.9.0@sha256:b74191bbcd9bca67f4569348b0e2827076977a88acd215fb8afdd0471203c273
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -90,8 +101,8 @@ spec:
               path: /
               port: 10241
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 12
+            periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
           name: jellyseerr
@@ -100,13 +111,13 @@ spec:
               name: main
               protocol: TCP
           readinessProbe:
-            failureThreshold: 5
+            failureThreshold: 4
             httpGet:
               path: /
               port: 10241
               scheme: HTTP
             initialDelaySeconds: 10
-            periodSeconds: 10
+            periodSeconds: 12
             successThreshold: 2
             timeoutSeconds: 5
           resources:
@@ -131,12 +142,14 @@ spec:
               type: RuntimeDefault
           startupProbe:
             failureThreshold: 60
+            httpGet:
+              path: /
+              port: 10241
+              scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 5
             successThreshold: 1
-            tcpSocket:
-              port: 10241
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           stdin: false
           tty: false
           volumeMounts:
@@ -189,16 +202,6 @@ spec:
           maxSkew: 1
           nodeAffinityPolicy: Honor
           nodeTaintsPolicy: Honor
-          topologyKey: truecharts.org/rack
-          whenUnsatisfiable: ScheduleAnyway
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: jellyseerr
-              app.kubernetes.io/name: jellyseerr
-              pod.name: main
-          maxSkew: 1
-          nodeAffinityPolicy: Honor
-          nodeTaintsPolicy: Honor
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
       volumes:
@@ -228,17 +231,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    checksum/services: 7b7e69e850c5e9f4ba85dcf393ea566d5da0f4479c0496d55c51806914154b84
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
-    app: jellyseerr-8.1.6
+    app: jellyseerr-10.1.0
     app.kubernetes.io/instance: jellyseerr
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: jellyseerr
-    app.kubernetes.io/version: 1.7.0
+    app.kubernetes.io/version: 1.9.0
     helm-revision: "1"
-    helm.sh/chart: jellyseerr-8.1.6
+    helm.sh/chart: jellyseerr-10.1.0
     release: jellyseerr
   name: jellyseerr
   namespace: prod-media

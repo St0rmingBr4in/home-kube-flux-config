@@ -8,6 +8,7 @@ resources:
   - jackett-config-pvc.yaml
   - prowlarr-config-pvc.yaml
   - jellyfin-config-pvc.yaml
+  - jellyseerr-config-pvc.yaml
   - media-downloads-pvc.yaml
   - media-library-pvc.yaml
   - qbittorrent-config-pvc.yaml
