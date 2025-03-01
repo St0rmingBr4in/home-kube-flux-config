@@ -234,7 +234,6 @@ metadata:
     checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
     checksum/services: 7b7e69e850c5e9f4ba85dcf393ea566d5da0f4479c0496d55c51806914154b84
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.middlewares: prod-infra-basic-auth@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
   labels:
     app: jellyseerr-10.1.0
