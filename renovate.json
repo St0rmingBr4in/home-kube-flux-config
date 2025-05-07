@@ -3,9 +3,13 @@
     "config:best-practices"
   ],
   "flux": {
-    "fileMatch": ["\\.yaml$"]
+    "managerFilePatterns": [
+      "/\\.yaml$/"
+    ]
   },
   "kubernetes": {
-    "fileMatch": ["clusters/home-lab/cdk8s_definitions/dist/.+\\.yaml$"]
+    "managerFilePatterns": [
+      "/clusters/home-lab/cdk8s_definitions/dist/.+\\.yaml$/"
+    ]
   }
 }
