@@ -1,8 +1,6 @@
 ---
 ports:
   web:
-    redirectTo:
-      port: websecure
     port: 80
   websecure:
     port: 443

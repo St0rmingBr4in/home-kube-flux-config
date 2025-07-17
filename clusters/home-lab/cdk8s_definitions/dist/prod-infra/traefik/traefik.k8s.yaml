@@ -193,8 +193,6 @@ spec:
             - --providers.kubernetesingress
             - --providers.kubernetesgateway
             - --experimental.kubernetesgateway
-            - --entrypoints.web.http.redirections.entryPoint.to=:443
-            - --entrypoints.web.http.redirections.entryPoint.scheme=https
             - --entrypoints.websecure.http.tls=true
             - --entrypoints.websecure.http.tls.domains[0].main=st0rmingbr4in.com
             - --entrypoints.websecure.http.tls.domains[0].sans=*.st0rmingbr4in.com
