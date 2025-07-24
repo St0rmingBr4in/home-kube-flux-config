@@ -226,7 +226,7 @@ spec:
               value: https://$(HOSTNAME).vault-internal:8201
             - name: HOME
               value: /home/vault
-          image: hashicorp/vault:1.14.0
+          image: hashicorp/vault:1.20.1@sha256:50e1ecbe385742293c4a7e18c90f55d4dcc39724a05c6ab35933305fe7622cf3
           imagePullPolicy: IfNotPresent
           lifecycle:
             preStop:
@@ -350,7 +350,7 @@ spec:
       env:
         - name: VAULT_ADDR
           value: http://vault.prod-infra.svc:8200
-      image: hashicorp/vault:1.14.0
+      image: hashicorp/vault:1.20.1@sha256:50e1ecbe385742293c4a7e18c90f55d4dcc39724a05c6ab35933305fe7622cf3
       imagePullPolicy: IfNotPresent
       name: vault-server-test
   restartPolicy: Never
