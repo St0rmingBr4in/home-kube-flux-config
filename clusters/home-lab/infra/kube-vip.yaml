@@ -12,7 +12,7 @@ spec:
         kind: HelmRepository
         name: kube-vip
         namespace: flux-system
-      version: 0.4.4
+      version: 0.7.1
   interval: 1h0m0s
   releaseName: kube-vip
   targetNamespace: kube-system
