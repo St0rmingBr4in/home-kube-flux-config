@@ -29,17 +29,6 @@ metrics:
     address: datadog-cluster-agent:5005
   prometheus: null
 
-experimental:
-  kubernetesGateway:
-    namespacePolicy: All
-    enabled: true
-    gateway:
-      enabled: true
-    certificate:
-      group: core
-      kind: Secret
-      name: st0rmingbr4in.com-cert
-
 resources:
   requests:
     cpu: 500m
