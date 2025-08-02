@@ -1,0 +1,14 @@
+# Exclude self-management application to prevent circular dependency
+argocd-self-management.yaml
+
+# Documentation
+README.md
+
+# Git files
+.git/
+.gitignore
+
+# Helm files
+*.orig
+*.rej
+.helmignore 
