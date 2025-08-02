@@ -10,8 +10,8 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-issuer-account-key
     solvers:
-    - dns01:
-        digitalocean:
-          tokenSecretRef:
-            name: digitalocean-token
-            key: access-token
+      - dns01:
+          digitalocean:
+            tokenSecretRef:
+              name: digitalocean-token
+              key: access-token
