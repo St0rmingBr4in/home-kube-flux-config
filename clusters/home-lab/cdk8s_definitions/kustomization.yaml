@@ -6,7 +6,6 @@ resources:
   - dist/prod-aphorya/dynmap-db/dynmap-db-prod-aphorya-flux-kustomization.k8s.yaml
   - dist/prod-media/basicauth-traefik-secret/basicauth-traefik-secret-prod-media-flux-kustomization.k8s.yaml
   - dist/renovate/renovate/renovate-renovate-flux-kustomization.k8s.yaml
-  - dist/prod-infra/traefik/traefik-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-media/flaresolverr/flaresolverr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/radarr/radarr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/sonarr/sonarr-prod-media-flux-kustomization.k8s.yaml
