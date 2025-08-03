@@ -1,5 +1,5 @@
 ---
-# Simple Gatekeeper Mutation: Add memory limits only to all pods cluster-wide
+# Gatekeeper Mutation: Add memory limits only to pods that don't have them
 apiVersion: mutations.gatekeeper.sh/v1beta1
 kind: Assign
 metadata:
@@ -13,6 +13,8 @@ spec:
     scope: Cluster
   location: "spec.containers[name:*].resources.limits.memory"
   parameters:
+    pathTests:
+      - subPath: "spec.containers[name:*].resources.limits.memory"
+        condition: MustNotExist
     assign:
       value: "512Mi"
-    ifNotPresent: true # Only add if not already set
