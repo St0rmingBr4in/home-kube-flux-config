@@ -9,7 +9,7 @@ spec:
 
   source:
     repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-    targetRevision: HEAD
+    targetRevision: master
     path: argocd/applications
 
   destination:
