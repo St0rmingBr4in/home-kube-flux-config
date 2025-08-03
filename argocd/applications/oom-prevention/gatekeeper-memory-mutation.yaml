@@ -10,7 +10,10 @@ spec:
       kinds: ["Pod"]
       versions: ["v1"]
   match:
-    scope: Cluster
+    scope: Namespaced
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
   location: "spec.containers[name:*].resources.limits.memory"
   parameters:
     pathTests:
