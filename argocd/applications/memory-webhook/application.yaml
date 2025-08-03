@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/julien-doche/home-kube-flux-config.git
+    repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
     targetRevision: HEAD
     path: argocd/applications/memory-webhook
   destination:
