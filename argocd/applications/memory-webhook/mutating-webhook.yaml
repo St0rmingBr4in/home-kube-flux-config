@@ -1,6 +1,6 @@
 ---
 apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingAdmissionWebhook
+kind: MutatingWebhookConfiguration
 metadata:
   name: memory-webhook
   labels:
