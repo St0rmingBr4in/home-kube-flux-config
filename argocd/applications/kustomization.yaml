@@ -30,8 +30,4 @@ resources:
   - minecraft-aphorya/application.yaml
 
   # Security & Compliance
-  - oom-prevention/application.yaml
   - memory-webhook/application.yaml
-
-  # External Secrets
-  - external-secrets-operator/application.yaml

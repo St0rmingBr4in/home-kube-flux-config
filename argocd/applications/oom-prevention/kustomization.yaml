@@ -1,8 +1,0 @@
----
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  # Gatekeeper memory management mutations (executed in descending order: 3→2→1)
-  - gatekeeper-memory-request-equals-limit.yaml # 3. Sets memory request = memory limit (respects existing limits)
-  - gatekeeper-memory-limit-equals-request.yaml # 2. Sets memory limit = memory request (respects existing requests)
-  - gatekeeper-add-memory-defaults.yaml # 1. Adds default 512Mi requests/limits only if nothing exists
