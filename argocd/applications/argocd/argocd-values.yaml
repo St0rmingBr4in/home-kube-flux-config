@@ -3,13 +3,75 @@
 # URL: https://localhost:8080
 
 argo-cd:
+  # Application Controller (main workload) - actual usage: 307m CPU, 294Mi memory
+  controller:
+    resources:
+      limits:
+        memory: 512Mi # Higher than usage with headroom
+      requests:
+        cpu: 300m # Based on actual usage
+        memory: 512Mi # Same as limit for guaranteed QoS
+
+  # Repository Server - actual usage: 13m CPU, 52Mi memory
+  repoServer:
+    resources:
+      limits:
+        memory: 128Mi # Generous headroom
+      requests:
+        cpu: 20m # Based on actual usage
+        memory: 128Mi # Same as limit for guaranteed QoS
+
+  # ArgoCD Server - actual usage: 3m CPU, 25Mi memory
   server:
+    resources:
+      limits:
+        memory: 64Mi # Generous headroom
+      requests:
+        cpu: 10m # Based on actual usage
+        memory: 64Mi # Same as limit for guaranteed QoS
+
     service:
       type: ClusterIP
 
     # Disable ingress - use port forwarding for access
     ingress:
       enabled: false
+
+  # Dex Server - actual usage: 1m CPU, 25Mi memory
+  dex:
+    resources:
+      limits:
+        memory: 64Mi # Generous headroom
+      requests:
+        cpu: 5m # Based on actual usage
+        memory: 64Mi # Same as limit for guaranteed QoS
+
+  # Redis - actual usage: 7m CPU, 10Mi memory
+  redis:
+    resources:
+      limits:
+        memory: 32Mi # Generous headroom
+      requests:
+        cpu: 10m # Based on actual usage
+        memory: 32Mi # Same as limit for guaranteed QoS
+
+  # Notifications Controller - actual usage: 1m CPU, 31Mi memory
+  notifications:
+    resources:
+      limits:
+        memory: 64Mi # Generous headroom
+      requests:
+        cpu: 5m # Based on actual usage
+        memory: 64Mi # Same as limit for guaranteed QoS
+
+  # ApplicationSet Controller - actual usage: 2m CPU, 27Mi memory
+  applicationSet:
+    resources:
+      limits:
+        memory: 64Mi # Generous headroom
+      requests:
+        cpu: 5m # Based on actual usage
+        memory: 64Mi # Same as limit for guaranteed QoS
 
   configs:
     # ArgoCD configuration
