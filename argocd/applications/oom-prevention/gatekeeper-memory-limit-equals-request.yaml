@@ -13,7 +13,8 @@ spec:
   match:
     scope: Namespaced
     kinds:
-      - kind: Pod
+      - apiGroups: ["*"]
+        kinds: ["Pod"]
   location: "spec.containers[name:*].resources.limits.memory"
   parameters:
     pathTests:
@@ -40,7 +41,8 @@ spec:
   match:
     scope: Namespaced
     kinds:
-      - kind: Pod
+      - apiGroups: ["*"]
+        kinds: ["Pod"]
   location: "spec.initContainers[name:*].resources.limits.memory"
   parameters:
     pathTests:
