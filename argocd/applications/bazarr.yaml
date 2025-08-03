@@ -10,7 +10,7 @@ spec:
   project: default
 
   sources:
-    - repoURL: oci://tccr.io/truecharts
+    - repoURL: tccr.io/truecharts
       chart: bazarr
       targetRevision: 22.2.0
       helm:
