@@ -60,4 +60,4 @@ spec:
       volumes:
         - name: webhook-tls-certs
           secret:
-            secretName: memory-webhook-cert
+            secretName: memory-webhook-certs
