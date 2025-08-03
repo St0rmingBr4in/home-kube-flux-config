@@ -15,7 +15,7 @@ spec:
       targetRevision: 7.7.6
       helm:
         valueFiles:
-          - $values/argocd/applications/argocd-values.yaml
+          - $values/argocd/applications/argocd/argocd-values.yaml
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
       targetRevision: HEAD
       ref: values
