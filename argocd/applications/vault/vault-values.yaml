@@ -11,6 +11,10 @@ server:
     hosts:
       - host: vault.st0rmingbr4in.com
         paths: ["/"]
+    tls:
+      - secretName: st0rmingbr4in.com-cert
+        hosts:
+          - vault.st0rmingbr4in.com
 
 ui:
   enabled: true
