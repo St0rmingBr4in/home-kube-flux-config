@@ -9,7 +9,7 @@ spec:
   sources:
     - repoURL: tccr.io/truecharts
       chart: prowlarr
-      targetRevision: 20.2.0
+      targetRevision: 18.15.4
       helm:
         valueFiles:
           - $values/argocd/applications/prowlarr/prowlarr-values.yaml
