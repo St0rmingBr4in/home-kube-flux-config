@@ -9,3 +9,9 @@ resources:
   - oom-prevention/application.yaml
   - gatekeeper/application.yaml
   - jellyfin/application.yaml
+  - jellyseerr/application.yaml
+  - sonarr/application.yaml
+  - radarr/application.yaml
+  - qbittorrent/application.yaml
+  - flaresolverr/application.yaml
+  - shared-storage/application.yaml
