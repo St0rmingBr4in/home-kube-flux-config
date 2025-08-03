@@ -1,0 +1,46 @@
+---
+# Self-signed ClusterIssuer for internal certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: vault-internal-ca
+spec:
+  ca:
+    secretName: vault-internal-ca-secret
+---
+# Self-signed CA certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-internal-ca-cert
+  namespace: prod-infra
+spec:
+  secretName: vault-internal-ca-secret
+  commonName: "Vault Internal CA"
+  isCA: true
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  duration: 87600h # 10 years
+---
+# Certificate for internal Vault service
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-internal-tls-cert
+  namespace: prod-infra
+spec:
+  secretName: vault-internal-tls-cert
+  issuerRef:
+    name: vault-internal-ca
+    kind: ClusterIssuer
+  dnsNames:
+    - vault.prod-infra.svc.cluster.local
+    - vault.prod-infra.svc
+    - vault.prod-infra
+    - vault
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days

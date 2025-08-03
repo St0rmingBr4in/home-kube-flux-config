@@ -6,6 +6,39 @@ server:
       cpu: 100m
     limits:
       memory: 150Mi
+
+  # Standalone mode with internal TLS
+  standalone:
+    enabled: true
+    config: |
+      listener "tcp" {
+        address         = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file   = "/vault/userconfig/vault-internal-tls-cert/tls.crt"
+        tls_key_file    = "/vault/userconfig/vault-internal-tls-cert/tls.key"
+        tls_min_version = "tls12"
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+      disable_mlock = true
+      api_addr = "https://vault.prod-infra.svc.cluster.local:8200"
+      cluster_addr = "https://vault.prod-infra.svc.cluster.local:8201"
+
+  # Mount TLS certificate
+  volumes:
+    - name: vault-internal-tls-cert
+      secret:
+        secretName: vault-internal-tls-cert
+
+  volumeMounts:
+    - mountPath: /vault/userconfig/vault-internal-tls-cert
+      name: vault-internal-tls-cert
+      readOnly: true
+
+  # External ingress (optional)
   ingress:
     enabled: true
     hosts:

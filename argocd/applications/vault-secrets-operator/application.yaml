@@ -18,7 +18,7 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: vault-secrets-operator
+    namespace: prod-infra
   syncPolicy:
     automated:
       prune: true

@@ -4,3 +4,5 @@ kind: Kustomization
 resources:
   - pv-vault-0.yaml
   - vault-pvc.yaml
+  - vault-internal-ca-issuer.yaml
+  - vault-internal-tls-cert.yaml
