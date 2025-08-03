@@ -11,7 +11,9 @@ server:
     hosts:
       - host: vault.st0rmingbr4in.com
         paths: ["/"]
+
 ui:
   enabled: true
+
 injector:
   enabled: false

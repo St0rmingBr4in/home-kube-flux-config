@@ -15,4 +15,5 @@ resources:
   - qbittorrent/application.yaml
   - flaresolverr/application.yaml
   - shared-storage/application.yaml
+  - vault/application.yaml
   - minecraft-aphorya/application.yaml

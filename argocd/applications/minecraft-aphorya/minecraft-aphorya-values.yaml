@@ -2,7 +2,7 @@
 minecraftServer:
   rcon:
     enabled: true
-    existingSecret: rcon-secret
+    existingSecret: minecraft-rcon-secret # Managed by Vault K8s secrets engine
     serviceType: LoadBalancer
     loadBalancerIP: 192.168.62.17
     externalTrafficPolicy: Cluster

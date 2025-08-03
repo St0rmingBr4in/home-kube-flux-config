@@ -9,7 +9,6 @@ resources:
   - dist/prod-media/bazarr/bazarr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-media/prowlarr/prowlarr-prod-media-flux-kustomization.k8s.yaml
   - dist/prod-infra/external-service/external-service-prod-infra-flux-kustomization.k8s.yaml
-  - dist/prod-infra/vault/vault-prod-infra-flux-kustomization.k8s.yaml
   - dist/prod-infra/pihole/pihole-prod-infra-flux-kustomization.k8s.yaml
   - dist/kube-system/kube-vip/kube-vip-kube-system-flux-kustomization.k8s.yaml
   - dist/prod-infra/datadog/datadog-prod-infra-flux-kustomization.k8s.yaml

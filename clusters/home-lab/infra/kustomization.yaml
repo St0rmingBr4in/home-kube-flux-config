@@ -6,7 +6,6 @@ resources:
   - ../common/
   - digitalocean-token.yaml
   - cert-manager-issuer.yaml
-  - vault-pvc-0.yaml
   - basic-auth.yaml
   - basic-auth-middleware.yaml
   - metrics-redirect-middleware.yaml
