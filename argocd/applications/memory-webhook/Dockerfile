@@ -19,14 +19,14 @@ FROM alpine:3.18
 # Install ca-certificates and wget for health checks
 RUN apk --no-cache add ca-certificates wget
 
-WORKDIR /root/
-
-# Copy the binary and set execute permissions
-COPY --from=builder /app/webhook .
-RUN chmod +x ./webhook
-
-# Create non-root user
+# Create non-root user first
 RUN adduser -D -s /bin/sh webhook
+
+WORKDIR /home/webhook
+
+# Copy the binary and set proper ownership and permissions
+COPY --from=builder /app/webhook .
+RUN chmod +x ./webhook && chown webhook:webhook ./webhook
 
 # Switch to non-root user
 USER webhook
