@@ -5,6 +5,17 @@ operator:
   traefik:
     namespace: prod-infra
 
+# Schedule main prowlarr pod on same node as any prowlarr component (for iSCSI sharing)
+affinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["prowlarr"]
+        topologyKey: kubernetes.io/hostname
+
 ingress:
   main:
     integrations:
@@ -32,6 +43,17 @@ exportarrResources:
   requests:
     cpu: 100m
     memory: 100Mi
+
+# Ensure exportarr also schedules on same node as any prowlarr component
+exportarrAffinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["prowlarr"]
+        topologyKey: kubernetes.io/hostname
 
 persistence:
   config:
