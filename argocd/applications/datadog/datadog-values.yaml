@@ -1,7 +1,19 @@
 ---
 datadog:
+  # Cluster configuration
+  clusterName: home-lab
+  site: datadoghq.eu
+
+  # API key from existing secret
+  apiKeyExistingSecret: datadog-api-key
+
+  # Cluster checks and monitoring
   clusterChecks:
     enabled: true
+  leaderElection: true
+  collectEvents: true
+
+  # Custom integrations for k3s cluster
   confd:
     systemd.yaml: |-
       init_config:
@@ -34,21 +46,29 @@ datadog:
             include:
               - "*"
 
-  clusterName: home-lab
-  apiKeyExistingSecret: datadog-api-key
+  # Container runtime configuration
+  criSocketPath: /run/k3s/containerd/containerd.sock
+
+  # Logging configuration
   logs:
     enabled: true
     containerCollectAll: true
+
+  # Process monitoring
   processAgent:
     enabled: true
     processCollection: true
     processDiscovery: true
+
+  # System probe for network and security monitoring
   systemProbe:
     bpfDebug: true
     enableTCPQueueLength: true
     enableOOMKill: true
     enableRuntimeCompiler: true
     enableKernelHeaderDownload: true
+
+  # Monitoring capabilities
   helmCheck:
     enabled: true
     collectEvents: true
@@ -56,6 +76,8 @@ datadog:
     enabled: true
   serviceMonitoring:
     enabled: true
+
+  # Security monitoring
   securityAgent:
     enabled: true
     runtime:
@@ -63,76 +85,85 @@ datadog:
       fimEnabled: true
     network:
       enabled: true
+
+  # Prometheus integration
   prometheusScrape:
     enabled: true
     serviceEndpoints: true
-  leaderElection: true
-  collectEvents: true
-  criSocketPath: /run/k3s/containerd/containerd.sock
+
+  # APM tracing
   apm:
     enabled: true
-  site: datadoghq.eu
+
+  # Kubernetes State Metrics
   kubeStateMetricsCore:
     collectVpaMetrics: true
 
+# RBAC configuration
 rbac:
   create: true
 
+# Pod labels as tags
 podLabelsAsTags:
   app: kube_app
   release: helm_release
 
+# Agent configuration
 agents:
-  image:
-    repository: registry.vms.st0rmingbr4in.lan/datadoghq/agent-with-integrations
-    tag: 7.44.0
+  # Use default official Datadog images
+
+  # Container resource configuration (memory request = limit, CPU request only)
   containers:
     agent:
       resources:
+        limits:
+          memory: 300Mi
         requests:
           cpu: 200m
           memory: 300Mi
-        limits:
-          memory: 300Mi
     processAgent:
       resources:
+        limits:
+          memory: 100Mi
         requests:
           cpu: 50m
-          memory: 100Mi
-        limits:
           memory: 100Mi
     traceAgent:
       resources:
+        limits:
+          memory: 150Mi
         requests:
           cpu: 50m
-          memory: 150Mi
-        limits:
           memory: 150Mi
     systemProbe:
       resources:
+        limits:
+          memory: 512Mi
         requests:
           cpu: 50m
-          memory: 512Mi
-        limits:
           memory: 512Mi
     securityAgent:
       resources:
+        limits:
+          memory: 150Mi
         requests:
           cpu: 50m
-          memory: 150Mi
-        limits:
           memory: 150Mi
     initContainers:
       resources:
+        limits:
+          memory: 150Mi
         requests:
           cpu: 50m
           memory: 150Mi
-        limits:
-          memory: 150Mi
+
+  # Node tolerations for scheduling
   tolerations:
     - effect: NoSchedule
       key: ram
       operator: Exists
+
+  # Custom volumes for k3s monitoring
   volumes:
     - hostPath:
         path: /run/log
@@ -140,30 +171,33 @@ agents:
     - hostPath:
         path: /run/systemd
       name: systemddir
+
   volumeMounts:
     - name: logdir
       mountPath: /host/run/log
     - name: systemddir
       mountPath: /host/run/systemd
 
+# Cluster Agent configuration
 clusterAgent:
   enabled: true
   tokenExistingSecret: datadog-cluster-agent
   resources:
+    limits:
+      memory: 150Mi
     requests:
       cpu: 50m
-      memory: 150Mi
-    limits:
       memory: 150Mi
   tolerations:
     - effect: NoSchedule
       key: ram
       operator: Exists
 
+# Kube State Metrics configuration
 kube-state-metrics:
   resources:
+    limits:
+      memory: 100Mi
     requests:
       cpu: 50m
-      memory: 100Mi
-    limits:
       memory: 100Mi

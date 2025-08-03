@@ -6,6 +6,7 @@ resources:
   - argocd-apps/application.yaml
   - cert-manager/application.yaml
   - cert-manager-selfsigned-issuer/application.yaml
+  - datadog/application.yaml
   - bazarr/application.yaml
   - prowlarr/application.yaml
   - oom-prevention/application.yaml
