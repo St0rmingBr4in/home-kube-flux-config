@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - pv-minecraft-aphorya-datadir.yaml
   - minecraft-aphorya-datadir-pvc.yaml
+  - vault-static-secret.yaml
   # Service account and secrets managed directly by Vault Kubernetes secrets engine
