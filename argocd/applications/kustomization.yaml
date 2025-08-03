@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - argocd/application.yaml
   - argocd-apps/application.yaml
+  - cert-manager/application.yaml
+  - cert-manager-selfsigned-issuer/application.yaml
   - bazarr/application.yaml
   - prowlarr/application.yaml
   - oom-prevention/application.yaml
@@ -17,4 +19,5 @@ resources:
   - shared-storage/application.yaml
   - vault-secrets-operator/application.yaml
   - vault/application.yaml
+  - cert-manager-letsencrypt-issuer/application.yaml
   - minecraft-aphorya/application.yaml

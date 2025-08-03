@@ -1,0 +1,28 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-letsencrypt-issuer
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+    targetRevision: HEAD
+    path: argocd/applications/cert-manager-letsencrypt-issuer
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod-infra
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

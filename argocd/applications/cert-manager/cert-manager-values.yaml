@@ -1,19 +1,19 @@
 ---
+# Install CRDs as part of the Helm chart
 installCRDs: true
+
 extraArgs:
-  - "--feature-gates=ExperimentalGatewayAPISupport=true"
   - "--dns01-recursive-nameservers-only=true"
   - "--dns01-recursive-nameservers=ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
 
-# dns01RecursiveNameservers: "ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
-# dns01RecursiveNameserversOnly: true
-
+# Resource configuration for cert-manager components
 resources:
   limits:
     memory: 100Mi
   requests:
     cpu: 100m
     memory: 100Mi
+
 webhook:
   resources:
     limits:
@@ -21,6 +21,7 @@ webhook:
     requests:
       cpu: 100m
       memory: 100Mi
+
 cainjector:
   resources:
     limits:
