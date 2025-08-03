@@ -1,0 +1,18 @@
+---
+# Simple Gatekeeper Mutation: Add memory limits only to all pods cluster-wide
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: add-memory-limits
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Cluster
+  location: "spec.containers[name:*].resources.limits.memory"
+  parameters:
+    assign:
+      value: "512Mi"
+    ifNotPresent: true # Only add if not already set

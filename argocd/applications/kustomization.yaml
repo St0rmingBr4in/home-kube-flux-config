@@ -6,3 +6,4 @@ resources:
   - argocd-apps/application.yaml
   - bazarr/application.yaml
   - prowlarr/application.yaml
+  - oom-prevention/application.yaml

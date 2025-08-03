@@ -12,8 +12,7 @@ argo-cd:
       enabled: false
 
   configs:
-    params:
-      server.insecure: false
+    # ArgoCD configuration
     cm:
       # URL for port forwarding access
       url: https://localhost:8080
@@ -23,21 +22,3 @@ argo-cd:
         - name: home-kube-flux-config
           type: git
           url: https://github.com/St0rmingBr4in/home-kube-flux-config
-
-  # Resource limits
-  repoServer:
-    resources:
-      limits:
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-
-  # Controller resources
-  controller:
-    resources:
-      limits:
-        memory: 512Mi
-      requests:
-        cpu: 250m
-        memory: 256Mi
