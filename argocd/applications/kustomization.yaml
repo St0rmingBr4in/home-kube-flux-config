@@ -5,3 +5,4 @@ resources:
   - argocd/application.yaml
   - argocd-apps/application.yaml
   - bazarr/application.yaml
+  - prowlarr/application.yaml
