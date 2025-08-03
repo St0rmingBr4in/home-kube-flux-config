@@ -46,3 +46,7 @@ spec:
       kind: "Secret"
       jsonPointers:
         - /data
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/hostUsers
