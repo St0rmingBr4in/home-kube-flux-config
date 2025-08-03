@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minecraft-aphorya
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://itzg.github.io/minecraft-server-charts/
+      chart: minecraft
+      targetRevision: 4.10.0
+      helm:
+        valueFiles:
+          - $values/argocd/applications/minecraft-aphorya/minecraft-aphorya-values.yaml
+    - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+      targetRevision: HEAD
+      path: argocd/applications/minecraft-aphorya
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod-aphorya
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  ignoreDifferences:
+    - group: "*"
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/hostUsers

@@ -1,0 +1,89 @@
+---
+minecraftServer:
+  rcon:
+    enabled: true
+    existingSecret: rcon-secret
+    serviceType: LoadBalancer
+    loadBalancerIP: 192.168.62.17
+    externalTrafficPolicy: Cluster
+  eula: true
+  version: "1.20.2"
+  motd: "Aphorya"
+  pvp: true
+  memory: 4G
+  ops: "juldoc,RaKk0o"
+  whitelist: "juldoc,RaKk0o"
+  type: "PAPER"
+  externalTrafficPolicy: Cluster
+  serviceType: LoadBalancer
+  loadBalancerIP: 192.168.62.17
+  servicePort: 25565
+  extraPorts:
+    - name: metrics
+      containerPort: 9940
+      protocol: TCP
+      ingress:
+        enabled: false
+      service:
+        enabled: true
+        type: ClusterIP
+        port: 9940
+    - name: dynmap
+      containerPort: 8123
+      protocol: TCP
+      service:
+        enabled: true
+        type: ClusterIP
+        port: 8123
+      ingress:
+        enabled: true
+        hosts:
+          - name: dynmap.aphorya.fr
+            path: /
+podAnnotations:
+  prometheus.io/port: "9940"
+  prometheus.io/scrape: true
+
+serviceAnnotations:
+  metallb.universe.tf/allow-shared-ip: prod
+startupProbe:
+  command: ["sh", "-c", "mc-health && touch /data/test"]
+readinessProbe:
+  command: ["sh", "-c", "mc-health && touch /data/test"]
+  initialDelaySeconds: 120
+  failureThreshold: 100
+livenessProbe:
+  command: ["sh", "-c", "mc-health && touch /data/test"]
+  initialDelaySeconds: 120
+  failureThreshold: 100
+resources:
+  limits:
+    memory: 5500Mi
+  requests:
+    cpu: "4"
+    memory: 5500Mi
+tolerations:
+  - key: ram
+    operator: Exists
+    effect: NoSchedule
+persistence:
+  dataDir:
+    enabled: true
+    existingClaim: minecraft-aphorya-datadir
+extraVolumes:
+  - volumeMounts:
+      - name: worldedit-schematics
+        mountPath: /data/plugins/WorldEdit/schematics
+        readOnly: false
+      - name: plugin-updates
+        mountPath: /plugins-update/
+        readOnly: true
+    volumes:
+      - name: plugin-updates
+        nfs:
+          server: nasse.hard.st0rmingbr4in.lan
+          path: /volume1/kubernetes_storage/minecraft-plugins
+      - name: worldedit-schematics
+        nfs:
+          server: nasse.hard.st0rmingbr4in.lan
+          path: /volume1/kubernetes_storage/worldedit_schematics

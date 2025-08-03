@@ -1,0 +1,7 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - pv-minecraft-aphorya-datadir.yaml
+  - minecraft-aphorya-datadir-pvc.yaml
+  - minecraft-aphorya-rcon-secret.yaml
