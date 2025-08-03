@@ -1,0 +1,34 @@
+---
+# Basic Gatekeeper configuration
+replicaCount: 1
+
+# Resource limits to prevent OOM - mem limits = mem requests for guaranteed QoS
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+
+audit:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+# Enable mutation (for our memory limit policy)
+mutation:
+  enabled: true
+
+# Basic webhook configuration
+webhook:
+  failurePolicy: Fail
+  namespaceSelector:
+    matchExpressions:
+      - key: admission.gatekeeper.sh/ignore
+        operator: DoesNotExist

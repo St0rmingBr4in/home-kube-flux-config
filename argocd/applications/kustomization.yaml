@@ -7,3 +7,4 @@ resources:
   - bazarr/application.yaml
   - prowlarr/application.yaml
   - oom-prevention/application.yaml
+  - gatekeeper/application.yaml
