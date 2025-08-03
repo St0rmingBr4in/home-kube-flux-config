@@ -1,0 +1,39 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionWebhook
+metadata:
+  name: memory-webhook
+  labels:
+    app: memory-webhook
+  annotations:
+    cert-manager.io/inject-ca-from: prod-infra/memory-webhook-cert
+spec:
+  webhooks:
+    - name: memory.webhook.prod-infra.svc
+      clientConfig:
+        service:
+          name: memory-webhook
+          namespace: prod-infra
+          path: "/mutate"
+      rules:
+        - operations: ["CREATE", "UPDATE"]
+          apiGroups: [""]
+          apiVersions: ["v1"]
+          resources: ["pods"]
+      failurePolicy: Fail
+      sideEffects: None
+      admissionReviewVersions: ["v1", "v1beta1"]
+      namespaceSelector:
+        matchExpressions:
+          # Skip kube-system and other system namespaces
+          - key: name
+            operator: NotIn
+            values: ["kube-system", "kube-public", "kube-node-lease"]
+          # Skip cert-manager namespace to avoid bootstrap issues
+          - key: name
+            operator: NotIn
+            values: ["cert-manager"]
+          # Skip gatekeeper namespace to avoid conflicts
+          - key: name
+            operator: NotIn
+            values: ["gatekeeper-system"]

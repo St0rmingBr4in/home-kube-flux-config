@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: memory-webhook
+  namespace: prod-infra
+  labels:
+    app: memory-webhook
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: memory-webhook
+  labels:
+    app: memory-webhook
+rules:
+  # Webhook needs to read pods to validate them
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  # Webhook needs to read admissionreviews
+  - apiGroups: ["admission.k8s.io"]
+    resources: ["admissionreviews"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: memory-webhook
+  labels:
+    app: memory-webhook
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: memory-webhook
+subjects:
+  - kind: ServiceAccount
+    name: memory-webhook
+    namespace: prod-infra

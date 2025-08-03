@@ -1,0 +1,20 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: memory-webhook-cert
+  namespace: prod-infra
+spec:
+  secretName: memory-webhook-certs
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - memory-webhook
+    - memory-webhook.prod-infra
+    - memory-webhook.prod-infra.svc
+    - memory-webhook.prod-infra.svc.cluster.local
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth

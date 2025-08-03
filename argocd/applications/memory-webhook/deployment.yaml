@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memory-webhook
+  namespace: prod-infra
+  labels:
+    app: memory-webhook
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: memory-webhook
+  template:
+    metadata:
+      labels:
+        app: memory-webhook
+    spec:
+      serviceAccountName: memory-webhook
+      containers:
+        - name: webhook
+          image: memory-webhook:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+              name: webhook-api
+          env:
+            - name: TLS_CERT_FILE
+              value: /etc/certs/tls.crt
+            - name: TLS_KEY_FILE
+              value: /etc/certs/tls.key
+            - name: PORT
+              value: "8443"
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/certs
+              readOnly: true
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: webhook-api
+              scheme: HTTPS
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: webhook-api
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: memory-webhook-certs
+      securityContext:
+        fsGroup: 1000
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
