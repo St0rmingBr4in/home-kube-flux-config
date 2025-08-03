@@ -23,10 +23,6 @@ argo-cd:
         - name: home-kube-flux-config
           type: git
           url: https://github.com/St0rmingBr4in/home-kube-flux-config
-        - name: truecharts
-          type: helm
-          url: oci://tccr.io/truecharts
-          enableOCI: true
 
   # Resource limits
   repoServer:
