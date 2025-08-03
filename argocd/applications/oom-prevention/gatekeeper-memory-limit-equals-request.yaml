@@ -1,0 +1,57 @@
+---
+# Gatekeeper Assign mutation: automatically set memory limit = memory request
+# Case: Pod has memory request but no limit → Set limit = request (Guaranteed QoS)
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: memory-limit-equals-request
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - apiVersion: v1
+        kind: Pod
+  location: "spec.containers[name:*].resources.limits.memory"
+  parameters:
+    assign:
+      fromMetadata:
+        obj: spec.containers[name:*].resources.requests.memory
+    pathTests:
+      # Only assign if memory request exists
+      - subPath: "spec.containers[name:*].resources.requests.memory"
+        condition: MustExist
+      # Only assign if memory limit doesn't exist
+      - subPath: "spec.containers[name:*].resources.limits.memory"
+        condition: MustNotExist
+---
+# Also handle init containers for memory limit = memory request
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: memory-limit-equals-request-init
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - apiVersion: v1
+        kind: Pod
+  location: "spec.initContainers[name:*].resources.limits.memory"
+  parameters:
+    assign:
+      fromMetadata:
+        obj: spec.initContainers[name:*].resources.requests.memory
+    pathTests:
+      # Only assign if memory request exists
+      - subPath: "spec.initContainers[name:*].resources.requests.memory"
+        condition: MustExist
+      # Only assign if memory limit doesn't exist
+      - subPath: "spec.initContainers[name:*].resources.limits.memory"
+        condition: MustNotExist

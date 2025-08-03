@@ -1,0 +1,51 @@
+---
+# Gatekeeper Assign mutation: automatically set memory request = memory limit
+# Case: Pod has memory limit but no request → Set request = limit (Guaranteed QoS)
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: memory-request-equals-limit
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - apiVersion: v1
+        kind: Pod
+  location: "spec.containers[name:*].resources.requests.memory"
+  parameters:
+    assign:
+      fromMetadata:
+        obj: spec.containers[name:*].resources.limits.memory
+    pathTests:
+      # Only assign if memory limit exists
+      - subPath: "spec.containers[name:*].resources.limits.memory"
+        condition: MustExist
+---
+# Also handle init containers for memory request = memory limit
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: memory-request-equals-limit-init
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - apiVersion: v1
+        kind: Pod
+  location: "spec.initContainers[name:*].resources.requests.memory"
+  parameters:
+    assign:
+      fromMetadata:
+        obj: spec.initContainers[name:*].resources.limits.memory
+    pathTests:
+      # Only assign if memory limit exists
+      - subPath: "spec.initContainers[name:*].resources.limits.memory"
+        condition: MustExist
