@@ -4,7 +4,4 @@ kind: Kustomization
 
 # ArgoCD Self-Management Resources
 resources:
-  - argocd-self-management.yaml
   - applications/
-
-namespace: argocd

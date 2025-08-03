@@ -2,22 +2,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-self-management
+  name: argocd
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
 
-  source:
-    repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-    targetRevision: HEAD
-    path: argocd
-
-    # Use Helm to deploy ArgoCD
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 7.7.6
+      helm:
+        valueFiles:
+          - $values/argocd/values.yaml
+    - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+      targetRevision: HEAD
+      ref: values
 
   destination:
     server: https://kubernetes.default.svc
