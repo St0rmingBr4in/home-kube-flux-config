@@ -4,7 +4,7 @@
 apiVersion: mutations.gatekeeper.sh/v1beta1
 kind: Assign
 metadata:
-  name: memory-limit-equals-request
+  name: 2-memory-limit-equals-request
 spec:
   applyTo:
     - groups: [""]
@@ -13,13 +13,9 @@ spec:
   match:
     scope: Namespaced
     kinds:
-      - apiVersion: v1
-        kind: Pod
+      - kind: Pod
   location: "spec.containers[name:*].resources.limits.memory"
   parameters:
-    assign:
-      fromMetadata:
-        obj: spec.containers[name:*].resources.requests.memory
     pathTests:
       # Only assign if memory request exists
       - subPath: "spec.containers[name:*].resources.requests.memory"
@@ -27,12 +23,15 @@ spec:
       # Only assign if memory limit doesn't exist
       - subPath: "spec.containers[name:*].resources.limits.memory"
         condition: MustNotExist
+    assign:
+      fromMetadata:
+        obj: spec.containers[name:*].resources.requests.memory
 ---
 # Also handle init containers for memory limit = memory request
 apiVersion: mutations.gatekeeper.sh/v1beta1
 kind: Assign
 metadata:
-  name: memory-limit-equals-request-init
+  name: 2-memory-limit-equals-request-init
 spec:
   applyTo:
     - groups: [""]
@@ -41,13 +40,9 @@ spec:
   match:
     scope: Namespaced
     kinds:
-      - apiVersion: v1
-        kind: Pod
+      - kind: Pod
   location: "spec.initContainers[name:*].resources.limits.memory"
   parameters:
-    assign:
-      fromMetadata:
-        obj: spec.initContainers[name:*].resources.requests.memory
     pathTests:
       # Only assign if memory request exists
       - subPath: "spec.initContainers[name:*].resources.requests.memory"
@@ -55,3 +50,6 @@ spec:
       # Only assign if memory limit doesn't exist
       - subPath: "spec.initContainers[name:*].resources.limits.memory"
         condition: MustNotExist
+    assign:
+      fromMetadata:
+        obj: spec.initContainers[name:*].resources.requests.memory

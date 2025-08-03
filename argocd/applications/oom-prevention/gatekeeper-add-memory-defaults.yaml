@@ -1,0 +1,88 @@
+---
+# Add default memory request if none exists
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: 1-add-memory-requests
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - kind: Pod
+  location: "spec.containers[name:*].resources.requests.memory"
+  parameters:
+    pathTests:
+      - subPath: "spec.containers[name:*].resources.requests.memory"
+        condition: MustNotExist
+    assign:
+      value: "512Mi"
+---
+# Add default memory request if none exists (init containers)
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: 1-add-memory-requests-init
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - kind: Pod
+  location: "spec.initContainers[name:*].resources.requests.memory"
+  parameters:
+    pathTests:
+      - subPath: "spec.initContainers[name:*].resources.requests.memory"
+        condition: MustNotExist
+    assign:
+      value: "512Mi"
+---
+# Add default memory limit if none exists
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: 1-add-memory-limits
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - kind: Pod
+  location: "spec.containers[name:*].resources.limits.memory"
+  parameters:
+    pathTests:
+      - subPath: "spec.containers[name:*].resources.limits.memory"
+        condition: MustNotExist
+    assign:
+      value: "512Mi"
+---
+# Add default memory limit if none exists (init containers)
+apiVersion: mutations.gatekeeper.sh/v1beta1
+kind: Assign
+metadata:
+  name: 1-add-memory-limits-init
+spec:
+  applyTo:
+    - groups: [""]
+      kinds: ["Pod"]
+      versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+      - kind: Pod
+  location: "spec.initContainers[name:*].resources.limits.memory"
+  parameters:
+    pathTests:
+      - subPath: "spec.initContainers[name:*].resources.limits.memory"
+        condition: MustNotExist
+    assign:
+      value: "512Mi"
