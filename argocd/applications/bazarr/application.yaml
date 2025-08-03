@@ -17,10 +17,10 @@ spec:
         valueFiles:
           - $values/argocd/applications/bazarr/bazarr-values.yaml
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-      targetRevision: master
+      targetRevision: HEAD
       ref: values
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-      targetRevision: master
+      targetRevision: HEAD
       path: argocd/applications/bazarr
 
   destination:
