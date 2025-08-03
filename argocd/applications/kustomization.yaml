@@ -8,3 +8,4 @@ resources:
   - prowlarr/application.yaml
   - oom-prevention/application.yaml
   - gatekeeper/application.yaml
+  - jellyfin/application.yaml
