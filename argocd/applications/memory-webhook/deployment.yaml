@@ -37,14 +37,14 @@ spec:
               cpu: 50m
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /health
               port: 8443
               scheme: HTTPS
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /readyz
+              path: /health
               port: 8443
               scheme: HTTPS
             initialDelaySeconds: 5
