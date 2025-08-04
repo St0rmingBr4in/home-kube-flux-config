@@ -1,4 +1,8 @@
 ---
+global:
+  enabled: true
+  tlsDisable: false
+
 server:
   resources:
     requests:
@@ -7,33 +11,13 @@ server:
     limits:
       memory: 150Mi
 
-  # Standalone mode with HTTP for ingress and TLS for internal
-  standalone:
-    enabled: true
-    config: |
-      # HTTP listener for ingress (port 8200)
-      listener "tcp" {
-        address         = "[::]:8200"
-        # No TLS - Traefik handles TLS termination
-      }
+  # Environment variables for TLS
+  extraEnvironmentVars:
+    VAULT_CACERT: /vault/userconfig/vault-internal-tls-cert/ca.crt
+    VAULT_TLSCERT: /vault/userconfig/vault-internal-tls-cert/tls.crt
+    VAULT_TLSKEY: /vault/userconfig/vault-internal-tls-cert/tls.key
 
-      # TLS listener for internal cluster communication (port 8201)
-      listener "tcp-tls" {
-        address         = "[::]:8201"
-        tls_cert_file   = "/vault/userconfig/vault-internal-tls-cert/tls.crt"
-        tls_key_file    = "/vault/userconfig/vault-internal-tls-cert/tls.key"
-        tls_min_version = "tls12"
-      }
-
-      storage "file" {
-        path = "/vault/data"
-      }
-
-      disable_mlock = true
-      api_addr = "http://vault.prod-infra.svc.cluster.local:8200"
-      cluster_addr = "https://vault.prod-infra.svc.cluster.local:8201"
-
-  # Mount TLS certificate
+  # Mount TLS certificates
   volumes:
     - name: vault-internal-tls-cert
       secret:
@@ -43,6 +27,25 @@ server:
     - mountPath: /vault/userconfig/vault-internal-tls-cert
       name: vault-internal-tls-cert
       readOnly: true
+
+  # Standalone mode with TLS
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 0
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/vault/userconfig/vault-internal-tls-cert/tls.crt"
+        tls_key_file = "/vault/userconfig/vault-internal-tls-cert/tls.key"
+        tls_client_ca_file = "/vault/userconfig/vault-internal-tls-cert/ca.crt"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+      disable_mlock = true
+      service_registration "kubernetes" {}
 
   # External ingress (optional)
   ingress:
@@ -55,8 +58,9 @@ server:
         hosts:
           - vault.st0rmingbr4in.com
     annotations:
-      # Backend HTTP configuration - Traefik handles TLS termination
-      traefik.ingress.kubernetes.io/service.serversscheme: http
+      # Backend HTTPS configuration with TLS verification
+      traefik.ingress.kubernetes.io/service.serversscheme: https
+      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@containo
 
 ui:
   enabled: true

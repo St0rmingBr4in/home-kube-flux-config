@@ -6,5 +6,9 @@ metadata:
   name: vault-backend-transport
   namespace: prod-infra
 spec:
-  # Skip TLS verification for internal vault communication
-  insecureSkipVerify: true
+  # Use the vault CA certificate for backend TLS verification
+  rootCAsSecrets:
+    - vault-internal-ca-secret
+  # Optional: Set other TLS options
+  serverName: "vault.prod-infra.svc.cluster.local"
+  insecureSkipVerify: false
