@@ -5,9 +5,9 @@ config:
   address: "192.168.72.2"
 
 env:
-  # LoadBalancer configuration for API server
-  lb_enable: "true"
-  lb_port: "6443"
-  vip_arp: "true"
-  svc_enable: "true"
+  # Enable both control plane and LoadBalancer service watching
   cp_enable: "true"
+  svc_enable: "true"
+
+  # Disable IPVS, use Layer 2 mode
+  lb_enable: "false"
