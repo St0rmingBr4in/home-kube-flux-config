@@ -22,7 +22,6 @@ service:
   type: LoadBalancer
   annotations:
     kube-vip.io/loadbalancerip: "192.168.72.3"
-  loadBalancerClass: kube-vip.io/kube-vip-class
 
 # IngressRoute CRD
 ingressRoute:
