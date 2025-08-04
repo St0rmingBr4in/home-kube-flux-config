@@ -1,12 +1,8 @@
-# Traefik Helm Chart Values
-# Configured for ArgoCD deployment
-
 # Global configuration
 global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
-# Deployment configuration
 deployment:
   replicas: 1
   resources:
@@ -17,22 +13,11 @@ deployment:
       cpu: 300m
       memory: 256Mi
 
-# Service configuration
 service:
   type: LoadBalancer
   annotations:
     kube-vip.io/loadbalancerIPs: "192.168.72.8"
 
-# IngressRoute CRD
-ingressRoute:
-  dashboard:
-    enabled: true
-
-# CRDs
-crds:
-  enabled: true
-
-# Ports configuration
 ports:
   web:
     port: 8000
@@ -47,15 +32,6 @@ ports:
     tls:
       enabled: true
 
-# Providers
-providers:
-  kubernetes:
-    enabled: true
-    allowExternalNameServices: true
-    allowCrossNamespace: true
-    ingressClass: traefik
-
-# Logging
 logs:
   general:
     level: DEBUG
@@ -63,7 +39,6 @@ logs:
     enabled: true
     format: json
 
-# Metrics
 metrics:
   prometheus:
     enabled: true

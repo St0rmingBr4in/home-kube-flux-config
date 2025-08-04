@@ -18,6 +18,6 @@ spec:
         - name: vault
           port: 8200
           scheme: https
-          serversTransport: vault-backend-transport@prod-infra
+          serversTransport: vault-backend-transport
   tls:
     secretName: st0rmingbr4in.com-cert
