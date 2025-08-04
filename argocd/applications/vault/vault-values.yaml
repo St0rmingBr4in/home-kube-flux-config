@@ -7,11 +7,10 @@ server:
     limits:
       memory: 150Mi
 
-  # Environment variables for HTTP ingress
+  # Override default environment variables for HTTP ingress
   extraEnvironmentVars:
+    # Override VAULT_ADDR to use HTTP for ingress
     VAULT_ADDR: "http://vault.prod-infra.svc.cluster.local:8200"
-    VAULT_API_ADDR: "http://vault.prod-infra.svc.cluster.local:8200"
-    VAULT_CLUSTER_ADDR: "https://vault.prod-infra.svc.cluster.local:8201"
 
   # Standalone mode with HTTP for ingress and TLS for internal
   standalone:
