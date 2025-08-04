@@ -45,7 +45,6 @@ server:
         path = "/vault/data"
       }
       disable_mlock = true
-      service_registration "kubernetes" {}
 
   # External ingress (optional)
   ingress:
