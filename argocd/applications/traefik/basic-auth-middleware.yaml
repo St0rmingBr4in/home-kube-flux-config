@@ -1,0 +1,11 @@
+---
+# Vault-based basic auth middleware for Traefik
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: basic-auth
+  namespace: prod-infra
+spec:
+  basicAuth:
+    secret: basic-auth-secret
+    removeHeader: false
