@@ -12,14 +12,13 @@ argo-cd:
         cpu: 300m # Based on actual usage
         memory: 512Mi # Same as limit for guaranteed QoS
 
-  # Repository Server - actual usage: 13m CPU, 52Mi memory
   repoServer:
     resources:
       limits:
-        memory: 128Mi # Generous headroom
+        memory: 1Gi
       requests:
-        cpu: 20m # Based on actual usage
-        memory: 128Mi # Same as limit for guaranteed QoS
+        cpu: 50m
+        memory: 1Gi # Same as limit for guaranteed QoS
 
   # ArgoCD Server - actual usage: 3m CPU, 25Mi memory
   server:
