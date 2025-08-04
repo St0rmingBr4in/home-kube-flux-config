@@ -1,14 +1,9 @@
-# kube-vip DaemonSet Values
-# TEMPORARILY DISABLED due to network conflicts
-
-# Disable the DaemonSet to prevent network interface conflicts
 daemonset:
-  enabled: false
+  enabled: true
 
 # kube-vip configuration
 config:
-  address: ""
-
+  address: "192.168.72.2"
 resources:
   limits:
     cpu: 100m
