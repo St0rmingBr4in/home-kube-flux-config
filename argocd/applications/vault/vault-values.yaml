@@ -18,7 +18,7 @@ server:
       }
 
       # TLS listener for internal cluster communication (port 8201)
-      listener "tcp" {
+      listener "tcp-tls" {
         address         = "[::]:8201"
         tls_cert_file   = "/vault/userconfig/vault-internal-tls-cert/tls.crt"
         tls_key_file    = "/vault/userconfig/vault-internal-tls-cert/tls.key"
