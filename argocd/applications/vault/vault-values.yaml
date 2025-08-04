@@ -7,19 +7,25 @@ server:
     limits:
       memory: 150Mi
 
-  # Environment variables to force HTTPS
+  # Environment variables for HTTP ingress
   extraEnvironmentVars:
-    VAULT_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
-    VAULT_API_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
+    VAULT_ADDR: "http://vault.prod-infra.svc.cluster.local:8200"
+    VAULT_API_ADDR: "http://vault.prod-infra.svc.cluster.local:8200"
     VAULT_CLUSTER_ADDR: "https://vault.prod-infra.svc.cluster.local:8201"
 
-  # Standalone mode with internal TLS
+  # Standalone mode with HTTP for ingress and TLS for internal
   standalone:
     enabled: true
     config: |
+      # HTTP listener for ingress (port 8200)
       listener "tcp" {
         address         = "[::]:8200"
-        cluster_address = "[::]:8201"
+        # No TLS - Traefik handles TLS termination
+      }
+
+      # TLS listener for internal cluster communication (port 8201)
+      listener "tcp" {
+        address         = "[::]:8201"
         tls_cert_file   = "/vault/userconfig/vault-internal-tls-cert/tls.crt"
         tls_key_file    = "/vault/userconfig/vault-internal-tls-cert/tls.key"
         tls_min_version = "tls12"
@@ -30,7 +36,7 @@ server:
       }
 
       disable_mlock = true
-      api_addr = "https://vault.prod-infra.svc.cluster.local:8200"
+      api_addr = "http://vault.prod-infra.svc.cluster.local:8200"
       cluster_addr = "https://vault.prod-infra.svc.cluster.local:8201"
 
   # Mount TLS certificate
@@ -55,9 +61,8 @@ server:
         hosts:
           - vault.st0rmingbr4in.com
     annotations:
-      # Backend TLS configuration for self-signed certificate
-      traefik.ingress.kubernetes.io/service.serversscheme: https
-      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@containo
+      # Backend HTTP configuration - Traefik handles TLS termination
+      traefik.ingress.kubernetes.io/service.serversscheme: http
 
 ui:
   enabled: true
