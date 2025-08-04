@@ -7,6 +7,12 @@ server:
     limits:
       memory: 150Mi
 
+  # Environment variables to force HTTPS
+  extraEnvironmentVars:
+    VAULT_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
+    VAULT_API_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
+    VAULT_CLUSTER_ADDR: "https://vault.prod-infra.svc.cluster.local:8201"
+
   # Standalone mode with internal TLS
   standalone:
     enabled: true
