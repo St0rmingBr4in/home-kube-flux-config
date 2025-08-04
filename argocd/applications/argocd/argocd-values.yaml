@@ -15,10 +15,10 @@ controller:
 repoServer:
   resources:
     limits:
-      memory: 1Gi # Increased significantly for complex Helm chart processing (VSO, etc.)
+      memory: 2Gi # Increased significantly for complex Helm chart processing (VSO, etc.)
     requests:
       cpu: 50m # Slightly increased for better performance
-      memory: 1Gi # Same as limit for guaranteed QoS
+      memory: 2Gi # Same as limit for guaranteed QoS
 
 # ArgoCD Server - actual usage: 3m CPU, 25Mi memory
 server:
