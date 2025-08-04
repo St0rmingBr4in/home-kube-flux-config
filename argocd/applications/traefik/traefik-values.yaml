@@ -21,12 +21,14 @@ service:
 ports:
   web:
     port: 8000
-    expose: true
+    expose:
+      default: true
     exposedPort: 80
     protocol: TCP
   websecure:
     port: 8443
-    expose: true
+    expose:
+      default: true
     exposedPort: 443
     protocol: TCP
     tls:
