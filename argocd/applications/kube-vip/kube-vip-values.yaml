@@ -1,0 +1,39 @@
+# kube-vip Cloud Provider Values
+# Configured for Layer 2 load balancing
+
+# Cloud provider configuration
+cloudProvider:
+  # Enable the cloud provider
+  enabled: true
+
+  # Load balancer configuration
+  loadBalancer:
+    # Default load balancer class
+    defaultClass: "kube-vip"
+
+    # Layer 2 configuration
+    layer2:
+      enabled: true
+
+    # BGP configuration (disabled for Layer 2)
+    bgp:
+      enabled: false
+
+# kube-vip configuration for DHCP
+kube-vip:
+  # Enable DHCP mode
+  dhcp:
+    enabled: true
+
+# Service configuration
+service:
+  type: ClusterIP
+
+# Resources
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
