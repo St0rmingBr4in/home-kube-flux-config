@@ -57,7 +57,7 @@ server:
     annotations:
       # Backend TLS configuration for self-signed certificate
       traefik.ingress.kubernetes.io/service.serversscheme: https
-      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@kubernetescrd
+      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@containo
 
 ui:
   enabled: true
