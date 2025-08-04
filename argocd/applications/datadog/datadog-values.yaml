@@ -117,38 +117,38 @@ agents:
     agent:
       resources:
         limits:
-          memory: 300Mi
+          memory: 1Gi # Increased from 300Mi to handle k3s cluster monitoring
         requests:
           cpu: 200m
-          memory: 300Mi
+          memory: 1Gi # Same as limit for guaranteed QoS
     processAgent:
       resources:
         limits:
-          memory: 100Mi
+          memory: 500Mi # Increased from 100Mi - was getting OOMKilled constantly
         requests:
-          cpu: 50m
-          memory: 100Mi
+          cpu: 100m # Increased for better performance
+          memory: 500Mi # Same as limit for guaranteed QoS
     traceAgent:
       resources:
         limits:
-          memory: 150Mi
+          memory: 256Mi # Increased from 150Mi for better performance
         requests:
           cpu: 50m
-          memory: 150Mi
+          memory: 256Mi # Same as limit for guaranteed QoS
     systemProbe:
       resources:
         limits:
-          memory: 512Mi
+          memory: 1Gi # Increased from 512Mi for eBPF compilation and network monitoring
         requests:
-          cpu: 50m
-          memory: 512Mi
+          cpu: 100m # Increased for eBPF compilation
+          memory: 1Gi # Same as limit for guaranteed QoS
     securityAgent:
       resources:
         limits:
-          memory: 150Mi
+          memory: 256Mi # Increased from 150Mi for runtime security monitoring
         requests:
           cpu: 50m
-          memory: 150Mi
+          memory: 256Mi # Same as limit for guaranteed QoS
     initContainers:
       resources:
         limits:
@@ -184,10 +184,10 @@ clusterAgent:
   tokenExistingSecret: datadog-cluster-agent
   resources:
     limits:
-      memory: 150Mi
+      memory: 256Mi # Increased from 150Mi for better cluster monitoring
     requests:
       cpu: 50m
-      memory: 150Mi
+      memory: 256Mi # Same as limit for guaranteed QoS
   tolerations:
     - effect: NoSchedule
       key: ram
