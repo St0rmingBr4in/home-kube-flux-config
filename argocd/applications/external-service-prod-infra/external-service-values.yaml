@@ -1,0 +1,33 @@
+---
+ingress:
+  enabled: true
+addresses:
+  - ip: 192.168.42.42
+ports:
+  - port: 80
+    name: nas-photos
+    ingress:
+      hosts:
+        - host: nas.st0rmingbr4in.com
+          paths:
+            - "/photo"
+        - host: nas-ui.st0rmingbr4in.com
+          paths:
+            - "/photo"
+  - port: 5000
+    name: nas-ui
+    ingress:
+      hosts:
+        - host: nas.st0rmingbr4in.com
+          paths:
+            - "/"
+        - host: nas-ui.st0rmingbr4in.com
+          paths:
+            - "/"
+  - port: 9001
+    name: minio
+    ingress:
+      hosts:
+        - host: minio.st0rmingbr4in.com
+          paths:
+            - "/"

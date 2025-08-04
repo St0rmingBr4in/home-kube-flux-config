@@ -33,3 +33,8 @@ resources:
 
   # Security & Compliance
   - memory-webhook/application.yaml
+
+  # External Services
+  - external-service-prod-infra/application.yaml
+  - external-service-prod-aphorya/application.yaml
+  - external-service-rakk0o-dev/application.yaml
