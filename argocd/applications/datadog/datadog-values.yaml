@@ -142,6 +142,11 @@ agents:
         requests:
           cpu: 100m # Increased for eBPF compilation
           memory: 1Gi # Same as limit for guaranteed QoS
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+        privileged: true
     securityAgent:
       resources:
         limits:
