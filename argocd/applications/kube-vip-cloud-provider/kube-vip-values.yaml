@@ -1,3 +1,5 @@
+namespaceOverride: "kube-system"
+
 # ConfigMap configuration for IP pools
 cm:
   data:
