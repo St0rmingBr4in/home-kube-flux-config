@@ -21,9 +21,9 @@ deployment:
 service:
   type: LoadBalancer
   annotations:
-    kube-vip.io/dhcp: "true"
-    kube-vip.io/mac: "02:00:00:00:00:01"
-  loadBalancerClass: "kube-vip"
+    # kube-vip will automatically assign IP from the configured pool
+    # kube-vip.io/loadbalancerip: "192.168.72.10"  # Optional: specify specific IP
+  loadBalancerClass: kube-vip.io/kube-vip-class
 
 # IngressRoute CRD
 ingressRoute:
