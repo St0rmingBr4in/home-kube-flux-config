@@ -11,7 +11,7 @@ spec:
       targetRevision: 0.2.6
       helm:
         valueFiles:
-          - $values/argocd/applications/kube-vip-cloud-provider/kube-vip-values.yaml
+          - $values/argocd/applications/kube-vip-cloud-provider/kube-vip-cloud-provider-values.yaml
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
       targetRevision: HEAD
       ref: values
