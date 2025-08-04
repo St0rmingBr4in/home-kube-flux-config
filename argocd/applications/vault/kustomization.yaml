@@ -6,3 +6,4 @@ resources:
   - vault-pvc.yaml
   - vault-internal-ca-issuer.yaml
   - vault-internal-tls-cert.yaml
+  - vault-backend-transport.yaml

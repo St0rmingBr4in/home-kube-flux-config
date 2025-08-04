@@ -54,6 +54,10 @@ server:
       - secretName: st0rmingbr4in.com-cert
         hosts:
           - vault.st0rmingbr4in.com
+    annotations:
+      # Backend TLS configuration for self-signed certificate
+      traefik.ingress.kubernetes.io/service.serversscheme: https
+      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@kubernetescrd
 
 ui:
   enabled: true
