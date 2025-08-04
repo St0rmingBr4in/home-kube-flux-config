@@ -1,7 +1,0 @@
----
-existingSecret: renovate-secret
-apiVersionOverrides:
-  cronjob: "batch/v1"
-renovate:
-  config: |
-    {}

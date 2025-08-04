@@ -7,16 +7,6 @@ resources:
   - infra
   - media
   - vpa
-  # - velero
   # - system-upgrade
   - iot
-  #- cloudnative-pg
-  - cdk8s_definitions
   - rakk0o-dev
-patches:
-  - path: namespace-no-prune-patch.yaml
-    target:
-      kind: Namespace
-  - path: pvc-no-prune-patch.yaml
-    target:
-      kind: PersistentVolumeClaim

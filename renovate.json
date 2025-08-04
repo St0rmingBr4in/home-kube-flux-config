@@ -1,11 +1,5 @@
 {
   "extends": [
     "config:best-practices"
-  ],
-  "flux": {
-    "fileMatch": ["\\.yaml$"]
-  },
-  "kubernetes": {
-    "fileMatch": ["clusters/home-lab/cdk8s_definitions/dist/.+\\.yaml$"]
-  }
+  ]
 }
