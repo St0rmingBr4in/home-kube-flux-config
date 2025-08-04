@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kube-vip
+  name: kube-vip-cloud-provider
   namespace: argocd
 spec:
   project: default
   sources:
     - repoURL: https://kube-vip.github.io/helm-charts/
-      chart: kube-vip
-      targetRevision: 0.7.1
+      chart: kube-vip-cloud-provider
+      targetRevision: 0.2.6
       helm:
         valueFiles:
           - $values/argocd/applications/kube-vip/kube-vip-values.yaml

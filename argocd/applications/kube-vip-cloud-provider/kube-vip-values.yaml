@@ -1,0 +1,20 @@
+cm:
+  data:
+    # Global IP pool for all namespaces
+    global: "192.168.72.10-192.168.72.254"
+
+    # Optional: Per-namespace IP pools
+    # prod-infra: "192.168.72.10-192.168.72.50"
+    # prod-media: "192.168.72.51-192.168.72.100"
+
+# Enable loadbalancerClass to only reconcile services that have
+# spec.loadBalancerClass: kube-vip.io/kube-vip-class
+enableloadbalancerClass: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
