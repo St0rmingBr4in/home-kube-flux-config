@@ -9,7 +9,7 @@ cm:
 
 # Enable loadbalancerClass to only reconcile services that have
 # spec.loadBalancerClass: kube-vip.io/kube-vip-class
-enableloadbalancerClass: true
+enableloadbalancerClass: false
 
 resources:
   requests:
