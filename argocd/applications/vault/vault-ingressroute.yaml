@@ -15,7 +15,7 @@ spec:
     - kind: Rule
       match: Host(`vault.st0rmingbr4in.com`)
       services:
-        - name: vault-prod-infra
+        - name: vault
           port: 8200
           scheme: https
           serversTransport: vault-backend-transport@prod-infra
