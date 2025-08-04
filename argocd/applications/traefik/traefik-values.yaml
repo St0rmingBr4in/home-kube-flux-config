@@ -20,8 +20,7 @@ deployment:
 # Service configuration
 service:
   type: LoadBalancer
-  annotations:
-    kube-vip.io/loadbalancerip: "192.168.72.3"
+  loadBalancerIP: "192.168.72.8"
 
 # IngressRoute CRD
 ingressRoute:
