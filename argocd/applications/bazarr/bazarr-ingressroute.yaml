@@ -1,0 +1,24 @@
+---
+# Traefik IngressRoute for Bazarr
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bazarr-ingressroute
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/instance: bazarr
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`bazarr.st0rmingbr4in.com`)
+      services:
+        - name: bazarr
+          port: 6767
+      middlewares:
+        - name: basic-auth
+          namespace: prod-infra
+  tls:
+    secretName: st0rmingbr4in.com-cert
