@@ -46,20 +46,9 @@ server:
       }
       disable_mlock = true
 
-  # External ingress (optional)
+  # External ingress disabled - using IngressRoute instead
   ingress:
-    enabled: true
-    hosts:
-      - host: vault.st0rmingbr4in.com
-        paths: ["/"]
-    tls:
-      - secretName: st0rmingbr4in.com-cert
-        hosts:
-          - vault.st0rmingbr4in.com
-    annotations:
-      # Backend HTTPS configuration with TLS verification
-      traefik.ingress.kubernetes.io/service.serversscheme: https
-      traefik.ingress.kubernetes.io/service.serverstransport: vault-backend-transport@containo
+    enabled: false
 
 ui:
   enabled: true

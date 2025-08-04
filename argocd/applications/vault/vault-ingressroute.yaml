@@ -1,0 +1,23 @@
+---
+# Traefik IngressRoute for Vault
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault-ingressroute
+  namespace: prod-infra
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: vault
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`vault.st0rmingbr4in.com`)
+      services:
+        - name: vault-prod-infra
+          port: 8200
+          scheme: https
+          serversTransport: vault-backend-transport@prod-infra
+  tls:
+    secretName: st0rmingbr4in.com-cert
