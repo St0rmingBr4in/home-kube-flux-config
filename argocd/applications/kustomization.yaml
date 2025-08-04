@@ -7,8 +7,8 @@ resources:
   - cert-manager-selfsigned-issuer/application.yaml
   - cert-manager-letsencrypt-issuer/application.yaml
   - gatekeeper/application.yaml
-    - kube-vip-cloud-provider/application.yaml
-    - kube-vip/application.yaml
+  - kube-vip-cloud-provider/application.yaml
+  - kube-vip/application.yaml
   - traefik/application.yaml
   - vault/application.yaml
   - vault-secrets-operator/application.yaml
