@@ -15,7 +15,7 @@ env:
   vip_arp: "true"
 
   # Specify the interface for service network
-  vip_interface: "enp0s19"
+  vip_interface: "ens19"
 
   # Disable IPVS, use Layer 2 mode
   lb_enable: "false"
