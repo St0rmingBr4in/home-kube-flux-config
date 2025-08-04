@@ -117,31 +117,31 @@ agents:
     agent:
       resources:
         limits:
-          memory: 1Gi # Increased from 300Mi to handle k3s cluster monitoring
+          memory: 1.2Gi # Based on actual usage (~903Mi) with some headroom
         requests:
           cpu: 200m
-          memory: 1Gi # Same as limit for guaranteed QoS
+          memory: 1Gi # Request slightly less than limit
     processAgent:
       resources:
         limits:
-          memory: 500Mi # Increased from 100Mi - was getting OOMKilled constantly
+          memory: 300Mi # Reduced from 500Mi - actual usage is much lower
         requests:
-          cpu: 100m # Increased for better performance
-          memory: 500Mi # Same as limit for guaranteed QoS
+          cpu: 100m
+          memory: 200Mi # Request less than limit
     traceAgent:
       resources:
         limits:
-          memory: 256Mi # Increased from 150Mi for better performance
+          memory: 200Mi # Reduced from 256Mi - actual usage is lower
         requests:
           cpu: 50m
-          memory: 256Mi # Same as limit for guaranteed QoS
+          memory: 150Mi # Request less than limit
     systemProbe:
       resources:
         limits:
-          memory: 1Gi # Increased from 512Mi for eBPF compilation and network monitoring
+          memory: 512Mi # Reduced from 1Gi - actual usage is much lower
         requests:
-          cpu: 100m # Increased for eBPF compilation
-          memory: 1Gi # Same as limit for guaranteed QoS
+          cpu: 100m
+          memory: 256Mi # Request less than limit
       securityContext:
         runAsUser: 0
         runAsGroup: 0
@@ -188,10 +188,10 @@ clusterAgent:
   tokenExistingSecret: datadog-cluster-agent
   resources:
     limits:
-      memory: 256Mi # Increased from 150Mi for better cluster monitoring
+      memory: 150Mi # Based on actual usage (~112Mi) with some headroom
     requests:
       cpu: 50m
-      memory: 256Mi # Same as limit for guaranteed QoS
+      memory: 150Mi # Request less than limit
   tolerations:
     - effect: NoSchedule
       key: ram
