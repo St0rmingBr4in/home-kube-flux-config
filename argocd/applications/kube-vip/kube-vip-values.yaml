@@ -5,9 +5,17 @@ config:
   address: "192.168.72.2"
 
 env:
-  # Enable both control plane and LoadBalancer service watching
+  # Control plane mode for API server
   cp_enable: "true"
+
+  # Enable LoadBalancer service watching
   svc_enable: "true"
+
+  # Layer 2 configuration for ARP
+  vip_arp: "true"
+
+  # Specify the interface for service network
+  vip_interface: "enp0s19"
 
   # Disable IPVS, use Layer 2 mode
   lb_enable: "false"
