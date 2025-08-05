@@ -2,40 +2,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  # Infrastructure Applications
-  - cert-manager/application.yaml
-  - cert-manager-selfsigned-issuer/application.yaml
-  - cert-manager-letsencrypt-issuer/application.yaml
-  - kube-vip-cloud-provider/application.yaml
-  - kube-vip/application.yaml
-  - traefik/application.yaml
-  - vault/application.yaml
-  - vault-secrets-operator/application.yaml
-  - datadog/application.yaml
-  - pihole/application.yaml
-
-  # Core Applications
-  - argocd/application.yaml
-  - argocd-apps/application.yaml
-
-  # Media Applications
-  - jellyfin/application.yaml
-  - jellyseerr/application.yaml
-  - bazarr/application.yaml
-  - sonarr/application.yaml
-  - radarr/application.yaml
-  - qbittorrent/application.yaml
-  - prowlarr/application.yaml
-  - flaresolverr/application.yaml
-  - shared-storage/application.yaml
-
-  # Game Applications
-  - minecraft-aphorya/application.yaml
-
-  # Security & Compliance
-  - memory-webhook/application.yaml
-
-  # External Services
-  - external-service-prod-infra/application.yaml
-  - external-service-prod-aphorya/application.yaml
-  - external-service-rakk0o-dev/application.yaml
+  # Application Categories
+  - infrastructure/
+  - core/
+  - media/
+  - games/
+  - compliance/
+  - external-services/

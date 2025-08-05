@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prowlarr
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: tccr.io/truecharts
+      chart: prowlarr
+      targetRevision: 18.15.4
+      helm:
+        valueFiles:
+          - $values/argocd/applications/media/prowlarr/prowlarr-values.yaml
+    - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+      targetRevision: HEAD
+      ref: values
+    - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+      targetRevision: HEAD
+      path: argocd/applications/prowlarr
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod-media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  ignoreDifferences:
+    - group: "*"
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/hostUsers
