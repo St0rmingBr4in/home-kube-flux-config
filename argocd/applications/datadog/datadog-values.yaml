@@ -138,10 +138,10 @@ agents:
     systemProbe:
       resources:
         limits:
-          memory: 512Mi # Reduced from 1Gi - actual usage is much lower
+          memory: 1Gi # Reduced from 1Gi - actual usage is much lower
         requests:
           cpu: 100m
-          memory: 256Mi # Request less than limit
+          memory: 1Gi # Request less than limit
       securityContext:
         runAsUser: 0
         runAsGroup: 0

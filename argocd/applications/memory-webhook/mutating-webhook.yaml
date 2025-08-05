@@ -22,21 +22,10 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     admissionReviewVersions: ["v1", "v1beta1"]
-    namespaceSelector:
+    namespaceSelector: {}
+    objectSelector:
       matchExpressions:
-        # Skip kube-system and other system namespaces
-        - key: kubernetes.io/metadata.name
+        # Exclude the memory webhook itself to avoid bootstrap issues
+        - key: app
           operator: NotIn
-          values: ["kube-system", "kube-public", "kube-node-lease"]
-        # Skip cert-manager namespace to avoid bootstrap issues
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values: ["cert-manager"]
-        # Skip gatekeeper namespace to avoid conflicts
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values: ["gatekeeper-system"]
-        # Skip prod-infra to avoid intercepting the webhook itself
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values: ["prod-infra"]
+          values: ["memory-webhook"]
