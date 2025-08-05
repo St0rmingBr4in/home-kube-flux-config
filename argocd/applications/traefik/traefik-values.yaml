@@ -3,10 +3,10 @@ global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
-# Pin the AMD64 image digest to ensure correct architecture
+# Use the latest working Traefik version
 image:
   repository: traefik
-  tag: "v3.4.5"
+  tag: "v3.4.3@sha256:f3de2b96ec6b1cc987619c4d1d65d7e8140862eb0bbfc5f0e2e563691e8787d8"
 
 deployment:
   replicas: 1
