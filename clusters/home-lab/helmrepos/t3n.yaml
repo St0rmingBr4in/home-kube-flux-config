@@ -1,9 +1,0 @@
----
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
-metadata:
-  name: t3n
-  namespace: flux-system
-spec:
-  interval: 1h0m0s
-  url: https://storage.googleapis.com/t3n-helm-charts

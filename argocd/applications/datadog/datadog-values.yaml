@@ -120,7 +120,7 @@ agents:
           memory: 1.2Gi # Based on actual usage (~903Mi) with some headroom
         requests:
           cpu: 200m
-          memory: 1Gi # Request slightly less than limit
+          memory: 1Gi # Request less than limit
     processAgent:
       resources:
         limits:

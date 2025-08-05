@@ -12,6 +12,7 @@ resources:
   - vault/application.yaml
   - vault-secrets-operator/application.yaml
   - datadog/application.yaml
+  - pihole/application.yaml
 
   # Core Applications
   - argocd/application.yaml

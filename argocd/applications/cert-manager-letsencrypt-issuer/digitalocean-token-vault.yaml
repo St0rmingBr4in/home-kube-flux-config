@@ -1,0 +1,18 @@
+---
+# VaultStaticSecret for DigitalOcean token
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: digitalocean-token-vault
+  namespace: prod-infra
+spec:
+  mount: secret
+  path: digitalocean-token
+  type: kv-v2
+  vaultAuthRef: prod-infra/default
+  destination:
+    create: true
+    name: digitalocean-token
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h

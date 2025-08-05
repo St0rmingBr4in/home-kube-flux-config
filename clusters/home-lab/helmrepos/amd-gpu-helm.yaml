@@ -1,9 +1,0 @@
----
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
-metadata:
-  name: amd-gpu-helm
-  namespace: flux-system
-spec:
-  interval: 1h0m0s
-  url: https://radeonopencompute.github.io/k8s-device-plugin/

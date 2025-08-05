@@ -1,0 +1,40 @@
+---
+# PiHole configuration
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi # Memory webhook will ensure this equals limit for guaranteed QoS
+
+# Service configuration for LoadBalancer (kube-vip)
+serviceDns:
+  type: LoadBalancer
+  loadBalancerIP: "192.168.72.7"
+
+serviceWeb:
+  type: ClusterIP
+
+# Enable DNS over HTTPS
+doh:
+  enabled: false
+
+# Persistent storage
+persistentVolumeClaim:
+  enabled: false
+
+# DNS configuration
+dnsmasq:
+  upstreamServers:
+    - 1.1.1.1
+    - 1.0.0.1
+  customDnsEntries: []
+
+# Admin interface
+admin:
+  enabled: true
+
+# Monitoring
+monitoring:
+  podMonitor:
+    enabled: false # Can be enabled if Prometheus is available

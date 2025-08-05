@@ -5,4 +5,5 @@ resources:
   - pv-minecraft-aphorya-datadir.yaml
   - minecraft-aphorya-datadir-pvc.yaml
   - vault-static-secret.yaml
+  - dynmap-db-secret-vault.yaml
   # Service account and secrets managed directly by Vault Kubernetes secrets engine
