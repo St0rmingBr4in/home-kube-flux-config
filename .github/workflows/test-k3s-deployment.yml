@@ -137,8 +137,8 @@ jobs:
           TIMEOUT=300
           FAILED_APPS=()
 
-          # Get list of application names
-          APPS=$(argocd app list -o name 2>/dev/null || echo "")
+          # Get list of specific application names to check
+          APPS="argocd/argocd-apps argocd/cert-manager"
 
           if [ -n "$APPS" ]; then
             # Function to check a single app
@@ -233,5 +233,26 @@ jobs:
           echo "=== ArgoCD Applications Details ==="
           kubectl describe applications -n argocd || echo "No applications found to describe"
 
+          echo "=== ArgoCD Pod Status ==="
+          kubectl get pods -n argocd || echo "ArgoCD namespace not found"
+
+          echo "=== ArgoCD Server Logs (last 50 lines) ==="
+          kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server --tail=50 || echo "ArgoCD server logs not available"
+
+          echo "=== ArgoCD Application Controller Logs (last 50 lines) ==="
+          kubectl logs -n argocd -l app.kubernetes.io/name=argocd-application-controller --tail=50 || echo "ArgoCD application controller logs not available"
+
+          echo "=== ArgoCD Repo Server Logs (last 50 lines) ==="
+          kubectl logs -n argocd -l app.kubernetes.io/name=argocd-repo-server --tail=50 || echo "ArgoCD repo server logs not available"
+
+          echo "=== ArgoCD Events ==="
+          kubectl get events -n argocd --sort-by='.lastTimestamp' || echo "No events found in argocd namespace"
+
+          echo "=== Cluster Events (last 20) ==="
+          kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20 || echo "No cluster events found"
+
           echo "=== Nodes ==="
           kubectl get nodes
+
+          echo "=== Node Conditions ==="
+          kubectl describe nodes || echo "Could not describe nodes"
