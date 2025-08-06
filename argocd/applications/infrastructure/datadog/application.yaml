@@ -9,7 +9,7 @@ spec:
   sources:
     - repoURL: https://helm.datadoghq.com
       chart: datadog
-      targetRevision: 3.40.2
+      targetRevision: 3.128.0
       helm:
         valueFiles:
           - $values/argocd/applications/infrastructure/datadog/datadog-values.yaml
