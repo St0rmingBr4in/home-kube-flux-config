@@ -86,7 +86,7 @@ jobs:
           ARGO_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
           # Port forward ArgoCD server (run in background)
-          kubectl port-forward svc/argocd-server -n argocd 8081:443 &
+          kubectl port-forward svc/argocd-server -n argocd 8081:443 --address=0.0.0.0 > /dev/null 2>&1 &
           PORTFORWARD_PID=$!
           sleep 10
 
@@ -120,7 +120,7 @@ jobs:
           echo "Checking ArgoCD application status..."
 
           # Port forward again for CLI commands
-          kubectl port-forward svc/argocd-server -n argocd 8081:443 &
+          kubectl port-forward svc/argocd-server -n argocd 8081:443 --address=0.0.0.0 > /dev/null 2>&1 &
           PORTFORWARD_PID=$!
           sleep 10
 
