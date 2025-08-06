@@ -9,7 +9,7 @@ spec:
   sources:
     - repoURL: https://itzg.github.io/minecraft-server-charts/
       chart: minecraft
-      targetRevision: 4.10.0
+      targetRevision: 4.26.4
       helm:
         valueFiles:
           - $values/argocd/applications/games/minecraft-aphorya/minecraft-aphorya-values.yaml
