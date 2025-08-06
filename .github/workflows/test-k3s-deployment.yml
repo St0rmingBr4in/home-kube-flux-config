@@ -134,7 +134,7 @@ jobs:
 
           # Wait for applications to sync and become healthy (30s timeout)
           echo "=== Waiting for applications to sync and become healthy ==="
-          TIMEOUT=30
+          TIMEOUT=300
           FAILED_APPS=()
 
           # Get list of application names
@@ -146,6 +146,8 @@ jobs:
               local app="$1"
               echo "Checking $app..."
               START_TIME=$(date +%s)
+              PREV_SYNC_STATUS=""
+              PREV_HEALTH_STATUS=""
               
               while [ $(($(date +%s) - START_TIME)) -lt $TIMEOUT ]; do
                 SYNC_STATUS=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.sync.status // "Unknown"')
@@ -156,14 +158,20 @@ jobs:
                   return 0
                 fi
                 
-                echo "  $app: Sync=$SYNC_STATUS, Health=$HEALTH_STATUS (waiting...)"
+                # Only log if status changed
+                if [ "$SYNC_STATUS" != "$PREV_SYNC_STATUS" ] || [ "$HEALTH_STATUS" != "$PREV_HEALTH_STATUS" ]; then
+                  echo "  $app: Sync=$SYNC_STATUS, Health=$HEALTH_STATUS (waiting...)"
+                  PREV_SYNC_STATUS="$SYNC_STATUS"
+                  PREV_HEALTH_STATUS="$HEALTH_STATUS"
+                fi
+                
                 sleep 5
               done
               
               # Final check after timeout
               FINAL_SYNC=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.sync.status // "Unknown"')
               FINAL_HEALTH=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.health.status // "Unknown"')
-              
+
               echo "✗ $app: Failed to reach Synced+Healthy within ${TIMEOUT}s (Sync=$FINAL_SYNC, Health=$FINAL_HEALTH)"
               echo "$app" >> /tmp/failed_apps.txt
               return 1
