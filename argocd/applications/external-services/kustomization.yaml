@@ -3,6 +3,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # External Service Definitions
-  - external-service-prod-infra/application.yaml
-  - external-service-prod-aphorya/application.yaml
-  - external-service-rakk0o-dev/application.yaml
+  - external-service-prod-infra/applicationset.yaml
+  - external-service-prod-aphorya/applicationset.yaml
+  - external-service-rakk0o-dev/applicationset.yaml

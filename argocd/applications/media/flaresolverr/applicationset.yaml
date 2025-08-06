@@ -9,12 +9,20 @@ spec:
     - list:
         elements:
           - name: flaresolverr
+            enabled: "true"
             chart: flaresolverr
             chartVersion: 12.3.0
             namespace: prod-media
             valuesPath: argocd/applications/media/flaresolverr/flaresolverr-values.yaml
             ciOverridesPath: media/flaresolverr/ci-overrides.yaml
             manifestPath: argocd/applications/media/flaresolverr
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

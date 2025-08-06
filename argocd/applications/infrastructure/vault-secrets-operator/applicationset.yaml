@@ -9,12 +9,20 @@ spec:
     - list:
         elements:
           - name: vault-secrets-operator
+            enabled: "true"
             chart: vault-secrets-operator
             chartVersion: 0.10.0
             namespace: prod-infra
             repoURL: https://helm.releases.hashicorp.com
             valuesPath: argocd/applications/infrastructure/vault-secrets-operator/vault-secrets-operator-values.yaml
             ciOverridesPath: infrastructure/vault-secrets-operator/ci-overrides.yaml
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

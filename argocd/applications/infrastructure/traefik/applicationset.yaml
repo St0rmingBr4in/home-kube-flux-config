@@ -9,6 +9,7 @@ spec:
     - list:
         elements:
           - name: traefik
+            enabled: "true"
             chart: traefik
             chartVersion: 36.3.0
             namespace: kube-system
@@ -16,6 +17,13 @@ spec:
             valuesPath: argocd/applications/infrastructure/traefik/traefik-values.yaml
             ciOverridesPath: infrastructure/traefik/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/traefik
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

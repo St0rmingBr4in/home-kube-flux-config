@@ -2,20 +2,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: radarr
+  name: argocd-apps
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - name: radarr
+          - name: argocd-apps
             enabled: "true"
-            chart: radarr
-            chartVersion: 23.17.1
-            namespace: prod-media
-            valuesPath: argocd/applications/media/radarr/radarr-values.yaml
-            ciOverridesPath: media/radarr/ci-overrides.yaml
-            manifestPath: argocd/applications/media/radarr
+            namespace: argocd
+            manifestPath: argocd/applications
 
   # Only generate applications where enabled is "true"
   selector:
@@ -28,24 +24,13 @@ spec:
     metadata:
       name: "{{name}}"
       namespace: argocd
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
 
-      sources:
-        - repoURL: tccr.io/truecharts
-          chart: "{{chart}}"
-          targetRevision: "{{chartVersion}}"
-          helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc
@@ -71,7 +56,7 @@ spec:
           kind: "Secret"
           jsonPointers:
             - /data
-        - group: apps
-          kind: Deployment
+        - group: "argoproj.io"
+          kind: "Application"
           jsonPointers:
-            - /spec/template/spec/hostUsers
+            - /status

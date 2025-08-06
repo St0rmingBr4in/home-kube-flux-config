@@ -2,20 +2,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: radarr
+  name: external-service-prod-aphorya
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - name: radarr
+          - name: external-service-prod-aphorya
             enabled: "true"
-            chart: radarr
-            chartVersion: 23.17.1
-            namespace: prod-media
-            valuesPath: argocd/applications/media/radarr/radarr-values.yaml
-            ciOverridesPath: media/radarr/ci-overrides.yaml
-            manifestPath: argocd/applications/media/radarr
+            chart: external-service
+            chartVersion: 1.1.0
+            namespace: prod-aphorya
+            repoURL: https://storage.googleapis.com/t3n-helm-charts
+            valuesPath: argocd/applications/external-services/external-service-prod-aphorya/external-service-values.yaml
+            ciOverridesPath: external-services/external-service-prod-aphorya/ci-overrides.yaml
 
   # Only generate applications where enabled is "true"
   selector:
@@ -28,13 +28,11 @@ spec:
     metadata:
       name: "{{name}}"
       namespace: argocd
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
 
       sources:
-        - repoURL: tccr.io/truecharts
+        - repoURL: "{{repoURL}}"
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
@@ -43,9 +41,6 @@ spec:
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           ref: values
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc
@@ -57,21 +52,11 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
 
         retry:
-          limit: 5
+          limit: 10
           backoff:
-            duration: 5s
+            duration: 10s
+            maxDuration: 5m
             factor: 2
-            maxDuration: 3m
-
-      ignoreDifferences:
-        - group: "*"
-          kind: "Secret"
-          jsonPointers:
-            - /data
-        - group: apps
-          kind: Deployment
-          jsonPointers:
-            - /spec/template/spec/hostUsers

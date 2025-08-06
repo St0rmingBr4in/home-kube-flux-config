@@ -2,20 +2,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: radarr
+  name: minecraft-aphorya
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - name: radarr
+          - name: minecraft-aphorya
             enabled: "true"
-            chart: radarr
-            chartVersion: 23.17.1
-            namespace: prod-media
-            valuesPath: argocd/applications/media/radarr/radarr-values.yaml
-            ciOverridesPath: media/radarr/ci-overrides.yaml
-            manifestPath: argocd/applications/media/radarr
+            namespace: prod-aphorya
+            minecraftChart: minecraft
+            minecraftChartVersion: 4.10.0
+            minecraftRepoURL: https://itzg.github.io/minecraft-server-charts/
+            postgresqlChart: postgresql
+            postgresqlChartVersion: 13.2.11
+            postgresqlRepoURL: https://charts.bitnami.com/bitnami
+            minecraftValuesPath: argocd/applications/games/minecraft-aphorya/minecraft-aphorya-values.yaml
+            dynmapDbValuesPath: argocd/applications/games/minecraft-aphorya/dynmap-db-values.yaml
+            manifestPath: argocd/applications/games/minecraft-aphorya
+            ciOverridesPath: games/minecraft-aphorya/ci-overrides.yaml
 
   # Only generate applications where enabled is "true"
   selector:
@@ -28,18 +33,23 @@ spec:
     metadata:
       name: "{{name}}"
       namespace: argocd
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
 
       sources:
-        - repoURL: tccr.io/truecharts
-          chart: "{{chart}}"
-          targetRevision: "{{chartVersion}}"
+        - repoURL: "{{minecraftRepoURL}}"
+          chart: "{{minecraftChart}}"
+          targetRevision: "{{minecraftChartVersion}}"
           helm:
             valueFiles:
-              - $values/{{valuesPath}}
+              - $values/{{minecraftValuesPath}}
+        - repoURL: "{{postgresqlRepoURL}}"
+          chart: "{{postgresqlChart}}"
+          targetRevision: "{{postgresqlChartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{dynmapDbValuesPath}}
+            releaseName: dynmap-db
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           ref: values
@@ -68,7 +78,7 @@ spec:
 
       ignoreDifferences:
         - group: "*"
-          kind: "Secret"
+          kind: Secret
           jsonPointers:
             - /data
         - group: apps

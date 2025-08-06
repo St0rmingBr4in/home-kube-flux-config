@@ -2,16 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: cert-manager-letsencrypt-issuer
+  name: memory-webhook
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - name: cert-manager-letsencrypt-issuer
+          - name: memory-webhook
             enabled: "true"
             namespace: prod-infra
-            manifestPath: argocd/applications/infrastructure/cert-manager-letsencrypt-issuer
+            manifestPath: argocd/applications/compliance/memory-webhook
+            ciOverridesPath: compliance/memory-webhook/ci-overrides.yaml
 
   # Only generate applications where enabled is "true"
   selector:
@@ -24,6 +25,8 @@ spec:
     metadata:
       name: "{{name}}"
       namespace: argocd
+      labels:
+        app.kubernetes.io/name: "{{name}}"
     spec:
       project: default
 
@@ -42,7 +45,7 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - ServerSideApply=true
+          - ApplyOutOfSyncOnly=true
 
         retry:
           limit: 5
@@ -50,3 +53,5 @@ spec:
             duration: 5s
             factor: 2
             maxDuration: 3m
+
+      revisionHistoryLimit: 10

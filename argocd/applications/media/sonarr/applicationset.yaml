@@ -9,12 +9,20 @@ spec:
     - list:
         elements:
           - name: sonarr
+            enabled: "true"
             chart: sonarr
             chartVersion: 23.6.5
             namespace: prod-media
             valuesPath: argocd/applications/media/sonarr/sonarr-values.yaml
             ciOverridesPath: media/sonarr/ci-overrides.yaml
             manifestPath: argocd/applications/media/sonarr
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

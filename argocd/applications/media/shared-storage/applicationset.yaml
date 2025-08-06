@@ -9,8 +9,16 @@ spec:
     - list:
         elements:
           - name: shared-storage
+            enabled: "true"
             namespace: prod-media
             manifestPath: argocd/applications/media/shared-storage
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

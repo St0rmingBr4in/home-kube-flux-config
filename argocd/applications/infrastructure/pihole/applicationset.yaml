@@ -9,6 +9,7 @@ spec:
     - list:
         elements:
           - name: pihole
+            enabled: "true"
             chart: pihole
             chartVersion: 2.18.0
             namespace: prod-infra
@@ -16,6 +17,13 @@ spec:
             valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
             ciOverridesPath: infrastructure/pihole/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/pihole
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

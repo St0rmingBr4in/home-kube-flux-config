@@ -9,6 +9,7 @@ spec:
     - list:
         elements:
           - name: kube-vip-cloud-provider
+            enabled: "true"
             chart: kube-vip-cloud-provider
             chartVersion: 0.2.6
             namespace: prod-infra
@@ -16,6 +17,13 @@ spec:
             valuesPath: argocd/applications/infrastructure/kube-vip-cloud-provider/kube-vip-cloud-provider-values.yaml
             ciOverridesPath: infrastructure/kube-vip-cloud-provider/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/kube-vip-cloud-provider
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:

@@ -9,6 +9,7 @@ spec:
     - list:
         elements:
           - name: vault
+            enabled: "true"
             chart: vault
             chartVersion: 0.25.0
             namespace: prod-infra
@@ -16,6 +17,13 @@ spec:
             valuesPath: argocd/applications/infrastructure/vault/vault-values.yaml
             ciOverridesPath: infrastructure/vault/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/vault
+
+  # Only generate applications where enabled is "true"
+  selector:
+    matchExpressions:
+      - key: enabled
+        operator: In
+        values: ["true"]
 
   template:
     metadata:
