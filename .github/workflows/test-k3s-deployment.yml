@@ -5,9 +5,11 @@ on:
     branches: ["**"]
     paths:
       - "argocd/applications/**"
+      - ".github/workflows/test-k3s-deployment.yml"
   pull_request:
     paths:
       - "argocd/applications/**"
+      - ".github/workflows/test-k3s-deployment.yml"
   workflow_dispatch: # Allow manual triggering
 
 env:
@@ -132,8 +134,8 @@ jobs:
           TIMEOUT=300
           FAILED_APPS=()
 
-          # Get list of specific application names to check
-          APPS="argocd/argocd-apps argocd/cert-manager argocd/traefik"
+          # Get list of all application names to check
+          APPS=$(argocd app list -o name 2>/dev/null || echo "")
 
           if [ -n "$APPS" ]; then
             # Function to check a single app
