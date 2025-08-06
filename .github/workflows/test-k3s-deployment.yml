@@ -67,7 +67,7 @@ jobs:
           echo "Waiting for ArgoCD deployments..."
           kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
           kubectl wait --for=condition=available --timeout=600s deployment/argocd-repo-server -n argocd
-          kubectl wait --for=condition=available --timeout=600s deployment/argocd-application-controller -n argocd
+          kubectl wait --for=condition=available --timeout=600s deployment/argocd-applicationset-controller -n argocd
 
       - name: Configure ArgoCD
         run: |
