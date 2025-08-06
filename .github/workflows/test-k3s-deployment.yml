@@ -104,7 +104,7 @@ jobs:
 
       - name: Apply applications
         run: |
-          kubectl apply -f argocd/applications/kustomization.yaml
+          kubectl apply -k argocd/applications/
 
           # Check if applications are created
           kubectl get applications -n argocd
