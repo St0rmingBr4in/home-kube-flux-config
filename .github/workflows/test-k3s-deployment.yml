@@ -132,7 +132,7 @@ jobs:
           FAILED_APPS=()
 
           # Get list of specific application names to check
-          APPS="argocd/argocd-apps argocd/cert-manager"
+          APPS="argocd/argocd-apps argocd/cert-manager argocd/traefik"
 
           if [ -n "$APPS" ]; then
             # Function to check a single app
