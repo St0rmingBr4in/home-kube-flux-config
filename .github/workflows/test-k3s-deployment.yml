@@ -75,7 +75,7 @@ jobs:
           ARGO_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 
           # Port forward ArgoCD server (run in background)
-          kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+          kubectl port-forward svc/argocd-server -n argocd 8081:443 &
           PORTFORWARD_PID=$!
           sleep 10
 
@@ -86,7 +86,7 @@ jobs:
           rm argocd-linux-amd64
 
           # Login (disable TLS verification for local testing)
-          argocd login localhost:8080 --username admin --password "$ARGO_PASSWORD" --insecure
+          argocd login localhost:8081 --username admin --password "$ARGO_PASSWORD" --insecure
 
           # Kill port forward
           kill $PORTFORWARD_PID || true
@@ -109,13 +109,13 @@ jobs:
           echo "Checking ArgoCD application status..."
 
           # Port forward again for CLI commands
-          kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+          kubectl port-forward svc/argocd-server -n argocd 8081:443 &
           PORTFORWARD_PID=$!
           sleep 10
 
           # Re-login
           ARGO_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-          argocd login localhost:8080 --username admin --password "$ARGO_PASSWORD" --insecure
+          argocd login localhost:8081 --username admin --password "$ARGO_PASSWORD" --insecure
 
           # List all applications
           echo "=== ArgoCD Applications ==="
