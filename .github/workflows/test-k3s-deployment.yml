@@ -102,15 +102,9 @@ jobs:
           # Kill port forward
           kill $PORTFORWARD_PID || true
 
-      - name: Test core ArgoCD applications
+      - name: Apply applications
         run: |
-          echo "Testing core ArgoCD applications..."
-
-          # Apply the argocd-apps application first (this manages other applications)
-          kubectl apply -f argocd/applications/core/argocd-apps/application.yaml
-
-          # Wait a moment for ArgoCD to process
-          sleep 30
+          kubectl apply -f argocd/applications/kustomization.yaml
 
           # Check if applications are created
           kubectl get applications -n argocd
