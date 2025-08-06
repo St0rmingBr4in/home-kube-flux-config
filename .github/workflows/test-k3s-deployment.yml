@@ -60,6 +60,7 @@ jobs:
         id: k3s
         with:
           version: latest
+          args: --disable=servicelb --disable=traefik
 
       - name: Wait for K3s to be ready
         run: |
