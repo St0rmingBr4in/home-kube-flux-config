@@ -18,7 +18,7 @@ spec:
       ref: values
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
       targetRevision: HEAD
-      path: argocd/applications/vault
+      path: argocd/applications/infrastructure/vault
   destination:
     server: https://kubernetes.default.svc
     namespace: prod-infra

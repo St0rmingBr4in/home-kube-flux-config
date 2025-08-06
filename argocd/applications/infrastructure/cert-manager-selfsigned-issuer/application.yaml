@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
     targetRevision: HEAD
-    path: argocd/applications/cert-manager-selfsigned-issuer
+    path: argocd/applications/infrastructure/cert-manager-selfsigned-issuer
   destination:
     server: https://kubernetes.default.svc
     namespace: prod-infra
