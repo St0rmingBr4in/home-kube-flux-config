@@ -1,5 +1,10 @@
 {
   "extends": [
     "config:best-practices"
-  ]
+  ],
+  "argocd": {
+    "managerFilePatterns": [
+      "/^argocd\\/applications\\/.+\\/application\\.yaml$/"
+    ]
+  }
 }

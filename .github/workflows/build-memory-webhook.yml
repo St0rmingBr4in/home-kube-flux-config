@@ -2,14 +2,36 @@ name: Build and Publish Memory Webhook
 
 on:
   push:
-    branches: [master]
+    branches: ["**"] # Run on all branches
     paths:
-      - "argocd/applications/memory-webhook/**"
+      - "argocd/applications/compliance/memory-webhook/**"
+  pull_request:
+    paths:
+      - "argocd/applications/compliance/memory-webhook/**"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "./argocd/applications/compliance/memory-webhook/go.mod"
+
+      - name: Run tests
+        working-directory: ./argocd/applications/compliance/memory-webhook
+        run: |
+          go mod tidy
+          go test -v ./...
+
   build-and-publish:
     runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -31,25 +53,20 @@ jobs:
           images: st0rmingbr4in/memory-webhook
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./argocd/applications/memory-webhook
-          file: ./argocd/applications/memory-webhook/Dockerfile
+          context: ./argocd/applications/compliance/memory-webhook
+          file: ./argocd/applications/compliance/memory-webhook/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Run tests in Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}/argocd/applications/memory-webhook:/app -w /app golang:1.21-alpine sh -c "go mod tidy && go test -v"
 
       - name: Update deployment image (if needed)
         run: |
