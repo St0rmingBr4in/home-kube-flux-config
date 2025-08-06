@@ -47,6 +47,8 @@ jobs:
       - name: Set up K3s cluster
         uses: debianmaster/actions-k3s@master
         id: k3s
+        with:
+          version: latest
 
       - name: Wait for K3s to be ready
         run: |
