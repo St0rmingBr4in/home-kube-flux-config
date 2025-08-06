@@ -42,7 +42,7 @@ jobs:
       - name: Verify changes
         run: |
           echo "Modified files with new targetRevision:"
-          git diff --no-pager
+          git diff
 
       - name: Set up K3s cluster
         uses: debianmaster/actions-k3s@master
