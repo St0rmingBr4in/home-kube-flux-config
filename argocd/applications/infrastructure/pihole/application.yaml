@@ -9,7 +9,7 @@ spec:
   sources:
     - repoURL: https://mojo2600.github.io/pihole-kubernetes/
       chart: pihole
-      targetRevision: 2.18.0
+      targetRevision: 2.31.0
       helm:
         valueFiles:
           - $values/argocd/applications/infrastructure/pihole/pihole-values.yaml
