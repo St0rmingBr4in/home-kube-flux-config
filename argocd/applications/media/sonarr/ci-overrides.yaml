@@ -1,0 +1,9 @@
+# CI Override: Sonarr optimized for testing
+# Disable all persistence
+persistence:
+  config:
+    enabled: false
+  media:
+    enabled: false
+  downloads:
+    enabled: false

@@ -1,0 +1,7 @@
+# CI Override: Vault optimized for testing
+# Disable persistence for CI
+server:
+  dataStorage:
+    enabled: false
+  auditStorage:
+    enabled: false

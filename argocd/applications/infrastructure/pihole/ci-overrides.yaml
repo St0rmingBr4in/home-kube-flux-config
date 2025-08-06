@@ -1,0 +1,4 @@
+# CI Override: Pi-hole optimized for testing
+# Disable persistence
+persistentVolumeClaim:
+  enabled: false

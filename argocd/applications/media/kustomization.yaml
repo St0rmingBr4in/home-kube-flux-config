@@ -9,7 +9,7 @@ resources:
   # Content Management (*arr stack)
   - sonarr/application.yaml
   - radarr/application.yaml
-  - bazarr/application.yaml
+  - bazarr/applicationset.yaml
   - prowlarr/application.yaml
 
   # Download & Tools

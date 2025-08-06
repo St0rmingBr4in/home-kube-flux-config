@@ -1,0 +1,9 @@
+# CI Override: Minecraft Aphorya optimized for testing
+# Disable persistence
+persistence:
+  dataDir:
+    enabled: false
+
+extraVolumes:
+  - volumeMounts: []
+    volumes: []

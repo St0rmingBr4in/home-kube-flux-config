@@ -1,0 +1,5 @@
+# CI Override: Prowlarr optimized for testing
+# Disable all persistence
+persistence:
+  config:
+    enabled: false

@@ -1,0 +1,3 @@
+# CI Override: Memory Webhook (Kustomize-based)
+# This application deploys custom webhook via Kustomize
+# No Helm values to override, but kept for consistency
