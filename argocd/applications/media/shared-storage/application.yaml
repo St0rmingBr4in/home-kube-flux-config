@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
     targetRevision: HEAD
-    path: argocd/applications/shared-storage
+    path: argocd/applications/media/shared-storage
   destination:
     server: https://kubernetes.default.svc
     namespace: prod-media

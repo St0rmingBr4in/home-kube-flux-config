@@ -14,7 +14,7 @@ spec:
             namespace: prod-media
             valuesPath: argocd/applications/media/bazarr/bazarr-values.yaml
             ciOverridesPath: media/bazarr/ci-overrides.yaml
-            manifestPath: argocd/applications/bazarr
+            manifestPath: argocd/applications/media/bazarr
 
   template:
     metadata:

@@ -18,7 +18,7 @@ spec:
       ref: values
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
       targetRevision: HEAD
-      path: argocd/applications/jellyseerr
+      path: argocd/applications/media/jellyseerr
   destination:
     server: https://kubernetes.default.svc
     namespace: prod-media

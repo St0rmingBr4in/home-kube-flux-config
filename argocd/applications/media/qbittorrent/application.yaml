@@ -18,7 +18,7 @@ spec:
       ref: values
     - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
       targetRevision: HEAD
-      path: argocd/applications/qbittorrent
+      path: argocd/applications/media/qbittorrent
   destination:
     server: https://kubernetes.default.svc
     namespace: prod-media
