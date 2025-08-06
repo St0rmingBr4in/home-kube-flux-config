@@ -230,5 +230,8 @@ jobs:
           echo "=== ArgoCD Applications ==="
           kubectl get applications -n argocd || echo "No applications found"
 
+          echo "=== ArgoCD Applications Details ==="
+          kubectl describe applications -n argocd || echo "No applications found to describe"
+
           echo "=== Nodes ==="
           kubectl get nodes
