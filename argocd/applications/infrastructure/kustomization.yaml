@@ -3,19 +3,19 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # Certificate Management
-  - cert-manager/application.yaml
-  - cert-manager-selfsigned-issuer/application.yaml
-  - cert-manager-letsencrypt-issuer/application.yaml
+  - cert-manager/applicationset.yaml
+  - cert-manager-selfsigned-issuer/applicationset.yaml
+  - cert-manager-letsencrypt-issuer/applicationset.yaml
 
   # Load Balancing & Networking
-  - kube-vip/application.yaml
-  - kube-vip-cloud-provider/application.yaml
-  - traefik/application.yaml
+  - kube-vip/applicationset.yaml
+  - kube-vip-cloud-provider/applicationset.yaml
+  - traefik/applicationset.yaml
 
   # Secret Management
-  - vault/application.yaml
-  - vault-secrets-operator/application.yaml
+  - vault/applicationset.yaml
+  - vault-secrets-operator/applicationset.yaml
 
   # Monitoring & DNS
-  - datadog/application.yaml
-  - pihole/application.yaml
+  - datadog/applicationset.yaml
+  - pihole/applicationset.yaml

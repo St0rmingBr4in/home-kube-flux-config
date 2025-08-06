@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://charts.t3n.io
+    - repoURL: https://storage.googleapis.com/t3n-helm-charts
       chart: external-service
       targetRevision: 1.1.0
       helm:

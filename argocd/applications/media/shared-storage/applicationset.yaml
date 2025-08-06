@@ -1,0 +1,44 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: shared-storage
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: shared-storage
+            namespace: prod-media
+            manifestPath: argocd/applications/media/shared-storage
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

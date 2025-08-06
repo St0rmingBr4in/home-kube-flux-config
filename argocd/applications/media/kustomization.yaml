@@ -3,18 +3,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # Media Server & UI
-  - jellyfin/application.yaml
-  - jellyseerr/application.yaml
+  - jellyfin/applicationset.yaml
+  - jellyseerr/applicationset.yaml
 
   # Content Management (*arr stack)
-  - sonarr/application.yaml
-  - radarr/application.yaml
+  - sonarr/applicationset.yaml
+  - radarr/applicationset.yaml
   - bazarr/applicationset.yaml
-  - prowlarr/application.yaml
+  - prowlarr/applicationset.yaml
 
   # Download & Tools
-  - qbittorrent/application.yaml
-  - flaresolverr/application.yaml
+  - qbittorrent/applicationset.yaml
+  - flaresolverr/applicationset.yaml
 
   # Storage
-  - shared-storage/application.yaml
+  - shared-storage/applicationset.yaml

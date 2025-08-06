@@ -1,0 +1,69 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: prowlarr
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: prowlarr
+            chart: prowlarr
+            chartVersion: 18.15.4
+            namespace: prod-media
+            valuesPath: argocd/applications/media/prowlarr/prowlarr-values.yaml
+            ciOverridesPath: media/prowlarr/ci-overrides.yaml
+            manifestPath: argocd/applications/media/prowlarr
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+
+      sources:
+        - repoURL: tccr.io/truecharts
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{valuesPath}}
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      ignoreDifferences:
+        - group: "*"
+          kind: "Secret"
+          jsonPointers:
+            - /data
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/template/spec/hostUsers

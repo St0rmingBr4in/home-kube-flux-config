@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: pihole
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: pihole
+            chart: pihole
+            chartVersion: 2.18.0
+            namespace: prod-infra
+            repoURL: https://mojo2600.github.io/pihole-kubernetes/
+            valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
+            ciOverridesPath: infrastructure/pihole/ci-overrides.yaml
+            manifestPath: argocd/applications/infrastructure/pihole
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: default
+
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{valuesPath}}
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

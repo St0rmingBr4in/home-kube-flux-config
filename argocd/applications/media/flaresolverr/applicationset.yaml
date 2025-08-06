@@ -1,0 +1,69 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: flaresolverr
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: flaresolverr
+            chart: flaresolverr
+            chartVersion: 12.3.0
+            namespace: prod-media
+            valuesPath: argocd/applications/media/flaresolverr/flaresolverr-values.yaml
+            ciOverridesPath: media/flaresolverr/ci-overrides.yaml
+            manifestPath: argocd/applications/media/flaresolverr
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+
+      sources:
+        - repoURL: tccr.io/truecharts
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{valuesPath}}
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      ignoreDifferences:
+        - group: "*"
+          kind: "Secret"
+          jsonPointers:
+            - /data
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/template/spec/hostUsers

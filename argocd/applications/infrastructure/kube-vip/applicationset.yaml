@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kube-vip
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: kube-vip
+            chart: kube-vip
+            chartVersion: 0.7.1
+            namespace: prod-infra
+            repoURL: https://kube-vip.github.io/helm-charts/
+            valuesPath: argocd/applications/infrastructure/kube-vip/kube-vip-values.yaml
+            ciOverridesPath: infrastructure/kube-vip/ci-overrides.yaml
+            manifestPath: argocd/applications/infrastructure/kube-vip
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: default
+
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{valuesPath}}
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

@@ -1,0 +1,58 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: traefik
+            chart: traefik
+            chartVersion: 36.3.0
+            namespace: kube-system
+            repoURL: https://helm.traefik.io/traefik
+            valuesPath: argocd/applications/infrastructure/traefik/traefik-values.yaml
+            ciOverridesPath: infrastructure/traefik/ci-overrides.yaml
+            manifestPath: argocd/applications/infrastructure/traefik
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: default
+
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            valueFiles:
+              - $values/{{valuesPath}}
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+
+        retry:
+          limit: 10
+          backoff:
+            duration: 10s
+            maxDuration: 5m
+            factor: 2
