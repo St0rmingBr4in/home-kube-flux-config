@@ -19,3 +19,5 @@ env:
 
   # Disable IPVS, use Layer 2 mode
   lb_enable: "false"
+
+  vip_subnet: "24,auto"
