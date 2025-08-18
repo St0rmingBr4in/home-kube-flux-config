@@ -13,14 +13,14 @@ apiServerProxyConfig:
   hostname: "home-kube-api"
 
 # Operator configuration
-operatorConfig:
-  # Disable default tags to avoid permission issues
-  defaultTags: []
+# operatorConfig:
+#   # Use default tags: tag:k8s-operator for operator, tag:k8s for proxies
+#   # These tags must be configured in your Tailscale ACL policy
 
 # Proxy configuration
-proxyConfig:
-  # Disable default tags for proxies to avoid permission issues
-  defaultTags: ""
+# proxyConfig:
+#   # Use default tag: tag:k8s
+#   # This tag must be configured in your Tailscale ACL policy
 
 # Ingress proxy configuration
 ingressProxyConfig:
