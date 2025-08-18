@@ -9,16 +9,9 @@ spec:
     - list:
         elements:
           - name: cert-manager-letsencrypt-issuer
-            enabled: "true"
             namespace: prod-infra
             manifestPath: argocd/applications/infrastructure/cert-manager-letsencrypt-issuer
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

@@ -9,7 +9,6 @@ spec:
     - list:
         elements:
           - name: qbittorrent
-            enabled: "true"
             chart: qbittorrent
             chartVersion: 20.0.11
             namespace: prod-media
@@ -17,12 +16,6 @@ spec:
             ciOverridesPath: media/qbittorrent/ci-overrides.yaml
             manifestPath: argocd/applications/media/qbittorrent
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

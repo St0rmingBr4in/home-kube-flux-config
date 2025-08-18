@@ -9,7 +9,6 @@ spec:
     - list:
         elements:
           - name: bazarr
-            enabled: "true"
             chart: bazarr
             chartVersion: 22.2.0
             namespace: prod-media
@@ -17,12 +16,6 @@ spec:
             ciOverridesPath: media/bazarr/ci-overrides.yaml
             manifestPath: argocd/applications/media/bazarr
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

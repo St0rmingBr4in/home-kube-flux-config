@@ -9,15 +9,8 @@ spec:
     - list:
         elements:
           - name: argocd-apps
-            enabled: "true"
             namespace: argocd
             manifestPath: argocd/applications
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
 
   template:
     metadata:

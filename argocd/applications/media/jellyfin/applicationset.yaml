@@ -9,7 +9,6 @@ spec:
     - list:
         elements:
           - name: jellyfin
-            enabled: "true"
             chart: jellyfin
             chartVersion: 19.1.11
             namespace: prod-media
@@ -17,12 +16,6 @@ spec:
             ciOverridesPath: media/jellyfin/ci-overrides.yaml
             manifestPath: argocd/applications/media/jellyfin
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

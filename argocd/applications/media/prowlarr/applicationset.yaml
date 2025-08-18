@@ -9,7 +9,6 @@ spec:
     - list:
         elements:
           - name: prowlarr
-            enabled: "true"
             chart: prowlarr
             chartVersion: 18.15.4
             namespace: prod-media
@@ -17,12 +16,6 @@ spec:
             ciOverridesPath: media/prowlarr/ci-overrides.yaml
             manifestPath: argocd/applications/media/prowlarr
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

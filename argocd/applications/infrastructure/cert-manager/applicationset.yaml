@@ -9,7 +9,6 @@ spec:
     - list:
         elements:
           - name: cert-manager
-            enabled: "true"
             chart: cert-manager
             chartVersion: v1.18.2
             namespace: prod-infra
@@ -17,12 +16,6 @@ spec:
             valuesPath: argocd/applications/infrastructure/cert-manager/cert-manager-values.yaml
             ciOverridesPath: infrastructure/cert-manager/ci-overrides.yaml
 
-        # Only generate applications where enabled is "true"
-        selector:
-          matchExpressions:
-            - key: enabled
-              operator: In
-              values: ["true"]
   template:
     metadata:
       name: "{{name}}"
