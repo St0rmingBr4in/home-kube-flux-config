@@ -2,21 +2,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: kube-vip-cloud-provider
+  name: tailscale-operator
   namespace: argocd
 spec:
   generators:
     - list:
         elements:
-          - name: kube-vip-cloud-provider
+          - name: tailscale-operator
             enabled: "true"
-            chart: kube-vip-cloud-provider
-            chartVersion: 0.2.6
-            namespace: prod-infra
-            repoURL: https://kube-vip.github.io/helm-charts/
-            valuesPath: argocd/applications/infrastructure/kube-vip-cloud-provider/kube-vip-cloud-provider-values.yaml
-            ciOverridesPath: infrastructure/kube-vip-cloud-provider/ci-overrides.yaml
-            manifestPath: argocd/applications/infrastructure/kube-vip-cloud-provider
+            chart: tailscale-operator
+            chartVersion: 1.74.1
+            namespace: tailscale
+            repoURL: https://pkgs.tailscale.com/helmcharts
+            valuesPath: argocd/applications/infrastructure/tailscale-operator/tailscale-operator-values.yaml
+            ciOverridesPath: infrastructure/tailscale-operator/ci-overrides.yaml
+            manifestPath: argocd/applications/infrastructure/tailscale-operator
 
   # Only generate applications where enabled is "true"
   selector:

@@ -1,0 +1,60 @@
+# Tailscale Operator Values
+# OAuth configuration for Tailscale authentication
+oauth:
+  # The Tailscale operator will use a secret named 'operator-oauth'
+  # We need to configure Vault to create this secret with the right name and keys
+  # The secret should contain 'client_id' and 'client_secret' keys
+
+# API Server proxy configuration
+apiServerProxyConfig:
+  # Enable API server proxy over Tailscale
+  mode: "true"
+  # Hostname for the API server proxy
+  hostname: "home-kube-api"
+
+# Operator configuration
+operatorConfig:
+  # Set default ACL tags for operator-created devices
+  defaultTags:
+    - "tag:kubernetes"
+    - "tag:home-cluster"
+
+# Ingress proxy configuration
+ingressProxyConfig:
+  # Enable ingress proxy
+  mode: "true"
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+# Image configuration
+image:
+  # Use the latest stable image
+  pullPolicy: IfNotPresent
+
+# Service account configuration
+serviceAccount:
+  # Create a service account
+  create: true
+  # Name of the service account
+  name: "tailscale-operator"
+
+# RBAC configuration
+rbac:
+  # Create RBAC resources
+  create: true
+
+# Node selector for operator placement
+nodeSelector: {}
+
+# Tolerations for operator scheduling
+tolerations: []
+
+# Affinity rules
+affinity: {}

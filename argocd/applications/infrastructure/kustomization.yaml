@@ -8,8 +8,7 @@ resources:
   - cert-manager-letsencrypt-issuer/applicationset.yaml
 
   # Load Balancing & Networking
-  - kube-vip/applicationset.yaml
-  - kube-vip-cloud-provider/applicationset.yaml
+  - tailscale-operator/applicationset.yaml
   - traefik/applicationset.yaml
 
   # Secret Management

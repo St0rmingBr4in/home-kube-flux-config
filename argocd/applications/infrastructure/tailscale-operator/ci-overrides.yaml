@@ -1,0 +1,19 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: tailscale-operator
+            enabled: "false" # Disabled in CI
+            chart: tailscale-operator
+            chartVersion: 1.74.1
+            namespace: tailscale
+            repoURL: https://pkgs.tailscale.com/helmcharts
+            valuesPath: argocd/applications/infrastructure/tailscale-operator/tailscale-operator-values.yaml
+            ciOverridesPath: infrastructure/tailscale-operator/ci-overrides.yaml
+            manifestPath: argocd/applications/infrastructure/tailscale-operator
