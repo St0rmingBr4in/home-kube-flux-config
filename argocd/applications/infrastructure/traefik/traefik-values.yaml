@@ -20,8 +20,9 @@ deployment:
 
 service:
   type: LoadBalancer
+  loadBalancerClass: tailscale
   annotations:
-    kube-vip.io/loadbalancerIPs: "192.168.72.8"
+    tailscale.com/hostname: "traefik"
 
 ports:
   web:

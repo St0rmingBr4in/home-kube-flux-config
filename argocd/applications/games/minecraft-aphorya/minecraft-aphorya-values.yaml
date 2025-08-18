@@ -44,7 +44,9 @@ podAnnotations:
   prometheus.io/scrape: true
 
 serviceAnnotations:
-  metallb.universe.tf/allow-shared-ip: prod
+  tailscale.com/expose: "true"
+  tailscale.com/hostname: "minecraft-aphorya"
+  # Removed metallb annotation - now using Tailscale
 startupProbe:
   command: ["sh", "-c", "mc-health && touch /data/test"]
 readinessProbe:
