@@ -13,11 +13,11 @@ apiServerProxyConfig:
   hostname: "home-kube-api"
 
 # Operator configuration
-operatorConfig:
-  # Set default ACL tags for operator-created devices
-  defaultTags:
-    - "tag:kubernetes"
-    - "tag:home-cluster"
+# operatorConfig:
+#   # Set default ACL tags for operator-created devices (requires tags to be configured in Tailscale admin)
+#   defaultTags:
+#     - "tag:kubernetes"
+#     - "tag:home-cluster"
 
 # Ingress proxy configuration
 ingressProxyConfig:
