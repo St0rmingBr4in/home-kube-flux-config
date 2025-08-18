@@ -17,13 +17,12 @@ spec:
             valuesPath: argocd/applications/infrastructure/tailscale-operator/tailscale-operator-values.yaml
             ciOverridesPath: infrastructure/tailscale-operator/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/tailscale-operator
-
-  # Only generate applications where enabled is "true"
-  selector:
-    matchExpressions:
-      - key: enabled
-        operator: In
-        values: ["true"]
+        # Only generate applications where enabled is "true"
+        selector:
+          matchExpressions:
+            - key: enabled
+              operator: In
+              values: ["true"]
 
   template:
     metadata:

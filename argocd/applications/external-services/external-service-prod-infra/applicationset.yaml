@@ -17,13 +17,12 @@ spec:
             valuesPath: argocd/applications/external-services/external-service-prod-infra/external-service-values.yaml
             ciOverridesPath: external-services/external-service-prod-infra/ci-overrides.yaml
 
-  # Only generate applications where enabled is "true"
-  selector:
-    matchExpressions:
-      - key: enabled
-        operator: In
-        values: ["true"]
-
+        # Only generate applications where enabled is "true"
+        selector:
+          matchExpressions:
+            - key: enabled
+              operator: In
+              values: ["true"]
   template:
     metadata:
       name: "{{name}}"

@@ -14,13 +14,12 @@ spec:
             manifestPath: argocd/applications/compliance/memory-webhook
             ciOverridesPath: compliance/memory-webhook/ci-overrides.yaml
 
-  # Only generate applications where enabled is "true"
-  selector:
-    matchExpressions:
-      - key: enabled
-        operator: In
-        values: ["true"]
-
+        # Only generate applications where enabled is "true"
+        selector:
+          matchExpressions:
+            - key: enabled
+              operator: In
+              values: ["true"]
   template:
     metadata:
       name: "{{name}}"
