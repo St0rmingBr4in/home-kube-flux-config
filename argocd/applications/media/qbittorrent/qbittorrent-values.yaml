@@ -42,39 +42,58 @@ securityContext:
   runAsUser: 1031
   runAsGroup: 100
 
-# NordVPN sidecar configuration
-additionalContainers:
-  nordvpn:
-    name: nordvpn
-    image: ghcr.io/bubuntux/nordvpn:latest
-    env:
-      - name: TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: nordvpn-credentials
-            key: token
-      - name: CONNECT
-        value: "Netherlands"
-      - name: TECHNOLOGY
-        value: "NordLynx"
-      - name: NETWORK
-        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
-      - name: NET_LOCAL
-        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
-      - name: WHITELIST
-        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
-    securityContext:
-      capabilities:
-        add:
-          - NET_ADMIN
-          - SYS_MODULE
-      privileged: true
-    resources:
-      limits:
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        memory: 256Mi
+# NordVPN sidecar configuration using TrueCharts pattern
+workload:
+  main:
+    podSpec:
+      containers:
+        nordvpn:
+          enabled: true
+          primary: false
+          imageSelector: nordvpnImage
+          env:
+            TOKEN:
+              secretKeyRef:
+                name: nordvpn-credentials
+                key: token
+            CONNECT: "Netherlands"
+            TECHNOLOGY: "NordLynx"
+            NETWORK: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+            NET_LOCAL: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+            WHITELIST: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+          probes:
+            liveness:
+              enabled: false
+            readiness:
+              enabled: false
+            startup:
+              enabled: false
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_MODULE
+            privileged: true
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+
+# NordVPN image configuration
+nordvpnImage:
+  repository: ghcr.io/bubuntux/nordvpn
+  tag: latest
+  pullPolicy: Always
+
+# Secret definition for templating (disabled - using external Vault secret)
+secret:
+  nordvpn-credentials:
+    enabled: false
+    type: Opaque
+    data:
+      token: "placeholder"
 
 # Network configuration to route through VPN
 podOptions:
