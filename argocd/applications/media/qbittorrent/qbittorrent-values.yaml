@@ -83,4 +83,8 @@ podOptions:
     nameservers:
       - "103.86.96.100"
       - "103.86.99.100"
+    searches:
+      - "prod-media.svc.cluster.local"
+      - "svc.cluster.local"
+      - "cluster.local"
   shareProcessNamespace: true
