@@ -41,3 +41,46 @@ env:
 securityContext:
   runAsUser: 1031
   runAsGroup: 100
+
+# NordVPN sidecar configuration
+additionalContainers:
+  nordvpn:
+    name: nordvpn
+    image: ghcr.io/bubuntux/nordvpn:latest
+    env:
+      - name: TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: nordvpn-credentials
+            key: token
+      - name: CONNECT
+        value: "Netherlands"
+      - name: TECHNOLOGY
+        value: "NordLynx"
+      - name: NETWORK
+        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+      - name: NET_LOCAL
+        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+      - name: WHITELIST
+        value: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+    securityContext:
+      capabilities:
+        add:
+          - NET_ADMIN
+          - SYS_MODULE
+      privileged: true
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# Network configuration to route through VPN
+podOptions:
+  dnsPolicy: "None"
+  dnsConfig:
+    nameservers:
+      - "103.86.96.100"
+      - "103.86.99.100"
+  shareProcessNamespace: true
