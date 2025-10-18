@@ -18,7 +18,7 @@ spec:
       services:
         - name: authentik-server
           namespace: prod-infra
-          port: 9000
+          port: 80
     # Main Sonarr application (with Authentik forward auth)
     - kind: Rule
       match: Host(`sonarr.st0rmingbr4in.com`)
