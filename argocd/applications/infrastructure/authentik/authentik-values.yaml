@@ -51,13 +51,13 @@ worker:
 
 postgresql:
   enabled: true
-  existingSecret: authentik-secret
-  secretKeys:
-    adminPasswordKey: "postgresql-password"
-    userPasswordKey: "postgresql-password"
   auth:
     username: authentik
     database: authentik
+    existingSecret: authentik
+    secretKeys:
+      adminPasswordKey: "postgresql-password"
+      userPasswordKey: "postgresql-password"
   primary:
     persistence:
       enabled: true
