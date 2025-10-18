@@ -1,0 +1,15 @@
+---
+authentik:
+  secret_key: "ci-test-key"
+  postgresql:
+    password: "ci-test-password"
+
+server:
+  ingress:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false

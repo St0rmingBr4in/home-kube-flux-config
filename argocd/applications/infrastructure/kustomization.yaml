@@ -18,3 +18,6 @@ resources:
   # Monitoring & DNS
   - datadog/applicationset.yaml
   - pihole/applicationset.yaml
+
+  # Authentication
+  - authentik/applicationset.yaml

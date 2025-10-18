@@ -1,0 +1,85 @@
+---
+authentik:
+  error_reporting:
+    enabled: false
+
+global:
+  env:
+    - name: AUTHENTIK_DISABLE_UPDATE_CHECK
+      value: "true"
+    - name: AUTHENTIK_DISABLE_STARTUP_ANALYTICS
+      value: "true"
+    - name: AUTHENTIK_AVATARS
+      value: "gravatar,initials"
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik
+          key: postgresql-password
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik
+          key: secret-key
+
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - authentik.st0rmingbr4in.com
+    # tls:
+    #   - secretName: authentik-tls
+    #     hosts:
+    #       - authentik.st0rmingbr4in.com
+
+worker:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+postgresql:
+  enabled: true
+  existingSecret: authentik-secret
+  secretKeys:
+    adminPasswordKey: "postgresql-password"
+    userPasswordKey: "postgresql-password"
+  auth:
+    username: authentik
+    database: authentik
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: "authentik-postgres"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
