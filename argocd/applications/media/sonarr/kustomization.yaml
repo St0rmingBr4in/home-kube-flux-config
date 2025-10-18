@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - pv-sonarr.yaml
   - sonarr-config-pvc.yaml
+  - ingressroute.yaml
