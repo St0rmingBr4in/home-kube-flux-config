@@ -4,5 +4,3 @@ kind: Kustomization
 resources:
   # External Service Definitions
   - external-service-prod-infra/applicationset.yaml
-  - external-service-prod-aphorya/applicationset.yaml
-  - external-service-rakk0o-dev/applicationset.yaml

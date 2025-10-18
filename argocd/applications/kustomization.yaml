@@ -6,6 +6,5 @@ resources:
   - infrastructure/
   - core/
   - media/
-  - games/
   - compliance/
   - external-services/
