@@ -10,7 +10,7 @@ spec:
         elements:
           - name: authentik
             chart: authentik
-            chartVersion: 2024.10.1
+            chartVersion: 2025.8.4
             namespace: prod-infra
             valuesPath: argocd/applications/infrastructure/authentik/authentik-values.yaml
             ciOverridesPath: infrastructure/authentik/ci-overrides.yaml
