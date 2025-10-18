@@ -3,6 +3,15 @@ global:
   checkNewVersion: false
   sendAnonymousUsage: false
 
+# Provider configuration
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+  kubernetesIngress:
+    enabled: true
+    allowExternalNameServices: true
+
 # Use the latest working Traefik version
 image:
   repository: traefik
