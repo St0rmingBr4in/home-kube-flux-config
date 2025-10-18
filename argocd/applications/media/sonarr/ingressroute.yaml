@@ -16,9 +16,9 @@ spec:
       match: Host(`sonarr.st0rmingbr4in.com`) && PathPrefix(`/outpost.goauthentik.io`)
       priority: 100
       services:
-        - name: authentik-server
+        - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
-          port: 80
+          port: 9000
     # Main Sonarr application (with Authentik forward auth)
     - kind: Rule
       match: Host(`sonarr.st0rmingbr4in.com`)
