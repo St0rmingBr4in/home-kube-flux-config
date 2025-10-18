@@ -6,6 +6,7 @@ resources:
   - cert-manager/applicationset.yaml
   - cert-manager-selfsigned-issuer/applicationset.yaml
   - cert-manager-letsencrypt-issuer/applicationset.yaml
+  - st0rmingbr4in.com-cert/applicationset.yaml
 
   # Load Balancing & Networking
   - tailscale-operator/applicationset.yaml

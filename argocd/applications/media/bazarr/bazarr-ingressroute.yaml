@@ -20,5 +20,3 @@ spec:
       middlewares:
         - name: basic-auth
           namespace: prod-infra
-  tls:
-    secretName: st0rmingbr4in.com-cert

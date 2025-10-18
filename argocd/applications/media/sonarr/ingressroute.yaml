@@ -4,25 +4,28 @@ kind: IngressRoute
 metadata:
   name: sonarr
   namespace: prod-media
+  labels:
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/instance: sonarr
 spec:
   entryPoints:
     - websecure
   routes:
     # Authentik outpost path (higher priority, no auth middleware)
-    - match: Host(`sonarr.st0rmingbr4in.com`) && PathPrefix(`/outpost.goauthentik.io`)
-      kind: Rule
+    - kind: Rule
+      match: Host(`sonarr.st0rmingbr4in.com`) && PathPrefix(`/outpost.goauthentik.io`)
       priority: 100
       services:
         - name: authentik-server
           namespace: prod-infra
           port: 9000
     # Main Sonarr application (with Authentik forward auth)
-    - match: Host(`sonarr.st0rmingbr4in.com`)
-      kind: Rule
+    - kind: Rule
+      match: Host(`sonarr.st0rmingbr4in.com`)
       priority: 10
       middlewares:
         - name: authentik-forward-auth
           namespace: prod-infra
       services:
         - name: sonarr
-          port: 10095
+          port: 8989
