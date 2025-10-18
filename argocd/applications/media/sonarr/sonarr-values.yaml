@@ -11,7 +11,7 @@ ingress:
       traefik:
         enableFixedMiddlewares: false
         middlewares:
-          - name: basic-auth
+          - name: authentik-forward-auth
             namespace: prod-infra
     enabled: true
     hosts:

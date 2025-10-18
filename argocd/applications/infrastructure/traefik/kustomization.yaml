@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - basic-auth-middleware.yaml
   - basic-auth-secret.yaml
+  - authentik-forward-auth.yaml
