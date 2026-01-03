@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - pv-prowlarr.yaml
   - prowlarr-config-pvc.yaml
+  - prowlarr-ingressroute.yaml
