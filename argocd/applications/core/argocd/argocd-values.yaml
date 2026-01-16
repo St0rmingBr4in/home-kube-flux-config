@@ -32,9 +32,13 @@ server:
   service:
     type: ClusterIP
 
-  # Disable ingress - use port forwarding for access
+  # Ingress disabled - using custom IngressRoute with Authentik
   ingress:
     enabled: false
+
+  # Run in insecure mode since TLS is terminated at Traefik
+  extraArgs:
+    - --insecure
 
 # Dex Server - actual usage: 1m CPU, 25Mi memory
 dex:
@@ -75,8 +79,8 @@ applicationSet:
 configs:
   # ArgoCD configuration
   cm:
-    # URL for port forwarding access
-    url: https://localhost:8080
+    # URL for web access via Authentik
+    url: https://argocd.st0rmingbr4in.com
 
     # Repository configuration for self-management
     repositories: |

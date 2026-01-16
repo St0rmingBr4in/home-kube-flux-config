@@ -15,6 +15,7 @@ spec:
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/core/argocd/argocd-values.yaml
             ciOverridesPath: core/argocd/ci-overrides.yaml
+            manifestPath: argocd/applications/core/argocd
 
   template:
     metadata:
@@ -33,6 +34,9 @@ spec:
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           ref: values
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc
