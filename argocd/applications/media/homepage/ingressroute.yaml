@@ -2,11 +2,11 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: homer
+  name: homepage
   namespace: prod-media
   labels:
-    app.kubernetes.io/name: homer
-    app.kubernetes.io/instance: homer
+    app.kubernetes.io/name: homepage
+    app.kubernetes.io/instance: homepage
 spec:
   entryPoints:
     - websecure
@@ -19,7 +19,7 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
-    # Main Homer application (with Authentik forward auth)
+    # Main Homepage application (with Authentik forward auth)
     - kind: Rule
       match: Host(`home.st0rmingbr4in.com`)
       priority: 10
@@ -27,5 +27,5 @@ spec:
         - name: authentik-forward-auth
           namespace: prod-infra
       services:
-        - name: homer
-          port: 8080
+        - name: homepage
+          port: 3000
