@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - pv-radarr.yaml
   - radarr-config-pvc.yaml
+  - ingressroute.yaml

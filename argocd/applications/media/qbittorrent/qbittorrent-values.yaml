@@ -7,17 +7,7 @@ operator:
 
 ingress:
   main:
-    integrations:
-      traefik:
-        enableFixedMiddlewares: false
-        middlewares:
-          - name: basic-auth
-            namespace: prod-infra
-    enabled: true
-    hosts:
-      - host: qbittorrent.st0rmingbr4in.com
-        paths:
-          - path: /
+    enabled: false
 
 resources:
   limits:
