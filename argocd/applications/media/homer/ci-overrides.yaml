@@ -1,0 +1,5 @@
+# CI Override: Homer optimized for testing
+# Disable persistence
+persistence:
+  config:
+    enabled: false
