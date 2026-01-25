@@ -26,7 +26,7 @@ spec:
       project: default
 
       sources:
-        - repoURL: tccr.io/truecharts
+        - repoURL: oci.trueforge.org/truecharts
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
