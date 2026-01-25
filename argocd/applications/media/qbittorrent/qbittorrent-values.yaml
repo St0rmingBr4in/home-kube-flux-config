@@ -27,10 +27,6 @@ persistence:
 
 env:
   TZ: Europe/Paris
-  # Disable authentication for cluster network since Authentik handles auth
-  WEBUI_AUTH_SUBNET_WHITELIST_ENABLED: "true"
-  WEBUI_AUTH_SUBNET_WHITELIST: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-  WEBUI_HOST_HEADER_VALIDATION: "false"
 
 securityContext:
   runAsUser: 1031
