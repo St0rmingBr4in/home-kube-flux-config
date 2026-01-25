@@ -28,4 +28,4 @@ spec:
           namespace: prod-infra
       services:
         - name: qbittorrent
-          port: 8080
+          port: 10095
