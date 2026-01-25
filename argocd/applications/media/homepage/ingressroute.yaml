@@ -11,21 +11,8 @@ spec:
   entryPoints:
     - websecure
   routes:
-    # Authentik outpost path (higher priority, no auth middleware)
-    - kind: Rule
-      match: Host(`home.st0rmingbr4in.com`) && PathPrefix(`/outpost.goauthentik.io`)
-      priority: 100
-      services:
-        - name: ak-outpost-authentik-embedded-outpost
-          namespace: prod-infra
-          port: 9000
-    # Main Homepage application (with Authentik forward auth)
     - kind: Rule
       match: Host(`home.st0rmingbr4in.com`)
-      priority: 10
-      middlewares:
-        - name: authentik-forward-auth
-          namespace: prod-infra
       services:
         - name: homepage
           port: 3000
