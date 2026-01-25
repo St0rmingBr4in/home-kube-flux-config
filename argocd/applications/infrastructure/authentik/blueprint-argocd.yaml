@@ -1,4 +1,15 @@
 ---
+# Authentik Blueprint for ArgoCD Application
+#
+# This blueprint automatically creates:
+# - ArgoCD Proxy Provider (forward auth)
+# - ArgoCD Application
+#
+# MANUAL STEP REQUIRED:
+# The outpost assignment below does NOT work due to a limitation in Authentik blueprints.
+# You must manually assign the "ArgoCD Provider" to the "authentik Embedded Outpost" via the UI.
+# See README.md for details.
+# Tracking: https://github.com/goauthentik/authentik/issues/6779
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -33,10 +44,13 @@ data:
           meta_description: GitOps Continuous Delivery
           policy_engine_mode: any
           open_in_new_tab: true
-      - model: authentik_outposts.outpost
-        identifiers:
-          name: authentik Embedded Outpost
-        state: present
-        attrs:
-          providers:
-            - !Find [authentik_providers_proxy.proxyprovider, [name, "ArgoCD Provider"]]
+      # NOTE: This outpost assignment does NOT work via blueprints
+      # Manual assignment required - see README.md
+      # Kept here for documentation/future support
+      # - model: authentik_outposts.outpost
+      #   identifiers:
+      #     name: authentik Embedded Outpost
+      #   state: present
+      #   attrs:
+      #     providers:
+      #       - !Find [authentik_providers_proxy.proxyprovider, [name, "ArgoCD Provider"]]
