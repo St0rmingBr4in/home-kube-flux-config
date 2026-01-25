@@ -28,4 +28,5 @@ spec:
           namespace: prod-infra
       services:
         - name: argocd-server
+          namespace: argocd
           port: 80
