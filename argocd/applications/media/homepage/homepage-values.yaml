@@ -26,7 +26,8 @@ securityContext:
 
 persistence:
   config:
-    enabled: false
+    enabled: true
+    type: emptyDir
 
 configmap:
   settings:
