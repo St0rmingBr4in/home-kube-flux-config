@@ -39,6 +39,14 @@ server:
     #   - secretName: authentik-tls
     #     hosts:
     #       - authentik.st0rmingbr4in.com
+  volumes:
+    - name: blueprints
+      configMap:
+        name: authentik-blueprint-argocd
+  volumeMounts:
+    - name: blueprints
+      mountPath: /blueprints/custom
+      readOnly: true
 
 worker:
   replicas: 1
@@ -48,6 +56,14 @@ worker:
       memory: 512Mi
     limits:
       memory: 1Gi
+  volumes:
+    - name: blueprints
+      configMap:
+        name: authentik-blueprint-argocd
+  volumeMounts:
+    - name: blueprints
+      mountPath: /blueprints/custom
+      readOnly: true
 
 postgresql:
   enabled: true

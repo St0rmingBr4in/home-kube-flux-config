@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprint-argocd
+  namespace: prod-infra
+  labels:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/instance: authentik
+data:
+  argocd-app.yaml: |
+    version: 1
+    metadata:
+      name: argocd-application
+      labels:
+        blueprints.goauthentik.io/instantiate: "true"
+    entries:
+      - model: authentik_providers_proxy.proxyprovider
+        id: argocd-provider
+        attrs:
+          name: ArgoCD Provider
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          mode: forward_single
+          external_host: https://argocd.st0rmingbr4in.com
+      - model: authentik_core.application
+        id: argocd-app
+        attrs:
+          name: ArgoCD
+          slug: argocd
+          provider: !KeyOf argocd-provider
+          meta_launch_url: https://argocd.st0rmingbr4in.com
+          meta_icon: https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png
+          meta_description: GitOps Continuous Delivery
+          policy_engine_mode: any
+          open_in_new_tab: true
