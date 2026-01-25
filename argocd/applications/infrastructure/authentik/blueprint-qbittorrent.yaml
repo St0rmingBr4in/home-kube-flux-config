@@ -1,0 +1,42 @@
+---
+# Authentik Blueprint for qBittorrent
+#
+# Uses 'identifiers' to match existing resource - will UPDATE rather than create duplicate.
+# Manual outpost assignment required - see README.md
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprint-qbittorrent
+  namespace: prod-infra
+  labels:
+    app.kubernetes.io/name: authentik
+    app.kubernetes.io/instance: authentik
+data:
+  qbittorrent-app.yaml: |
+    version: 1
+    metadata:
+      name: qbittorrent-application
+      labels:
+        blueprints.goauthentik.io/instantiate: "true"
+    entries:
+      - model: authentik_providers_proxy.proxyprovider
+        identifiers:
+          name: qBittorrent Provider
+        state: present
+        attrs:
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          mode: forward_single
+          external_host: https://qbittorrent.st0rmingbr4in.com
+
+      - model: authentik_core.application
+        identifiers:
+          slug: qbittorrent
+        state: present
+        attrs:
+          name: qBittorrent
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, "qBittorrent Provider"]]
+          meta_launch_url: https://qbittorrent.st0rmingbr4in.com
+          meta_icon: https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/qbittorrent.png
+          meta_description: Download Client
+          policy_engine_mode: any
+          open_in_new_tab: true
