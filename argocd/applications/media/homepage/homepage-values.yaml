@@ -13,6 +13,13 @@ ingress:
   main:
     enabled: false
 
+service:
+  main:
+    ports:
+      main:
+        port: 3000
+        targetPort: 3000
+
 resources:
   limits:
     memory: 256Mi
