@@ -1,4 +1,8 @@
 ---
+alpineImage:
+  repository: oci.trueforge.org/tccr/alpine
+  tag: v3.22.1@sha256:6dc807ae4f2867cb2d00d061f8f579f1966420ad792c179ac68072ab235109f8
+
 operator:
   verify:
     enabled: false
