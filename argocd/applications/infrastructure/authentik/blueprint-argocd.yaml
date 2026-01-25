@@ -33,3 +33,11 @@ data:
           meta_description: GitOps Continuous Delivery
           policy_engine_mode: any
           open_in_new_tab: true
+      - model: authentik_outposts.outpost
+        id: embedded-outpost
+        identifiers:
+          name: authentik Embedded Outpost
+        state: present
+        attrs:
+          providers:
+            - !KeyOf argocd-provider
