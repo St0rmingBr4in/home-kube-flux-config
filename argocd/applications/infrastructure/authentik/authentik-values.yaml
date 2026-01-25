@@ -41,8 +41,20 @@ server:
     #       - authentik.st0rmingbr4in.com
   volumes:
     - name: blueprints
-      configMap:
-        name: authentik-blueprint-argocd
+      projected:
+        sources:
+          - configMap:
+              name: authentik-blueprint-argocd
+          - configMap:
+              name: authentik-blueprint-sonarr
+          - configMap:
+              name: authentik-blueprint-radarr
+          - configMap:
+              name: authentik-blueprint-prowlarr
+          - configMap:
+              name: authentik-blueprint-bazarr
+          - configMap:
+              name: authentik-blueprint-qbittorrent
   volumeMounts:
     - name: blueprints
       mountPath: /blueprints/custom
@@ -58,8 +70,20 @@ worker:
       memory: 1Gi
   volumes:
     - name: blueprints
-      configMap:
-        name: authentik-blueprint-argocd
+      projected:
+        sources:
+          - configMap:
+              name: authentik-blueprint-argocd
+          - configMap:
+              name: authentik-blueprint-sonarr
+          - configMap:
+              name: authentik-blueprint-radarr
+          - configMap:
+              name: authentik-blueprint-prowlarr
+          - configMap:
+              name: authentik-blueprint-bazarr
+          - configMap:
+              name: authentik-blueprint-qbittorrent
   volumeMounts:
     - name: blueprints
       mountPath: /blueprints/custom
