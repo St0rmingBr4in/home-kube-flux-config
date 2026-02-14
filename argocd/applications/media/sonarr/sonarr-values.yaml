@@ -11,10 +11,10 @@ ingress:
 
 resources:
   limits:
-    memory: 250Mi
+    memory: 512Mi
   requests:
     cpu: 100m
-    memory: 250Mi
+    memory: 512Mi
 
 exportarrResources:
   limits:
