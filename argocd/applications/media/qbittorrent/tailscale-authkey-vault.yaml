@@ -2,14 +2,14 @@
 apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultStaticSecret
 metadata:
-  name: nordvpn-credentials
+  name: tailscale-authkey
   namespace: prod-media
 spec:
   type: kv-v2
   mount: secret
-  path: nordvpn
+  path: qbittorrent-tailscale
   destination:
-    name: qbittorrent-nordvpn-credentials
+    name: qbittorrent-tailscale-authkey
     create: true
-  refreshAfter: 30s
+  refreshAfter: 24h
   vaultAuthRef: prod-infra/default

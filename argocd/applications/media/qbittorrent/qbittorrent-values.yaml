@@ -15,6 +15,18 @@ service:
       main:
         port: 10095
         targetPort: 8080
+  torrent:
+    enabled: true
+    type: LoadBalancer
+    loadBalancerClass: tailscale
+    annotations:
+      tailscale.com/hostname: "qbittorrent-torrent"
+    ports:
+      torrent:
+        enabled: true
+        port: 6881
+        targetPort: 6881
+        protocol: TCP
 
 resources:
   limits:
@@ -39,25 +51,30 @@ securityContext:
   runAsUser: 1031
   runAsGroup: 100
 
-# NordVPN sidecar configuration using TrueCharts pattern
+# Tailscale sidecar to route qBittorrent traffic through inlet exit node
+tailscaleImage:
+  repository: ghcr.io/tailscale/tailscale
+  tag: latest
+  pullPolicy: Always
+
 workload:
   main:
     podSpec:
       containers:
-        nordvpn:
+        tailscale:
           enabled: true
           primary: false
-          imageSelector: nordvpnImage
+          imageSelector: tailscaleImage
           env:
-            TOKEN:
+            TS_AUTHKEY:
               secretKeyRef:
-                name: nordvpn-credentials
-                key: token
-            CONNECT: "Netherlands"
-            TECHNOLOGY: "NordLynx"
-            NETWORK: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
-            NET_LOCAL: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
-            WHITELIST: "10.0.0.0/8,192.168.0.0/16,172.16.0.0/12"
+                name: qbittorrent-tailscale-authkey
+                key: TS_AUTHKEY
+            TS_HOSTNAME: qbittorrent
+            TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-routes"
+            TS_STATE_DIR: /tmp/tailscale
+            TS_ACCEPT_DNS: "false"
+            TS_KUBE_SECRET: ""
           probes:
             liveness:
               enabled: false
@@ -69,38 +86,11 @@ workload:
             capabilities:
               add:
                 - NET_ADMIN
-                - SYS_MODULE
+                - NET_RAW
             privileged: true
           resources:
             limits:
-              memory: 256Mi
+              memory: 128Mi
             requests:
-              cpu: 100m
-              memory: 256Mi
-
-# NordVPN image configuration
-nordvpnImage:
-  repository: ghcr.io/bubuntux/nordvpn
-  tag: latest
-  pullPolicy: Always
-
-# Secret definition for templating (disabled - using external Vault secret)
-secret:
-  nordvpn-credentials:
-    enabled: false
-    type: Opaque
-    data:
-      token: "placeholder"
-
-# Network configuration to route through VPN
-podOptions:
-  dnsPolicy: "None"
-  dnsConfig:
-    nameservers:
-      - "103.86.96.100"
-      - "103.86.99.100"
-    searches:
-      - "prod-media.svc.cluster.local"
-      - "svc.cluster.local"
-      - "cluster.local"
-  shareProcessNamespace: true
+              cpu: 50m
+              memory: 64Mi

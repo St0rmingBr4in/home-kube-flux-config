@@ -4,5 +4,5 @@ kind: Kustomization
 resources:
   - pv-qbittorrent.yaml
   - qbittorrent-config-pvc.yaml
-  - nordvpn-secret-vault.yaml
+  - tailscale-authkey-vault.yaml
   - ingressroute.yaml
