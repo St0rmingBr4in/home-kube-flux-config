@@ -19,6 +19,15 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
+    # ArgoCD CLI / API calls: bypass Authentik when a Bearer token is present.
+    # The argocd-server validates the token itself, so no SSO layer is needed.
+    - kind: Rule
+      match: Host(`argocd.st0rmingbr4in.com`) && HeaderRegexp(`Authorization`, `^Bearer .+`)
+      priority: 50
+      services:
+        - name: argocd-server
+          namespace: argocd
+          port: 80
     # Main ArgoCD application (with Authentik forward auth)
     - kind: Rule
       match: Host(`argocd.st0rmingbr4in.com`)

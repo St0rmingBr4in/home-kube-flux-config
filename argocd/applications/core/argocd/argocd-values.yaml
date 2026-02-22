@@ -1,6 +1,6 @@
 # ArgoCD Configuration (Bootstrap + Self-Management)
-# Access: kubectl port-forward svc/argocd-server -n argocd 8080:443
-# URL: https://localhost:8080
+# URL: https://argocd.st0rmingbr4in.com
+# CLI: argocd login argocd.st0rmingbr4in.com --username admin --grpc-web
 
 # Application Controller (main workload) - actual usage: 307m CPU, 294Mi memory
 controller:
