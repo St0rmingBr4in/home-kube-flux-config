@@ -83,7 +83,7 @@ workload:
                 name: tailscale-authkey
                 key: TS_AUTHKEY
             TS_HOSTNAME: qbittorrent
-            TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-routes"
+            TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-access"
             TS_STATE_DIR: /tmp/tailscale
             TS_ACCEPT_DNS: "false"
             TS_KUBE_SECRET: ""
