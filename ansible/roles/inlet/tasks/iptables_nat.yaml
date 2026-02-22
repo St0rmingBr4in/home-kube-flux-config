@@ -58,6 +58,21 @@
   when: qbittorrent_torrent_tailscale_ip != ""
   notify: Save iptables rules
 
+# --- MASQUERADE for DNAT'd traffic exiting via Tailscale ---
+# Without this, Traefik (and qbittorrent) would see the original client IP as source
+# and try to reply directly to the internet, breaking the connection. MASQUERADE on
+# tailscale0 makes the source appear as inlet's Tailscale IP so replies come back
+# through inlet and get un-DNAT'd correctly.
+
+- name: MASQUERADE forwarded traffic exiting via tailscale0
+  ansible.builtin.iptables:
+    table: nat
+    chain: POSTROUTING
+    out_interface: tailscale0
+    jump: MASQUERADE
+    comment: "inlet: MASQUERADE DNAT'd traffic via Tailscale"
+  notify: Save iptables rules
+
 # --- Web traffic → Traefik ---
 
 - name: DNAT HTTP traffic to Traefik
