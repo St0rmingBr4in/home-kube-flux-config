@@ -2,6 +2,13 @@
   "extends": [
     "config:best-practices"
   ],
+  "packageRules": [
+    {
+      "description": "Auto-merge minor and patch updates when CI passes",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
+    }
+  ],
   "argocd": {
     "managerFilePatterns": ["/\\.yaml$/"]
   },
