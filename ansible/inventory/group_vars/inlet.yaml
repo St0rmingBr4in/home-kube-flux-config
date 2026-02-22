@@ -3,12 +3,7 @@ tailscale_extra_args: "--advertise-exit-node --accept-routes"
 
 traefik_tailscale_ip: "100.92.78.42"
 
-# Leave empty until the Tailscale operator provisions the qbittorrent-torrent service.
-# Find the IP with:
-#   kubectl get svc -n prod-media qbittorrent-torrent \
-#     -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-# Commit the value here once it is stable.
-qbittorrent_torrent_tailscale_ip: ""
+qbittorrent_torrent_tailscale_ip: "100.122.130.88"
 
 torrent_port: 6881
 http_port: 80
