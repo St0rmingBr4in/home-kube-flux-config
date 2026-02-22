@@ -1,4 +1,7 @@
 ---
+- name: Create swapfile to prevent OOM on low-memory VM
+  ansible.builtin.import_tasks: swapfile.yaml
+
 - name: Configure sysctl for IP forwarding
   ansible.builtin.import_tasks: sysctl.yaml
 

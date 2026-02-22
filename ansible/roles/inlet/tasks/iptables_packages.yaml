@@ -6,6 +6,7 @@
       - netfilter-persistent
     state: present
     update_cache: true
+    cache_valid_time: 86400
 
 - name: Enable and start netfilter-persistent
   ansible.builtin.systemd:
