@@ -10,7 +10,7 @@ spec:
         elements:
           - name: traefik
             chart: traefik
-            chartVersion: 36.3.0
+            chartVersion: 39.0.2
             namespace: kube-system
             repoURL: https://helm.traefik.io/traefik
             valuesPath: argocd/applications/infrastructure/traefik/traefik-values.yaml
