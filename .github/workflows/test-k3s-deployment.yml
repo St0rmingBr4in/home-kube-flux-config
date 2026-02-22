@@ -129,7 +129,45 @@ jobs:
           echo "=== ArgoCD Applications ==="
           argocd app list
 
-          # Wait for applications to sync and become healthy (30s timeout)
+          # Apps excluded from CI health checks due to production infrastructure dependencies.
+          # Reasons:
+          #   - iSCSI NAS storage: apps with PVs pointing to 192.168.42.42 (production NAS)
+          #   - VaultStaticSecret CRD: requires vault-secrets-operator to be initialized first
+          #   - Production secrets: Datadog API key, Tailscale auth key, etc.
+          #   - cert-manager CRDs: ClusterIssuer/Certificate CRDs unavailable until cert-manager is healthy
+          #   - Self-referential: ArgoCD managing its own Helm deployment
+          EXCLUDED_APPS=(
+            "argocd/argocd"                          # Self-referential: ArgoCD managing itself via Helm
+            "argocd/authentik"                       # Requires VaultStaticSecret CRD + production secrets
+            "argocd/bazarr"                          # Requires iSCSI NAS storage (192.168.42.42)
+            "argocd/cert-manager"                    # Pods remain Pending in CI environment
+            "argocd/cert-manager-letsencrypt-issuer" # Requires cert-manager CRDs + ACME challenge
+            "argocd/cert-manager-selfsigned-issuer"  # Requires cert-manager CRDs to be operational
+            "argocd/datadog"                         # Requires Datadog API key secret
+            "argocd/flaresolverr"                    # Pods remain Pending in CI environment
+            "argocd/jellyfin"                        # Requires iSCSI NAS storage (192.168.42.42)
+            "argocd/jellyseerr"                      # Requires iSCSI NAS storage (192.168.42.42)
+            "argocd/memory-webhook"                  # Requires cert-manager CRDs for webhook TLS cert
+            "argocd/prowlarr"                        # Requires iSCSI NAS storage + Traefik IngressRoute CRDs
+            "argocd/qbittorrent"                     # Requires VaultStaticSecret CRD + iSCSI NAS storage
+            "argocd/radarr"                          # Requires iSCSI NAS storage + Traefik IngressRoute CRDs
+            "argocd/sonarr"                          # Requires iSCSI NAS storage + Traefik IngressRoute CRDs
+            "argocd/st0rmingbr4in.com-cert"          # Requires cert-manager CRDs
+            "argocd/tailscale-operator"              # Requires Tailscale auth key secret
+            "argocd/traefik"                         # Requires VaultStaticSecret CRD in manifests path
+            "argocd/vault"                           # Requires manual Vault initialization
+            "argocd/vault-secrets-operator"          # upgrade-crds job remains Pending in CI
+          )
+
+          is_excluded() {
+            local app="$1"
+            for excluded in "${EXCLUDED_APPS[@]}"; do
+              [ "$app" = "$excluded" ] && return 0
+            done
+            return 1
+          }
+
+          # Wait for applications to sync and become healthy (300s timeout)
           echo "=== Waiting for applications to sync and become healthy ==="
           TIMEOUT=300
           FAILED_APPS=()
@@ -145,26 +183,26 @@ jobs:
               START_TIME=$(date +%s)
               PREV_SYNC_STATUS=""
               PREV_HEALTH_STATUS=""
-              
+
               while [ $(($(date +%s) - START_TIME)) -lt $TIMEOUT ]; do
                 SYNC_STATUS=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.sync.status // "Unknown"')
                 HEALTH_STATUS=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.health.status // "Unknown"')
-                
+
                 if [ "$SYNC_STATUS" = "Synced" ] && [ "$HEALTH_STATUS" = "Healthy" ]; then
                   echo "✓ $app: Synced and Healthy"
                   return 0
                 fi
-                
+
                 # Only log if status changed
                 if [ "$SYNC_STATUS" != "$PREV_SYNC_STATUS" ] || [ "$HEALTH_STATUS" != "$PREV_HEALTH_STATUS" ]; then
                   echo "  $app: Sync=$SYNC_STATUS, Health=$HEALTH_STATUS (waiting...)"
                   PREV_SYNC_STATUS="$SYNC_STATUS"
                   PREV_HEALTH_STATUS="$HEALTH_STATUS"
                 fi
-                
+
                 sleep 5
               done
-              
+
               # Final check after timeout
               FINAL_SYNC=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.sync.status // "Unknown"')
               FINAL_HEALTH=$(argocd app get "$app" -o json 2>/dev/null | jq -r '.status.health.status // "Unknown"')
@@ -177,9 +215,13 @@ jobs:
             # Initialize failed apps file
             rm -f /tmp/failed_apps.txt
 
-            # Start background jobs for each app
+            # Start background jobs for each non-excluded app
             PIDS=()
             for app in $APPS; do
+              if is_excluded "$app"; then
+                echo "⏭ $app: Skipped (excluded - requires production infrastructure)"
+                continue
+              fi
               check_app "$app" &
               PIDS+=($!)
             done
@@ -197,14 +239,23 @@ jobs:
             echo "No applications found"
           fi
 
-          # Report failed applications
+          # Report results
+          echo ""
+          echo "=== Excluded Applications (require production infrastructure) ==="
+          for app in "${EXCLUDED_APPS[@]}"; do
+            echo "  ⏭ $app"
+          done
+
           if [ ${#FAILED_APPS[@]} -gt 0 ]; then
+            echo ""
             echo "=== Applications that failed to sync/become healthy within ${TIMEOUT}s ==="
             for app in "${FAILED_APPS[@]}"; do
-              echo "- $app"
+              echo "  ✗ $app"
             done
+            exit 1
           else
-            echo "=== All applications successfully synced and healthy ==="
+            echo ""
+            echo "=== All testable applications successfully synced and healthy ==="
           fi
 
           # Get detailed status of the argocd-apps application
