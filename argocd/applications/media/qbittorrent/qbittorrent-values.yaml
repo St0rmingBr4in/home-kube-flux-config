@@ -26,7 +26,7 @@ service:
         enabled: true
         port: 6881
         targetPort: 6881
-        protocol: TCP
+        protocol: tcp
 
 resources:
   limits:
