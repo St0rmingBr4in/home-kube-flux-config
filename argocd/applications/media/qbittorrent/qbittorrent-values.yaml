@@ -96,6 +96,8 @@ workload:
             startup:
               enabled: false
           securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
             capabilities:
               add:
                 - NET_ADMIN
