@@ -67,11 +67,9 @@ jobs:
       - name: Wait for K3s to be ready
         run: |
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
-          # Wait for flannel CNI to finish writing subnet.env, otherwise pod sandbox
-          # creation fails with "open /run/flannel/subnet.env: no such file or directory"
-          echo "Waiting for flannel networking to be ready..."
-          until [ -f /run/flannel/subnet.env ]; do sleep 2; done
-          echo "Flannel ready"
+          # Wait for CoreDNS to be available: it requires pod networking (flannel),
+          # so this implicitly ensures the CNI is ready before we deploy anything.
+          kubectl wait --for=condition=available --timeout=120s deployment/coredns -n kube-system
           kubectl get nodes -o wide
 
       - name: Install ArgoCD
