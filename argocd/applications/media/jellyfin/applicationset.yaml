@@ -10,7 +10,7 @@ spec:
         elements:
           - name: jellyfin
             chart: jellyfin
-            chartVersion: 19.1.11
+            chartVersion: 22.3.4
             namespace: prod-media
             valuesPath: argocd/applications/media/jellyfin/jellyfin-values.yaml
             ciOverridesPath: media/jellyfin/ci-overrides.yaml

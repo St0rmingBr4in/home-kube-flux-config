@@ -10,7 +10,7 @@ spec:
         elements:
           - name: qbittorrent
             chart: qbittorrent
-            chartVersion: 20.0.11
+            chartVersion: 24.3.5
             namespace: prod-media
             valuesPath: argocd/applications/media/qbittorrent/qbittorrent-values.yaml
             ciOverridesPath: media/qbittorrent/ci-overrides.yaml

@@ -10,7 +10,7 @@ spec:
         elements:
           - name: jellyseerr
             chart: jellyseerr
-            chartVersion: 10.1.0
+            chartVersion: 13.14.4
             namespace: prod-media
             valuesPath: argocd/applications/media/jellyseerr/jellyseerr-values.yaml
             ciOverridesPath: media/jellyseerr/ci-overrides.yaml
