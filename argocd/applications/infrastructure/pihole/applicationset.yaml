@@ -10,7 +10,7 @@ spec:
         elements:
           - name: pihole
             chart: pihole
-            chartVersion: 2.18.0
+            chartVersion: 2.35.0
             namespace: prod-infra
             repoURL: https://mojo2600.github.io/pihole-kubernetes/
             valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
