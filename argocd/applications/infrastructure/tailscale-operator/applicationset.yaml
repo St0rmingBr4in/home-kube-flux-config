@@ -10,7 +10,7 @@ spec:
         elements:
           - name: tailscale-operator
             chart: tailscale-operator
-            chartVersion: 1.74.1
+            chartVersion: 1.94.2
             namespace: tailscale
             repoURL: https://pkgs.tailscale.com/helmcharts
             valuesPath: argocd/applications/infrastructure/tailscale-operator/tailscale-operator-values.yaml
