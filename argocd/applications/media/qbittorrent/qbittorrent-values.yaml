@@ -14,7 +14,7 @@ service:
     ports:
       main:
         port: 10095
-        targetPort: 10095
+        targetPort: 8080
   torrent:
     enabled: true
     type: LoadBalancer
