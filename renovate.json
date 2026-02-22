@@ -4,5 +4,26 @@
   ],
   "argocd": {
     "managerFilePatterns": ["/\\.yaml$/"]
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update Helm chart versions in ArgoCD ApplicationSet list generators (HTTPS registries)",
+      "fileMatch": ["^argocd/applications/(?!media/).*/applicationset\\.yaml$"],
+      "matchStrings": [
+        "- name: [^\\n]+\\n\\s+chart: (?P<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?P<currentValue>[^\\s\\n]+)[\\s\\S]*?repoURL: (?P<registryUrl>https?://[^\\s\\n]+)"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "Update TrueCharts OCI Helm chart versions in media ApplicationSets",
+      "fileMatch": ["^argocd/applications/media/.*/applicationset\\.yaml$"],
+      "matchStrings": [
+        "- name: [^\\n]+\\n\\s+chart: (?P<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?P<currentValue>[^\\s\\n]+)"
+      ],
+      "datasourceTemplate": "helm",
+      "registryUrlTemplate": "oci://oci.trueforge.org/truecharts"
+    }
+  ]
 }

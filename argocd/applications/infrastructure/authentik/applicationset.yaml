@@ -11,6 +11,7 @@ spec:
           - name: authentik
             chart: authentik
             chartVersion: 2025.8.4
+            repoURL: https://charts.goauthentik.io
             namespace: prod-infra
             valuesPath: argocd/applications/infrastructure/authentik/authentik-values.yaml
             ciOverridesPath: infrastructure/authentik/ci-overrides.yaml
@@ -26,7 +27,7 @@ spec:
       project: default
 
       sources:
-        - repoURL: https://charts.goauthentik.io
+        - repoURL: "{{repoURL}}"
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
