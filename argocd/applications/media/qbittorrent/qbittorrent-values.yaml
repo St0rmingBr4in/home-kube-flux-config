@@ -13,7 +13,7 @@ service:
   main:
     ports:
       main:
-        port: 8080
+        port: 10095
         targetPort: 8080
   torrent:
     enabled: true
@@ -82,6 +82,12 @@ workload:
   main:
     podSpec:
       containers:
+        main:
+          env:
+            # Chart derives QBITTORRENT__PORT from service.main.ports.main.port (10095).
+            # Override to 8080 so qBittorrent listens on 8080, matching the chart's
+            # hardcoded probe port. Service port 10095 routes to targetPort 8080.
+            QBITTORRENT__PORT: "8080"
         tailscale:
           enabled: true
           primary: false
