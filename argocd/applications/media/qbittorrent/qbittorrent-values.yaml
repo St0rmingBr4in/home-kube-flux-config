@@ -83,40 +83,13 @@ workload:
     podSpec:
       containers:
         qbittorrent:
-          probes:
-            liveness:
-              enabled: true
-              custom: true
-              spec:
-                httpGet:
-                  path: /
-                  port: 10095
-                initialDelaySeconds: 12
-                periodSeconds: 15
-                failureThreshold: 5
-                timeoutSeconds: 5
-            readiness:
-              enabled: true
-              custom: true
-              spec:
-                httpGet:
-                  path: /
-                  port: 10095
-                initialDelaySeconds: 10
-                periodSeconds: 12
-                failureThreshold: 4
-                timeoutSeconds: 5
-            startup:
-              enabled: true
-              custom: true
-              spec:
-                httpGet:
-                  path: /
-                  port: 10095
-                initialDelaySeconds: 10
-                periodSeconds: 5
-                failureThreshold: 60
-                timeoutSeconds: 3
+          env:
+            # The chart sets QBITTORRENT__PORT=10095 (from service port), making the
+            # linuxserver startup script write WebUI\Port=10095 to qBittorrent.conf.
+            # The chart hardcodes probes to port 8080.
+            # QBT_Preferences__* env vars are processed by qBittorrent at startup and
+            # override the config file, so this forces the WebUI to listen on 8080.
+            QBT_Preferences__WebUI__Port: "8080"
         tailscale:
           enabled: true
           primary: false
