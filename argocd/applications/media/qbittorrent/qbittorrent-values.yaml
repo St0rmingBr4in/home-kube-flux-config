@@ -82,7 +82,7 @@ workload:
   main:
     podSpec:
       containers:
-        main:
+        qbittorrent:
           probes:
             liveness:
               enabled: true
