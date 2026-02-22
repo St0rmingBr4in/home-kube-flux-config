@@ -19,7 +19,17 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
-    # ArgoCD CLI / API calls: bypass Authentik when a Bearer token is present.
+    # ArgoCD gRPC API calls: bypass Authentik for all gRPC traffic.
+    # This covers CLI login (no Bearer yet) and API calls using native gRPC or gRPC-web.
+    # ArgoCD-server enforces its own authentication, so Authentik SSO is not needed here.
+    - kind: Rule
+      match: Host(`argocd.st0rmingbr4in.com`) && HeaderRegexp(`Content-Type`, `^application/grpc`)
+      priority: 55
+      services:
+        - name: argocd-server
+          namespace: argocd
+          port: 80
+    # ArgoCD REST API calls: bypass Authentik when a Bearer token is present.
     # The argocd-server validates the token itself, so no SSO layer is needed.
     - kind: Rule
       match: Host(`argocd.st0rmingbr4in.com`) && HeaderRegexp(`Authorization`, `^Bearer .+`)
