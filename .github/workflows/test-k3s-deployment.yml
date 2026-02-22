@@ -77,8 +77,10 @@ jobs:
           # Create ArgoCD namespace
           kubectl create namespace argocd
 
-          # Install ArgoCD using the official manifests
-          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          # Install ArgoCD using the official manifests.
+          # --server-side is required: the applicationsets CRD exceeds the 262144-byte
+          # client-side annotation limit used by regular kubectl apply.
+          kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
           # Wait for ArgoCD to be ready
           echo "Waiting for ArgoCD deployments..."
