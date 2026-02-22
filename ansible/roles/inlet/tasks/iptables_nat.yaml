@@ -1,0 +1,105 @@
+---
+- name: Warn when qbittorrent torrent IP is not configured
+  ansible.builtin.debug:
+    msg: >
+      qbittorrent_torrent_tailscale_ip is empty — torrent port {{ torrent_port }} DNAT rules
+      will be skipped. Set the variable once the Tailscale LoadBalancer service gets its IP:
+        kubectl get svc -n prod-media qbittorrent-torrent \
+          -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  when: qbittorrent_torrent_tailscale_ip == ""
+
+# --- Torrent port forwarding (conditional) ---
+
+- name: DNAT TCP torrent traffic to qbittorrent
+  ansible.builtin.iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ public_interface }}"
+    protocol: tcp
+    destination_port: "{{ torrent_port }}"
+    jump: DNAT
+    to_destination: "{{ qbittorrent_torrent_tailscale_ip }}:{{ torrent_port }}"
+    comment: "inlet: torrent TCP DNAT"
+  when: qbittorrent_torrent_tailscale_ip != ""
+  notify: Save iptables rules
+
+- name: DNAT UDP torrent traffic to qbittorrent
+  ansible.builtin.iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ public_interface }}"
+    protocol: udp
+    destination_port: "{{ torrent_port }}"
+    jump: DNAT
+    to_destination: "{{ qbittorrent_torrent_tailscale_ip }}:{{ torrent_port }}"
+    comment: "inlet: torrent UDP DNAT"
+  when: qbittorrent_torrent_tailscale_ip != ""
+  notify: Save iptables rules
+
+- name: FORWARD TCP torrent traffic to qbittorrent
+  ansible.builtin.iptables:
+    chain: FORWARD
+    protocol: tcp
+    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
+    destination_port: "{{ torrent_port }}"
+    jump: ACCEPT
+    comment: "inlet: torrent TCP FORWARD"
+  when: qbittorrent_torrent_tailscale_ip != ""
+  notify: Save iptables rules
+
+- name: FORWARD UDP torrent traffic to qbittorrent
+  ansible.builtin.iptables:
+    chain: FORWARD
+    protocol: udp
+    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
+    destination_port: "{{ torrent_port }}"
+    jump: ACCEPT
+    comment: "inlet: torrent UDP FORWARD"
+  when: qbittorrent_torrent_tailscale_ip != ""
+  notify: Save iptables rules
+
+# --- Web traffic → Traefik ---
+
+- name: DNAT HTTP traffic to Traefik
+  ansible.builtin.iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ public_interface }}"
+    protocol: tcp
+    destination_port: "{{ http_port }}"
+    jump: DNAT
+    to_destination: "{{ traefik_tailscale_ip }}:{{ http_port }}"
+    comment: "inlet: HTTP DNAT to Traefik"
+  notify: Save iptables rules
+
+- name: DNAT HTTPS traffic to Traefik
+  ansible.builtin.iptables:
+    table: nat
+    chain: PREROUTING
+    in_interface: "{{ public_interface }}"
+    protocol: tcp
+    destination_port: "{{ https_port }}"
+    jump: DNAT
+    to_destination: "{{ traefik_tailscale_ip }}:{{ https_port }}"
+    comment: "inlet: HTTPS DNAT to Traefik"
+  notify: Save iptables rules
+
+- name: FORWARD HTTP traffic to Traefik
+  ansible.builtin.iptables:
+    chain: FORWARD
+    protocol: tcp
+    destination: "{{ traefik_tailscale_ip }}"
+    destination_port: "{{ http_port }}"
+    jump: ACCEPT
+    comment: "inlet: HTTP FORWARD to Traefik"
+  notify: Save iptables rules
+
+- name: FORWARD HTTPS traffic to Traefik
+  ansible.builtin.iptables:
+    chain: FORWARD
+    protocol: tcp
+    destination: "{{ traefik_tailscale_ip }}"
+    destination_port: "{{ https_port }}"
+    jump: ACCEPT
+    comment: "inlet: HTTPS FORWARD to Traefik"
+  notify: Save iptables rules

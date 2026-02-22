@@ -1,0 +1,14 @@
+---
+- name: Install iptables-persistent and netfilter-persistent
+  ansible.builtin.apt:
+    name:
+      - iptables-persistent
+      - netfilter-persistent
+    state: present
+    update_cache: true
+
+- name: Enable and start netfilter-persistent
+  ansible.builtin.systemd:
+    name: netfilter-persistent
+    enabled: true
+    state: started

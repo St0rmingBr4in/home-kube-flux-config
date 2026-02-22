@@ -1,0 +1,6 @@
+---
+- name: Configure inlet.st0rmingbr4in.com
+  hosts: inlet
+  become: false
+  roles:
+    - role: inlet

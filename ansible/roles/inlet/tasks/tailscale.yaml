@@ -1,0 +1,47 @@
+---
+- name: Check if tailscale binary is present
+  ansible.builtin.stat:
+    path: /usr/bin/tailscale
+  register: tailscale_binary
+
+- name: Install Tailscale
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://tailscale.com/install.sh | sh
+  when: not tailscale_binary.stat.exists
+
+- name: Enable and start tailscaled
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: true
+    state: started
+
+- name: Get Tailscale status
+  ansible.builtin.command:
+    cmd: tailscale status --json
+  register: tailscale_status_raw
+  changed_when: false
+
+- name: Parse Tailscale status
+  ansible.builtin.set_fact:
+    tailscale_status: "{{ tailscale_status_raw.stdout | from_json }}"
+
+- name: Bring up Tailscale exit node
+  ansible.builtin.command:
+    cmd: "tailscale up --authkey={{ tailscale_authkey }} {{ tailscale_extra_args }}"
+  when:
+    - tailscale_authkey is defined
+    - tailscale_status.BackendState != "Running"
+  no_log: true
+
+- name: Verify Tailscale exit node is active
+  ansible.builtin.command:
+    cmd: tailscale status
+  register: tailscale_status_text
+  changed_when: false
+
+- name: Assert exit node is advertised
+  ansible.builtin.assert:
+    that:
+      - '"exit node" in tailscale_status_text.stdout'
+    fail_msg: "Tailscale is not advertising as an exit node. Run with -e tailscale_authkey=... if this is a new node."
+    success_msg: "Tailscale exit node is active."

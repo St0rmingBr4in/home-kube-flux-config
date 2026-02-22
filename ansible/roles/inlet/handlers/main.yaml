@@ -1,0 +1,5 @@
+---
+- name: Save iptables rules
+  ansible.builtin.command:
+    cmd: netfilter-persistent save
+  listen: "Save iptables rules"

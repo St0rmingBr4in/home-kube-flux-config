@@ -1,0 +1,62 @@
+name: Ansible - Configure inlet
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "ansible/**"
+      - ".github/workflows/ansible-inlet.yaml"
+  workflow_dispatch:
+    inputs:
+      qbittorrent_torrent_tailscale_ip:
+        description: "Tailscale IP of qbittorrent-torrent LoadBalancer service (leave empty to skip torrent rules)"
+        required: false
+        default: ""
+        type: string
+      check_mode:
+        description: "Run in check mode (dry-run, no changes applied)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and dependencies
+        run: |
+          pip install ansible
+          ansible-galaxy collection install ansible.posix
+
+      - name: Write SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.INLET_SSH_PRIVATE_KEY }}" > ~/.ssh/inlet_id_ed25519
+          chmod 600 ~/.ssh/inlet_id_ed25519
+          echo "IdentityFile ~/.ssh/inlet_id_ed25519" >> ~/.ssh/config
+
+      - name: Run Ansible playbook
+        run: |
+          EXTRA_VARS=""
+
+          if [ -n "${{ inputs.qbittorrent_torrent_tailscale_ip }}" ]; then
+            EXTRA_VARS="$EXTRA_VARS -e qbittorrent_torrent_tailscale_ip=${{ inputs.qbittorrent_torrent_tailscale_ip }}"
+          fi
+
+          CHECK_FLAG=""
+          if [ "${{ inputs.check_mode }}" = "true" ]; then
+            CHECK_FLAG="--check --diff"
+          fi
+
+          ansible-playbook playbooks/inlet.yaml $CHECK_FLAG $EXTRA_VARS

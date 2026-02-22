@@ -1,0 +1,12 @@
+---
+- name: Configure sysctl for IP forwarding
+  ansible.builtin.import_tasks: sysctl.yaml
+
+- name: Configure Tailscale exit node
+  ansible.builtin.import_tasks: tailscale.yaml
+
+- name: Install iptables-persistent packages
+  ansible.builtin.import_tasks: iptables_packages.yaml
+
+- name: Configure iptables NAT rules
+  ansible.builtin.import_tasks: iptables_nat.yaml

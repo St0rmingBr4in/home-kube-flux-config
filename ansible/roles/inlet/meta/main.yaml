@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: st0rmingbr4in
+  description: Configures inlet.st0rmingbr4in.com as a Tailscale exit node and port-forwarding gateway
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+dependencies: []
