@@ -10,7 +10,7 @@ spec:
         elements:
           - name: argocd
             chart: argo-cd
-            chartVersion: 7.7.6
+            chartVersion: 7.9.1
             namespace: argocd
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/core/argocd/argocd-values.yaml
