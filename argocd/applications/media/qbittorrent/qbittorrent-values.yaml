@@ -51,6 +51,14 @@ securityContext:
   runAsUser: 1031
   runAsGroup: 100
 
+# Secret stub (disabled) — actual secret created by VaultStaticSecret as qbittorrent-tailscale-authkey
+secret:
+  tailscale-authkey:
+    enabled: false
+    type: Opaque
+    data:
+      TS_AUTHKEY: "placeholder"
+
 # Tailscale sidecar to route qBittorrent traffic through inlet exit node
 tailscaleImage:
   repository: ghcr.io/tailscale/tailscale
@@ -68,7 +76,7 @@ workload:
           env:
             TS_AUTHKEY:
               secretKeyRef:
-                name: qbittorrent-tailscale-authkey
+                name: tailscale-authkey
                 key: TS_AUTHKEY
             TS_HOSTNAME: qbittorrent
             TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-routes"
