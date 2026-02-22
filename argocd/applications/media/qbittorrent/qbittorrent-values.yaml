@@ -65,6 +65,10 @@ tailscaleImage:
   tag: latest
   pullPolicy: Always
 
+# Allow Tailscale containerboot to init its K8s client (needed even with TS_KUBE_SECRET="")
+podOptions:
+  automountServiceAccountToken: true
+
 workload:
   main:
     podSpec:
