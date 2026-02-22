@@ -67,3 +67,13 @@ spec:
           kind: Deployment
           jsonPointers:
             - /spec/template/spec/hostUsers
+        # The chart generates a duplicate Service port "main" when service.main.ports.main.port
+        # is set to 8080 (the chart default), causing a Kubernetes validation error on apply.
+        # We keep port: 8080 in values so the Deployment gets QBITTORRENT__PORT=8080 (matching
+        # the hardcoded probe port), while the in-cluster Service retains port: 10095 for the
+        # IngressRoute. ignoreDifferences prevents ArgoCD from trying to reconcile this.
+        - group: ""
+          kind: Service
+          name: qbittorrent
+          jsonPointers:
+            - /spec/ports

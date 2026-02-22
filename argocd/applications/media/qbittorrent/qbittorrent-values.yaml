@@ -13,7 +13,7 @@ service:
   main:
     ports:
       main:
-        port: 10095
+        port: 8080
         targetPort: 8080
   torrent:
     enabled: true
@@ -82,14 +82,6 @@ workload:
   main:
     podSpec:
       containers:
-        qbittorrent:
-          env:
-            # The chart sets QBITTORRENT__PORT=10095 (from service port), making the
-            # linuxserver startup script write WebUI\Port=10095 to qBittorrent.conf.
-            # The chart hardcodes probes to port 8080.
-            # QBT_Preferences__* env vars are processed by qBittorrent at startup and
-            # override the config file, so this forces the WebUI to listen on 8080.
-            QBT_Preferences__WebUI__Port: "8080"
         tailscale:
           enabled: true
           primary: false
