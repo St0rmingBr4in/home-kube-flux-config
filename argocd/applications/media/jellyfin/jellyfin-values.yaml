@@ -31,7 +31,7 @@ podSecurityContext:
     - 44 # video
 
 persistence:
-  config:
+  data:
     enabled: true
     existingClaim: jellyfin-config
   media:
