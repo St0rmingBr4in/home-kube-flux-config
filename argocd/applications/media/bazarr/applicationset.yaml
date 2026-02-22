@@ -10,7 +10,7 @@ spec:
         elements:
           - name: bazarr
             chart: bazarr
-            chartVersion: 22.2.0
+            chartVersion: 22.12.3
             namespace: prod-media
             valuesPath: argocd/applications/media/bazarr/bazarr-values.yaml
             ciOverridesPath: media/bazarr/ci-overrides.yaml
