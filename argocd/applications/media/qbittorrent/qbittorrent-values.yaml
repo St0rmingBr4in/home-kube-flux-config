@@ -68,6 +68,15 @@ tailscaleImage:
 # Allow Tailscale containerboot to init its K8s client (needed even with TS_KUBE_SECRET="")
 podOptions:
   automountServiceAccountToken: true
+  dnsPolicy: "None"
+  dnsConfig:
+    nameservers:
+      - "8.8.8.8"
+      - "1.1.1.1"
+    searches:
+      - "prod-media.svc.cluster.local"
+      - "svc.cluster.local"
+      - "cluster.local"
 
 workload:
   main:
