@@ -10,7 +10,7 @@ spec:
         elements:
           - name: vault
             chart: vault
-            chartVersion: 0.25.0
+            chartVersion: 0.32.0
             namespace: prod-infra
             repoURL: https://helm.releases.hashicorp.com
             valuesPath: argocd/applications/infrastructure/vault/vault-values.yaml
