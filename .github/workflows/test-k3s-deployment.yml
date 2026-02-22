@@ -160,6 +160,7 @@ jobs:
             "argocd/st0rmingbr4in.com-cert"          # Requires cert-manager CRDs
             "argocd/tailscale-operator"              # Requires Tailscale auth key secret
             "argocd/traefik"                         # Requires VaultStaticSecret CRD in manifests path
+            "argocd/pihole"                          # Liveness probe checks DNS functionality unavailable in CI
             "argocd/vault"                           # Requires manual Vault initialization
             "argocd/vault-secrets-operator"          # upgrade-crds job remains Pending in CI
           )
