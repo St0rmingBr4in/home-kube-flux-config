@@ -22,8 +22,9 @@
       "matchStrings": [
         "- name: [^\\n]+\\n\\s+chart: (?<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?<currentValue>[^\\s\\n]+)"
       ],
-      "datasourceTemplate": "helm",
-      "registryUrlTemplate": "oci://oci.trueforge.org/truecharts"
+      "datasourceTemplate": "docker",
+      "packageNameTemplate": "truecharts/{{depName}}",
+      "registryUrlTemplate": "https://oci.trueforge.org"
     }
   ]
 }
