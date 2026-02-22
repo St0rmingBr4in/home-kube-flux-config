@@ -46,6 +46,7 @@ persistence:
 
 env:
   TZ: Europe/Paris
+  WEBUI_PORT: "8080"
 
 securityContext:
   runAsUser: 1031
