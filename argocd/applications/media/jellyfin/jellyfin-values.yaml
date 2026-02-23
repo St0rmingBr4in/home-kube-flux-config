@@ -33,7 +33,8 @@ podSecurityContext:
 persistence:
   config:
     enabled: true
-    type: emptyDir
+    existingClaim: jellyfin-config
+    subPath: config
   data:
     enabled: true
     existingClaim: jellyfin-config
