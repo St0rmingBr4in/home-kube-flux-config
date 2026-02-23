@@ -34,8 +34,6 @@ persistence:
   config:
     enabled: true
     type: emptyDir
-    emptyDir:
-      medium: Memory
   data:
     enabled: true
     existingClaim: jellyfin-config
