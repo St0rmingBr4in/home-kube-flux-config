@@ -30,18 +30,10 @@ podSecurityContext:
     - 107 # render
     - 44 # video
 
-env:
-  JELLYFIN_DATA_DIR: /config
-
 persistence:
   config:
     enabled: true
     existingClaim: jellyfin-config
-  data:
-    enabled: true
-    type: emptyDir
-    emptyDir:
-      medium: Memory
   media:
     enabled: true
     existingClaim: media-library
