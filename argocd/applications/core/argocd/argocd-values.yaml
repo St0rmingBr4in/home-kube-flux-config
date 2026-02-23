@@ -24,10 +24,10 @@ repoServer:
 server:
   resources:
     limits:
-      memory: 64Mi # Generous headroom
+      memory: 100Mi
     requests:
       cpu: 10m # Based on actual usage
-      memory: 64Mi # Same as limit for guaranteed QoS
+      memory: 100Mi
 
   service:
     type: ClusterIP
