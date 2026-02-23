@@ -32,10 +32,10 @@ podSecurityContext:
 
 persistence:
   config:
-    enabled: false
-  data:
     enabled: true
     existingClaim: jellyfin-config
+  data:
+    enabled: false
   media:
     enabled: true
     existingClaim: media-library
