@@ -35,7 +35,9 @@ persistence:
     enabled: true
     existingClaim: jellyfin-config
   data:
-    enabled: false
+    enabled: true
+    type: emptyDir
+    medium: Memory
   media:
     enabled: true
     existingClaim: media-library
