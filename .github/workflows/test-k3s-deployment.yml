@@ -67,9 +67,13 @@ jobs:
       - name: Wait for K3s to be ready
         run: |
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
-          # Wait for CoreDNS to be available: it requires pod networking (flannel),
-          # so this implicitly ensures the CNI is ready before we deploy anything.
-          kubectl wait --for=condition=available --timeout=120s deployment/coredns -n kube-system
+          # Wait for CoreDNS pods to be ready: ensures pod networking (flannel/CNI)
+          # is up before deploying anything. Uses pod labels rather than the
+          # deployment name because newer k3s versions deploy CoreDNS via a
+          # HelmChart controller and the Deployment may not exist immediately.
+          echo "Waiting for CoreDNS pods to appear..."
+          timeout 120 sh -c 'until kubectl get pods -n kube-system -l k8s-app=kube-dns -o name 2>/dev/null | grep -q pod; do sleep 2; done'
+          kubectl wait --for=condition=Ready pod -l k8s-app=kube-dns -n kube-system --timeout=120s
           kubectl get nodes -o wide
 
       - name: Install ArgoCD
