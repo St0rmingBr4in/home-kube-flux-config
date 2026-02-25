@@ -173,9 +173,10 @@ jobs:
             return 1
           }
 
-          # Wait for applications to sync and become healthy (300s timeout)
+          # Wait for applications to sync and become healthy (600s timeout)
+          # homepage pulls images from oci.trueforge.org which can take 4-5 minutes
           echo "=== Waiting for applications to sync and become healthy ==="
-          TIMEOUT=300
+          TIMEOUT=600
           FAILED_APPS=()
 
           # Get list of all application names to check
