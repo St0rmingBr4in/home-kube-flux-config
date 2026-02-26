@@ -185,6 +185,7 @@ agents:
 # Cluster Agent configuration
 clusterAgent:
   enabled: true
+  apiKeyExistingSecret: datadog-api-key
   tokenExistingSecret: datadog-cluster-agent
   resources:
     limits:
