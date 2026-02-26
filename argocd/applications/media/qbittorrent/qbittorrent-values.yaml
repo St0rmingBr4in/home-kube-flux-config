@@ -84,10 +84,12 @@ workload:
       containers:
         main:
           env:
-            # Chart derives QBITTORRENT__PORT from service.main.ports.main.port (10095).
-            # Override to 8080 so qBittorrent listens on 8080, matching the chart's
-            # hardcoded probe port. Service port 10095 routes to targetPort 8080.
+            # Chart derives both QBITTORRENT__PORT and QBT_WEBUI_PORT from
+            # service.main.ports.main.port (10095). Override both to 8080 so
+            # qBittorrent listens on 8080, matching the chart's probe port.
+            # Service port 10095 routes to targetPort 8080.
             QBITTORRENT__PORT: "8080"
+            QBT_WEBUI_PORT: "8080"
         tailscale:
           enabled: true
           primary: false
