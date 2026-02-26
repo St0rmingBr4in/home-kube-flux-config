@@ -9,9 +9,9 @@ resources:
 
 serviceDns:
   type: LoadBalancer
+  loadBalancerClass: tailscale
   annotations:
     tailscale.com/hostname: "pihole"
-    kube-vip.io/loadbalancerIPs: "192.168.72.7"
 
 serviceWeb:
   type: ClusterIP
