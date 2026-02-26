@@ -9,7 +9,6 @@ resources:
 
 serviceDns:
   type: LoadBalancer
-  loadBalancerClass: tailscale
   annotations:
     tailscale.com/hostname: "pihole"
 
