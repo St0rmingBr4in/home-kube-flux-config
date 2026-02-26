@@ -23,11 +23,13 @@ doh:
 persistentVolumeClaim:
   enabled: false
 
+# Upstream DNS servers
+DNS1: "1.1.1.1"
+DNS2: "1.0.0.1"
+
 # DNS configuration
 dnsmasq:
-  upstreamServers:
-    - 1.1.1.1
-    - 1.0.0.1
+  upstreamServers: []
   customDnsEntries: []
 
 # Admin interface
