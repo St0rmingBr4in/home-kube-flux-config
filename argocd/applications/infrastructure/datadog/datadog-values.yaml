@@ -189,10 +189,10 @@ clusterAgent:
   tokenExistingSecret: datadog-cluster-agent
   resources:
     limits:
-      memory: 150Mi # Based on actual usage (~112Mi) with some headroom
+      memory: 256Mi
     requests:
       cpu: 50m
-      memory: 150Mi # Request less than limit
+      memory: 256Mi
   tolerations:
     - effect: NoSchedule
       key: ram
