@@ -6,10 +6,10 @@
 controller:
   resources:
     limits:
-      memory: 512Mi # Higher than usage with headroom
+      memory: 1Gi # Increased from 512Mi after OOMKills
     requests:
       cpu: 300m # Based on actual usage
-      memory: 512Mi # Same as limit for guaranteed QoS
+      memory: 1Gi # Same as limit for guaranteed QoS
 
 # Repository Server - processes Helm charts and Git repos (was getting OOMKilled at 256Mi)
 repoServer:
