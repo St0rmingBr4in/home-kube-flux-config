@@ -47,6 +47,8 @@ jobs:
           echo "IdentityFile ~/.ssh/inlet_id_ed25519" >> ~/.ssh/config
 
       - name: Run Ansible playbook
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           EXTRA_VARS=""
 
