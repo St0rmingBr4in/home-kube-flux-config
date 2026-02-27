@@ -1,9 +1,7 @@
 tailscale_extra_args: "--advertise-exit-node --accept-routes"
 # tailscale_authkey: never stored here — pass via -e at runtime (only for re-registration)
 
-traefik_tailscale_ip: "100.92.78.42"
-
-qbittorrent_torrent_tailscale_ip: "100.122.130.88"
+qbittorrent_torrent_tailscale_ip: ""
 
 torrent_port: 6881
 http_port: 80

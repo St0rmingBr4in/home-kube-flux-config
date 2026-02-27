@@ -1,4 +1,26 @@
 ---
+- name: Resolve Traefik Tailscale IP
+  ansible.builtin.command:
+    cmd: tailscale ip --4 traefik
+  register: traefik_ip_result
+  changed_when: false
+
+- name: Set traefik_tailscale_ip fact
+  ansible.builtin.set_fact:
+    traefik_tailscale_ip: "{{ traefik_ip_result.stdout | trim }}"
+
+- name: Resolve qBittorrent torrent Tailscale IP
+  ansible.builtin.command:
+    cmd: tailscale ip --4 qbittorrent-torrent
+  register: qbt_ip_result
+  changed_when: false
+  failed_when: false
+
+- name: Set qbittorrent_torrent_tailscale_ip fact (if device exists)
+  ansible.builtin.set_fact:
+    qbittorrent_torrent_tailscale_ip: "{{ qbt_ip_result.stdout | trim }}"
+  when: qbt_ip_result.rc == 0 and (qbt_ip_result.stdout | trim) != ""
+
 - name: Warn when qbittorrent torrent IP is not configured
   ansible.builtin.debug:
     msg: >
