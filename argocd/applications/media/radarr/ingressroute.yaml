@@ -19,6 +19,13 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
+    # API endpoints bypass Authentik (secured by Radarr's own API key)
+    - kind: Rule
+      match: Host(`radarr.st0rmingbr4in.com`) && PathPrefix(`/api/`)
+      priority: 50
+      services:
+        - name: radarr
+          port: 7878
     # Main Radarr application (with Authentik forward auth)
     - kind: Rule
       match: Host(`radarr.st0rmingbr4in.com`)

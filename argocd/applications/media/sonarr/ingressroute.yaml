@@ -19,6 +19,13 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
+    # API endpoints bypass Authentik (secured by Sonarr's own API key)
+    - kind: Rule
+      match: Host(`sonarr.st0rmingbr4in.com`) && PathPrefix(`/api/`)
+      priority: 50
+      services:
+        - name: sonarr
+          port: 8989
     # Main Sonarr application (with Authentik forward auth)
     - kind: Rule
       match: Host(`sonarr.st0rmingbr4in.com`)
