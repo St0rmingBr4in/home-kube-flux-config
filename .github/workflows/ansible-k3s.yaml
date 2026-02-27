@@ -45,11 +45,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.K3S_SSH_PRIVATE_KEY }}" > ~/.ssh/k3s_id_ed25519
           chmod 600 ~/.ssh/k3s_id_ed25519
-          cat >> ~/.ssh/config <<'EOF'
-Host *
-  IdentityFile ~/.ssh/k3s_id_ed25519
-  StrictHostKeyChecking no
-EOF
+          printf 'Host *\n  IdentityFile ~/.ssh/k3s_id_ed25519\n  StrictHostKeyChecking no\n' >> ~/.ssh/config
 
       - name: Run Ansible playbook
         env:
