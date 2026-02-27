@@ -4,6 +4,7 @@ oauth:
   # The Tailscale operator will use a secret named 'operator-oauth'
   # We need to configure Vault to create this secret with the right name and keys
   # The secret should contain 'client_id' and 'client_secret' keys
+  audience: ""
 
 # API Server proxy configuration
 apiServerProxyConfig:
