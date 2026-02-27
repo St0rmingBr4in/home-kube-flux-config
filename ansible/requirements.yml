@@ -1,0 +1,10 @@
+---
+roles:
+  - name: xanmanning.k3s
+    src: xanmanning.k3s
+
+collections:
+  - name: community.general
+    version: ">=7.0.0"
+  - name: ansible.posix
+    version: ">=1.5.0"
