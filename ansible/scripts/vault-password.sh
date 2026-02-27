@@ -6,6 +6,8 @@ set -euo pipefail
 
 if [ -n "${ANSIBLE_VAULT_PASSWORD:-}" ]; then
     printf '%s' "$ANSIBLE_VAULT_PASSWORD"
-else
+elif command -v security &>/dev/null; then
     security find-generic-password -a "$USER" -s ansible-vault-k3s -w
 fi
+# No vault password source available (Linux CI without secret) — exit 0 with no output.
+# Playbooks that don't reference vault-encrypted vars will still work.
