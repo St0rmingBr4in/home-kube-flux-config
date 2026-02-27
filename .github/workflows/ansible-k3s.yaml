@@ -1,6 +1,16 @@
 name: Ansible - Configure k3s cluster
 
 on:
+  push:
+    branches: ["master"]
+    paths:
+      - "ansible/ansible.cfg"
+      - "ansible/scripts/**"
+      - "ansible/requirements.yml"
+      - "ansible/inventory/hosts.yaml"
+      - "ansible/inventory/group_vars/k3s_cluster/**"
+      - "ansible/playbooks/k3s.yaml"
+      - ".github/workflows/ansible-k3s.yaml"
   workflow_dispatch:
     inputs:
       check_mode:
