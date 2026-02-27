@@ -13,6 +13,11 @@ on:
       - ".github/workflows/ansible-inlet.yaml"
   workflow_dispatch:
     inputs:
+      qbittorrent_torrent_tailscale_ip:
+        description: "Tailscale IP of qbittorrent-torrent LoadBalancer service (leave empty to skip torrent rules)"
+        required: false
+        default: ""
+        type: string
       check_mode:
         description: "Run in check mode (dry-run, no changes applied)"
         required: false
@@ -50,9 +55,15 @@ jobs:
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
+          EXTRA_VARS=""
+
+          if [ -n "${{ inputs.qbittorrent_torrent_tailscale_ip }}" ]; then
+            EXTRA_VARS="$EXTRA_VARS -e qbittorrent_torrent_tailscale_ip=${{ inputs.qbittorrent_torrent_tailscale_ip }}"
+          fi
+
           CHECK_FLAG=""
           if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
             CHECK_FLAG="--check --diff"
           fi
 
-          ansible-playbook playbooks/inlet.yaml $CHECK_FLAG
+          ansible-playbook playbooks/inlet.yaml $CHECK_FLAG $EXTRA_VARS
