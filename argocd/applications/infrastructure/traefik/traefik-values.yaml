@@ -32,6 +32,7 @@ service:
   loadBalancerClass: tailscale
   annotations:
     tailscale.com/hostname: "traefik"
+    tailscale.com/proxy-class: "proxy-resources"
 
 ports:
   web:

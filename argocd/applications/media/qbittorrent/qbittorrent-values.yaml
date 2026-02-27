@@ -20,6 +20,7 @@ service:
     loadBalancerClass: tailscale
     annotations:
       tailscale.com/hostname: "qbittorrent-torrent"
+      tailscale.com/proxy-class: "proxy-resources"
     ports:
       torrent:
         enabled: true

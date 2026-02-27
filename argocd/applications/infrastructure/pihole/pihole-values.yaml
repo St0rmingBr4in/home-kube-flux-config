@@ -12,6 +12,7 @@ serviceDns:
   loadBalancerClass: tailscale
   annotations:
     tailscale.com/hostname: "pihole"
+    tailscale.com/proxy-class: "proxy-resources"
 
 serviceWeb:
   type: ClusterIP
