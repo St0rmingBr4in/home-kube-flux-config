@@ -22,6 +22,9 @@ service:
         port: 3000
         targetPort: 3000
 
+env:
+  HOMEPAGE_ALLOWED_HOSTS: "home.st0rmingbr4in.com"
+
 resources:
   limits:
     memory: 256Mi
