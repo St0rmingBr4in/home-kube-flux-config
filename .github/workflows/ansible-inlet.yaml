@@ -6,6 +6,11 @@ on:
     paths:
       - "ansible/**"
       - ".github/workflows/ansible-inlet.yaml"
+  pull_request:
+    branches: ["master"]
+    paths:
+      - "ansible/**"
+      - ".github/workflows/ansible-inlet.yaml"
   workflow_dispatch:
     inputs:
       qbittorrent_torrent_tailscale_ip:
@@ -57,7 +62,7 @@ jobs:
           fi
 
           CHECK_FLAG=""
-          if [ "${{ inputs.check_mode }}" = "true" ]; then
+          if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
             CHECK_FLAG="--check --diff"
           fi
 

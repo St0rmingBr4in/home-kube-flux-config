@@ -11,6 +11,16 @@ on:
       - "ansible/inventory/group_vars/k3s_cluster/**"
       - "ansible/playbooks/k3s.yaml"
       - ".github/workflows/ansible-k3s.yaml"
+  pull_request:
+    branches: ["master"]
+    paths:
+      - "ansible/ansible.cfg"
+      - "ansible/scripts/**"
+      - "ansible/requirements.yml"
+      - "ansible/inventory/hosts.yaml"
+      - "ansible/inventory/group_vars/k3s_cluster/**"
+      - "ansible/playbooks/k3s.yaml"
+      - ".github/workflows/ansible-k3s.yaml"
   workflow_dispatch:
     inputs:
       check_mode:
@@ -52,7 +62,7 @@ jobs:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           CHECK_FLAG=""
-          if [ "${{ inputs.check_mode }}" = "true" ]; then
+          if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
             CHECK_FLAG="--check --diff"
           fi
           ansible-playbook playbooks/k3s.yaml $CHECK_FLAG
