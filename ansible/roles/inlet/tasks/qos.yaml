@@ -1,0 +1,106 @@
+---
+# QoS on tailscale0 to prevent qbittorrent bulk traffic from starving
+# Jellyfin/web streaming traffic.
+#
+# Root cause: qbittorrent uses inlet as a Tailscale exit node, generating
+# 100+ Mbps through the shared tailscale0 interface. This saturates the TX
+# queue and causes queuing latency that interrupts Jellyfin streams.
+#
+# Fix: mark qbittorrent Tailscale peer traffic as DSCP CS1 (scavenger/bulk)
+# via iptables mangle, then apply CAKE with diffserv3 on tailscale0.
+# CAKE dequeues CS0 (Traefik/web) before CS1 (qbittorrent) whenever both
+# are competing, eliminating the latency spikes.
+
+- name: Install iproute2 for tc/CAKE support
+  ansible.builtin.apt:
+    name: iproute2
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: Deploy inlet-qos script
+  ansible.builtin.copy:
+    dest: /usr/local/bin/inlet-qos.sh
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # Apply CAKE QoS on tailscale0.
+      # Traefik traffic (CS0, best-effort) is scheduled before
+      # qbittorrent traffic (CS1, scavenger) in CAKE's diffserv3 tiers.
+      set -e
+
+      IFACE=tailscale0
+
+      # Wait up to 30s for tailscale0 to come up after tailscaled starts
+      for i in $(seq 1 30); do
+        ip link show "$IFACE" &>/dev/null && break
+        sleep 1
+      done
+      ip link show "$IFACE" &>/dev/null || { echo "tailscale0 not found after 30s"; exit 1; }
+
+      # Remove existing root qdisc (idempotent)
+      tc qdisc del dev "$IFACE" root 2>/dev/null || true
+
+      # CAKE with diffserv3: CS1 (scavenger) < CS0 (best-effort) < higher tiers.
+      # bandwidth 1gbit matches the DO VPS NIC; CAKE uses it to tune AQM targets.
+      tc qdisc add dev "$IFACE" root cake bandwidth 1gbit diffserv3
+  notify: Apply QoS rules
+
+- name: Deploy inlet-qos systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/inlet-qos.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Apply CAKE QoS rules on tailscale0
+      After=network.target tailscaled.service
+      Wants=tailscaled.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/inlet-qos.sh
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Reload systemd
+
+- name: Ensure inlet-qos service is enabled for boot persistence
+  ansible.builtin.systemd:
+    name: inlet-qos
+    enabled: true
+    daemon_reload: true
+
+- name: Check whether CAKE qdisc is active on tailscale0
+  ansible.builtin.command:
+    cmd: tc qdisc show dev tailscale0
+  register: tc_qdisc_state
+  changed_when: false
+  failed_when: false
+
+- name: Apply CAKE qdisc on tailscale0 (if not already active)
+  ansible.builtin.command:
+    cmd: /usr/local/bin/inlet-qos.sh
+  when: "'cake' not in tc_qdisc_state.stdout"
+
+- name: Mark qbittorrent-torrent Tailscale traffic as CS1 (scavenger)
+  ansible.builtin.iptables:
+    table: mangle
+    chain: POSTROUTING
+    out_interface: tailscale0
+    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
+    jump: DSCP
+    set_dscp_mark_class: CS1
+    comment: "inlet: mark qbittorrent-torrent as CS1 for CAKE deprioritization"
+  notify: Save iptables rules
+
+- name: Mark qbittorrent exit-node Tailscale traffic as CS1 (scavenger)
+  ansible.builtin.iptables:
+    table: mangle
+    chain: POSTROUTING
+    out_interface: tailscale0
+    destination: "{{ qbittorrent_tailscale_ip }}"
+    jump: DSCP
+    set_dscp_mark_class: CS1
+    comment: "inlet: mark qbittorrent exit-node as CS1 for CAKE deprioritization"
+  notify: Save iptables rules

@@ -3,3 +3,20 @@
   ansible.builtin.command:
     cmd: netfilter-persistent save
   listen: "Save iptables rules"
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: "Reload systemd"
+
+- name: Enable and start inlet-qos
+  ansible.builtin.systemd:
+    name: inlet-qos
+    enabled: true
+    state: started
+  listen: "Enable and start inlet-qos"
+
+- name: Apply QoS rules
+  ansible.builtin.command:
+    cmd: /usr/local/bin/inlet-qos.sh
+  listen: "Apply QoS rules"

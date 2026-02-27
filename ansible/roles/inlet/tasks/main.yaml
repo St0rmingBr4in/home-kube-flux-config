@@ -13,3 +13,6 @@
 
 - name: Configure iptables NAT rules
   ansible.builtin.import_tasks: iptables_nat.yaml
+
+- name: Configure QoS to prioritise web traffic over bulk torrent traffic
+  ansible.builtin.import_tasks: qos.yaml
