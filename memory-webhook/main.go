@@ -17,7 +17,6 @@ import (
 var logger *zap.Logger
 
 func init() {
-	// Configure structured JSON logging with zap
 	config := zap.NewProductionConfig()
 	config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	config.OutputPaths = []string{"stdout"}
@@ -42,7 +41,6 @@ type patchOperation struct {
 	Value interface{} `json:"value,omitempty"`
 }
 
-// Memory resource mutation logic
 func mutateMemoryResources(pod *corev1.Pod) []patchOperation {
 	var patches []patchOperation
 
@@ -52,7 +50,6 @@ func mutateMemoryResources(pod *corev1.Pod) []patchOperation {
 		zap.Int("containers", len(pod.Spec.Containers)),
 		zap.Int("initContainers", len(pod.Spec.InitContainers)))
 
-	// Process regular containers
 	for i, container := range pod.Spec.Containers {
 		logger.Info("Processing container",
 			zap.Int("index", i),
@@ -62,7 +59,6 @@ func mutateMemoryResources(pod *corev1.Pod) []patchOperation {
 		patches = append(patches, containerPatches...)
 	}
 
-	// Process init containers
 	for i, container := range pod.Spec.InitContainers {
 		logger.Info("Processing container",
 			zap.Int("index", i),
@@ -87,9 +83,7 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 	logger.Info("Analyzing container memory resources",
 		zap.String("container", container.Name))
 
-	// Initialize resources if nil
 	if container.Resources.Limits == nil && container.Resources.Requests == nil {
-		// Case 1: No resources defined - add both limit and request
 		patches = append(patches, patchOperation{
 			Op:   "add",
 			Path: basePath,
@@ -109,7 +103,6 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 		return patches
 	}
 
-	// Handle cases where resources exist but need memory adjustments
 	var hasMemoryLimit, hasMemoryRequest bool
 	var memoryLimit, memoryRequest interface{}
 
@@ -134,7 +127,6 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 	}
 
 	if hasMemoryLimit && hasMemoryRequest {
-		// Case 2: Both exist - make request equal to limit (Guaranteed QoS)
 		if memoryLimit != memoryRequest {
 			patches = append(patches, patchOperation{
 				Op:    "replace",
@@ -153,9 +145,6 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 				zap.String("qos", "Guaranteed"))
 		}
 	} else if hasMemoryLimit && !hasMemoryRequest {
-		// Case 3: Only limit exists - add request to match limit
-
-		// Check if requests object exists
 		if container.Resources.Requests == nil {
 			patches = append(patches, patchOperation{
 				Op:   "add",
@@ -180,9 +169,6 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 				zap.String("action", "add_memory_request"))
 		}
 	} else if !hasMemoryLimit && hasMemoryRequest {
-		// Case 4: Only request exists - add limit to match request
-
-		// Check if limits object exists
 		if container.Resources.Limits == nil {
 			patches = append(patches, patchOperation{
 				Op:   "add",
@@ -207,8 +193,6 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 				zap.String("action", "add_memory_limit"))
 		}
 	} else {
-		// Case 5: Neither limit nor request exist but resources object exists
-		// Add both with default values
 		if container.Resources.Limits == nil {
 			logger.Warn("Resources block exists but both limits and requests are nil",
 				zap.String("container", container.Name))
@@ -282,10 +266,8 @@ func (ws *WebhookServer) mutate(w http.ResponseWriter, r *http.Request) {
 		zap.String("namespace", pod.Namespace),
 		zap.String("name", pod.Name))
 
-	// Apply memory mutations
 	patches := mutateMemoryResources(&pod)
 
-	// Create admission response
 	admissionResponse := &admissionv1.AdmissionResponse{
 		UID:     req.UID,
 		Allowed: true,
@@ -318,7 +300,6 @@ func (ws *WebhookServer) mutate(w http.ResponseWriter, r *http.Request) {
 			zap.String("name", pod.Name))
 	}
 
-	// Send response
 	admissionReview.Response = admissionResponse
 	responseBytes, err := json.Marshal(admissionReview)
 	if err != nil {
@@ -352,7 +333,7 @@ func readRequestBody(r *http.Request) ([]byte, error) {
 }
 
 func main() {
-	defer logger.Sync() // Ensure all logs are flushed
+	defer logger.Sync()
 
 	certPath := os.Getenv("TLS_CERT_FILE")
 	keyPath := os.Getenv("TLS_KEY_FILE")

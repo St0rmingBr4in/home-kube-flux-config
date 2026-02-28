@@ -35,4 +35,4 @@ USER webhook
 EXPOSE 8443
 
 # Run the webhook
-CMD ["./webhook"] 
+CMD ["./webhook"]

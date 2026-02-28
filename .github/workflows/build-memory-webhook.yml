@@ -4,10 +4,10 @@ on:
   push:
     branches: ["**"] # Run on all branches
     paths:
-      - "argocd/applications/compliance/memory-webhook/**"
+      - "memory-webhook/**"
   pull_request:
     paths:
-      - "argocd/applications/compliance/memory-webhook/**"
+      - "memory-webhook/**"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -20,10 +20,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
         with:
-          go-version-file: "./argocd/applications/compliance/memory-webhook/go.mod"
+          go-version-file: "./memory-webhook/go.mod"
 
       - name: Run tests
-        working-directory: ./argocd/applications/compliance/memory-webhook
+        working-directory: ./memory-webhook
         run: |
           go mod tidy
           go test -v ./...
@@ -59,8 +59,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
-          context: ./argocd/applications/compliance/memory-webhook
-          file: ./argocd/applications/compliance/memory-webhook/Dockerfile
+          context: ./memory-webhook
+          file: ./memory-webhook/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

@@ -22,7 +22,11 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     admissionReviewVersions: ["v1", "v1beta1"]
-    namespaceSelector: {}
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["tailscale", "kube-system"]
     objectSelector:
       matchExpressions:
         # Exclude the memory webhook itself to avoid bootstrap issues

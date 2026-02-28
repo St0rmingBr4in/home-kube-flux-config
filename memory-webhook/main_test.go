@@ -10,7 +10,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Helper function to create a pod with specified resources
 func createTestPod(name string, containerResources *corev1.ResourceRequirements) *corev1.Pod {
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -34,7 +33,6 @@ func createTestPod(name string, containerResources *corev1.ResourceRequirements)
 	return pod
 }
 
-// Helper function to create resource requirements
 func createResourceRequirements(limitMem, requestMem string) *corev1.ResourceRequirements {
 	resources := &corev1.ResourceRequirements{}
 
@@ -56,7 +54,6 @@ func createResourceRequirements(limitMem, requestMem string) *corev1.ResourceReq
 }
 
 func TestMutateMemoryResources_NoResourcesDefined(t *testing.T) {
-	// Test Case 1: No resources defined - should add complete resources block
 	pod := createTestPod("test-pod", nil)
 
 	patches := mutateMemoryResources(pod)
@@ -80,7 +77,6 @@ func TestMutateMemoryResources_NoResourcesDefined(t *testing.T) {
 }
 
 func TestMutateMemoryResources_OnlyLimitSet(t *testing.T) {
-	// Test Case 2: Only limit set - should add request to match limit
 	resources := createResourceRequirements("1Gi", "")
 	pod := createTestPod("test-pod", resources)
 
@@ -100,7 +96,6 @@ func TestMutateMemoryResources_OnlyLimitSet(t *testing.T) {
 }
 
 func TestMutateMemoryResources_OnlyRequestSet(t *testing.T) {
-	// Test Case 3: Only request set - should add limit to match request
 	resources := createResourceRequirements("", "256Mi")
 	pod := createTestPod("test-pod", resources)
 
@@ -120,7 +115,6 @@ func TestMutateMemoryResources_OnlyRequestSet(t *testing.T) {
 }
 
 func TestMutateMemoryResources_BothSetButDifferent(t *testing.T) {
-	// Test Case 4: Both set but different - should make request equal to limit
 	resources := createResourceRequirements("2Gi", "1Gi")
 	pod := createTestPod("test-pod", resources)
 
@@ -138,7 +132,6 @@ func TestMutateMemoryResources_BothSetButDifferent(t *testing.T) {
 }
 
 func TestMutateMemoryResources_BothSetAndEqual(t *testing.T) {
-	// Test Case 5: Both set and equal - should do nothing
 	resources := createResourceRequirements("1Gi", "1Gi")
 	pod := createTestPod("test-pod", resources)
 
@@ -148,7 +141,6 @@ func TestMutateMemoryResources_BothSetAndEqual(t *testing.T) {
 }
 
 func TestMutateMemoryResources_WithInitContainers(t *testing.T) {
-	// Test Case 6: Pod with both regular and init containers
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -159,7 +151,6 @@ func TestMutateMemoryResources_WithInitContainers(t *testing.T) {
 				{
 					Name:  "main-container",
 					Image: "nginx:alpine",
-					// No resources defined
 				},
 			},
 			InitContainers: []corev1.Container{
@@ -176,7 +167,6 @@ func TestMutateMemoryResources_WithInitContainers(t *testing.T) {
 
 	require.Len(t, patches, 2, "Expected 2 patches: one for main container, one for init container")
 
-	// Check main container patch (should add complete resources)
 	expectedMainPatch := patchOperation{
 		Op:   "add",
 		Path: "/spec/containers/0/resources",
@@ -190,7 +180,6 @@ func TestMutateMemoryResources_WithInitContainers(t *testing.T) {
 		},
 	}
 
-	// Check init container patch (should add requests block)
 	expectedInitPatch := patchOperation{
 		Op:   "add",
 		Path: "/spec/initContainers/0/resources/requests",
@@ -204,7 +193,6 @@ func TestMutateMemoryResources_WithInitContainers(t *testing.T) {
 }
 
 func TestMutateContainerMemory_EmptyResources(t *testing.T) {
-	// Test container with completely empty resources
 	container := corev1.Container{
 		Name:  "test",
 		Image: "nginx",
@@ -218,7 +206,6 @@ func TestMutateContainerMemory_EmptyResources(t *testing.T) {
 
 	require.Len(t, patches, 2, "Expected 2 patches for container with empty resource lists")
 
-	// Should add both limits and requests with default memory
 	expectedPatches := []patchOperation{
 		{
 			Op:    "add",
@@ -237,7 +224,6 @@ func TestMutateContainerMemory_EmptyResources(t *testing.T) {
 }
 
 func TestMutateContainerMemory_WithCPUOnly(t *testing.T) {
-	// Test container with CPU resources but no memory
 	container := corev1.Container{
 		Name:  "test",
 		Image: "nginx",
@@ -255,7 +241,6 @@ func TestMutateContainerMemory_WithCPUOnly(t *testing.T) {
 
 	require.Len(t, patches, 2, "Expected 2 patches to add memory while preserving CPU resources")
 
-	// Should add memory limits and requests, preserving CPU
 	expectedPatches := []patchOperation{
 		{
 			Op:    "add",
@@ -274,7 +259,6 @@ func TestMutateContainerMemory_WithCPUOnly(t *testing.T) {
 }
 
 func TestMutateContainerMemory_NilResourceObjects(t *testing.T) {
-	// Test container with nil Limits but existing Requests
 	container := corev1.Container{
 		Name:  "test",
 		Image: "nginx",
@@ -302,7 +286,6 @@ func TestMutateContainerMemory_NilResourceObjects(t *testing.T) {
 }
 
 func TestPatchOperationJSONMarshaling(t *testing.T) {
-	// Test that patch operations marshal to correct JSON
 	patch := patchOperation{
 		Op:   "add",
 		Path: "/spec/containers/0/resources",
@@ -324,7 +307,6 @@ func TestPatchOperationJSONMarshaling(t *testing.T) {
 }
 
 func TestMutateMemoryResources_MultipleContainers(t *testing.T) {
-	// Test pod with multiple containers having different resource configurations
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "multi-container-pod",
@@ -335,7 +317,6 @@ func TestMutateMemoryResources_MultipleContainers(t *testing.T) {
 				{
 					Name:  "no-resources",
 					Image: "nginx:alpine",
-					// No resources
 				},
 				{
 					Name:      "limit-only",
@@ -355,7 +336,6 @@ func TestMutateMemoryResources_MultipleContainers(t *testing.T) {
 
 	require.Len(t, patches, 3, "Expected 3 patches for 3 containers with different resource configurations")
 
-	// Verify each container gets appropriate patches
 	require.Equal(t, "add", patches[0].Op, "First container should get add operation")
 	require.Equal(t, "/spec/containers/0/resources", patches[0].Path, "First patch should target container 0")
 
@@ -366,7 +346,6 @@ func TestMutateMemoryResources_MultipleContainers(t *testing.T) {
 	require.Equal(t, "/spec/containers/2/resources/limits", patches[2].Path, "Third patch should add limits")
 }
 
-// Benchmark tests to ensure performance is acceptable
 func BenchmarkMutateMemoryResources(b *testing.B) {
 	pod := createTestPod("benchmark-pod", nil)
 
