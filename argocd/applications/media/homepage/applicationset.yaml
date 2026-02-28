@@ -10,7 +10,7 @@ spec:
         elements:
           - name: homepage
             chart: homepage
-            chartVersion: 11.20.1
+            chartVersion: 11.22.1
             namespace: prod-media
             valuesPath: argocd/applications/media/homepage/homepage-values.yaml
             ciOverridesPath: media/homepage/ci-overrides.yaml
