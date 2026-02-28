@@ -10,7 +10,7 @@ spec:
         elements:
           - name: datadog
             chart: datadog
-            chartVersion: 3.174.0
+            chartVersion: 3.178.1
             namespace: prod-infra
             repoURL: https://helm.datadoghq.com
             valuesPath: argocd/applications/infrastructure/datadog/datadog-values.yaml
