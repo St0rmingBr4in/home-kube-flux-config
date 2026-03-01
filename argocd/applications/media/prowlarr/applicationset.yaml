@@ -10,7 +10,7 @@ spec:
         elements:
           - name: prowlarr
             chart: prowlarr
-            chartVersion: 21.4.2
+            chartVersion: 21.6.1
             namespace: prod-media
             valuesPath: argocd/applications/media/prowlarr/prowlarr-values.yaml
             ciOverridesPath: media/prowlarr/ci-overrides.yaml
