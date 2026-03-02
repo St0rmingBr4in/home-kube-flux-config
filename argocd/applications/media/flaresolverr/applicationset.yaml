@@ -10,7 +10,7 @@ spec:
         elements:
           - name: flaresolverr
             chart: flaresolverr
-            chartVersion: 16.17.1
+            chartVersion: 16.18.0
             namespace: prod-media
             valuesPath: argocd/applications/media/flaresolverr/flaresolverr-values.yaml
             ciOverridesPath: media/flaresolverr/ci-overrides.yaml
