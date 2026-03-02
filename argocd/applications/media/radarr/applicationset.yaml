@@ -10,7 +10,7 @@ spec:
         elements:
           - name: radarr
             chart: radarr
-            chartVersion: 26.4.4
+            chartVersion: 26.7.0
             namespace: prod-media
             valuesPath: argocd/applications/media/radarr/radarr-values.yaml
             ciOverridesPath: media/radarr/ci-overrides.yaml
