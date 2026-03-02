@@ -5,3 +5,5 @@ resources:
   - pv-radarr.yaml
   - radarr-config-pvc.yaml
   - ingressroute.yaml
+  - radarr-api-vault.yaml
+  - cronjob-missing-search.yaml

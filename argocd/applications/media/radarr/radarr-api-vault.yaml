@@ -1,0 +1,17 @@
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: radarr-api
+  namespace: prod-media
+spec:
+  type: kv-v2
+  mount: secret
+  path: radarr-api
+  destination:
+    name: radarr-api-key
+    create: true
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h
+  vaultAuthRef: prod-infra/default

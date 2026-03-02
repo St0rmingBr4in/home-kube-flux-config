@@ -5,3 +5,5 @@ resources:
   - pv-sonarr.yaml
   - sonarr-config-pvc.yaml
   - ingressroute.yaml
+  - sonarr-api-vault.yaml
+  - cronjob-missing-search.yaml

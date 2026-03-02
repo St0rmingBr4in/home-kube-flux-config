@@ -1,0 +1,17 @@
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: sonarr-api
+  namespace: prod-media
+spec:
+  type: kv-v2
+  mount: secret
+  path: sonarr-api
+  destination:
+    name: sonarr-api-key
+    create: true
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h
+  vaultAuthRef: prod-infra/default

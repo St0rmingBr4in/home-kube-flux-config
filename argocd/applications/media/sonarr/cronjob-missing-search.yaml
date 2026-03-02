@@ -1,0 +1,50 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sonarr-missing-search
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/instance: sonarr
+spec:
+  schedule: "0 3 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: sonarr
+            app.kubernetes.io/instance: sonarr
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: missing-search
+              image: curlimages/curl:latest
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  curl -sf -X POST \
+                    "http://sonarr.prod-media.svc:8989/api/v3/command" \
+                    -H "X-Api-Key: $(cat /secrets/api-key)" \
+                    -H "Content-Type: application/json" \
+                    -d '{"name":"MissingEpisodeSearch"}'
+              volumeMounts:
+                - name: api-key
+                  mountPath: /secrets
+                  readOnly: true
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+          volumes:
+            - name: api-key
+              secret:
+                secretName: sonarr-api-key
