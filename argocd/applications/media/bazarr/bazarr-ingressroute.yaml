@@ -20,6 +20,13 @@ spec:
         - name: ak-outpost-authentik-embedded-outpost
           namespace: prod-infra
           port: 9000
+    # Bazarr API (no auth middleware, API key authentication handled by bazarr itself)
+    - kind: Rule
+      match: Host(`bazarr.st0rmingbr4in.com`) && PathPrefix(`/api/`)
+      priority: 50
+      services:
+        - name: bazarr
+          port: 6767
     # Main Bazarr application (with Authentik forward auth)
     - kind: Rule
       match: Host(`bazarr.st0rmingbr4in.com`)
