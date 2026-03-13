@@ -10,7 +10,7 @@ spec:
         elements:
           - name: sonarr
             chart: sonarr
-            chartVersion: 25.6.0
+            chartVersion: 25.6.2
             namespace: prod-media
             valuesPath: argocd/applications/media/sonarr/sonarr-values.yaml
             ciOverridesPath: media/sonarr/ci-overrides.yaml
