@@ -98,7 +98,7 @@ workload:
             TS_STATE_DIR: /tmp/tailscale
             TS_ACCEPT_DNS: "false"
             TS_KUBE_SECRET: ""
-            TS_USERSPACE: "false"
+            TS_USERSPACE: "true"
           probes:
             liveness:
               enabled: false
