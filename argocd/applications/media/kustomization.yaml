@@ -17,7 +17,6 @@ resources:
 
   # Download & Tools
   - qbittorrent/applicationset.yaml
-  - flaresolverr/applicationset.yaml
 
   # Storage
   - shared-storage/applicationset.yaml

@@ -7,4 +7,3 @@ metadata:
 spec:
   defaultCertificate:
     secretName: st0rmingbr4in.com-cert
-    namespace: prod-infra
