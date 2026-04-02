@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cleanuparr
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: cleanuparr
+    app.kubernetes.io/instance: cleanuparr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cleanuparr
+      app.kubernetes.io/instance: cleanuparr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cleanuparr
+        app.kubernetes.io/instance: cleanuparr
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: cleanuparr
+          image: ghcr.io/cleanuparr/cleanuparr:latest
+          imagePullPolicy: Always
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Paris
+          ports:
+            - name: http
+              containerPort: 11011
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: cleanuparr-config

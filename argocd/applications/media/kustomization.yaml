@@ -17,6 +17,7 @@ resources:
 
   # Download & Tools
   - qbittorrent/applicationset.yaml
+  - cleanuparr/applicationset.yaml
 
   # Storage
   - shared-storage/applicationset.yaml

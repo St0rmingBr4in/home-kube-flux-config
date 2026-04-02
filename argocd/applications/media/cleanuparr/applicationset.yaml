@@ -1,0 +1,55 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cleanuparr
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: cleanuparr
+            namespace: prod-media
+            manifestPath: argocd/applications/media/cleanuparr
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      ignoreDifferences:
+        - group: "*"
+          kind: "Secret"
+          jsonPointers:
+            - /data
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/template/spec/hostUsers
