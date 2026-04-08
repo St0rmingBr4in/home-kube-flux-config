@@ -46,16 +46,8 @@ jobs:
           echo "Modified files with new targetRevision:"
           git diff
 
-      - name: Test specific application categories
-        run: |
-          echo "Testing application categories..."
-
-          # Test that kustomization files are valid
-          echo "=== Validating Kustomization files ==="
-          find argocd/applications -name "kustomization.yaml" | while read -r file; do
-            echo "Validating $file"
-            kubectl kustomize "$(dirname "$file")" > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
-          done
+      - name: Validate kustomization files
+        run: make kustomize-validate
 
       - name: Set up K3s cluster
         uses: debianmaster/actions-k3s@master

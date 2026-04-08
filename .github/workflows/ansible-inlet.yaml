@@ -27,15 +27,10 @@ on:
 jobs:
   ansible:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ansible
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Set up Python 3.14
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.14"
 
@@ -56,14 +51,12 @@ jobs:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           EXTRA_VARS=""
-
           if [ -n "${{ inputs.qbittorrent_torrent_tailscale_ip }}" ]; then
-            EXTRA_VARS="$EXTRA_VARS -e qbittorrent_torrent_tailscale_ip=${{ inputs.qbittorrent_torrent_tailscale_ip }}"
+            EXTRA_VARS="-e qbittorrent_torrent_tailscale_ip=${{ inputs.qbittorrent_torrent_tailscale_ip }}"
           fi
 
-          CHECK_FLAG=""
           if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHECK_FLAG="--check --diff"
+            make ansible-inlet-check ANSIBLE_FLAGS="--check --diff $EXTRA_VARS"
+          else
+            make ansible-inlet ANSIBLE_FLAGS="$EXTRA_VARS"
           fi
-
-          ansible-playbook playbooks/inlet.yaml $CHECK_FLAG $EXTRA_VARS

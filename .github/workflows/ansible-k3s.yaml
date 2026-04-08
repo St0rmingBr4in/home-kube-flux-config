@@ -32,23 +32,18 @@ on:
 jobs:
   ansible:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ansible
     steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Set up Python 3.14
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.14"
 
       - name: Install Ansible and collections
         run: |
           pip install ansible
-          ansible-galaxy role install -r requirements.yml
-          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy role install -r ansible/requirements.yml
+          ansible-galaxy collection install -r ansible/requirements.yml
 
       - name: Write SSH private key
         run: |
@@ -61,8 +56,8 @@ jobs:
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          CHECK_FLAG=""
           if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
-            CHECK_FLAG="--check --diff"
+            make ansible-k3s-check
+          else
+            make ansible-k3s
           fi
-          ansible-playbook playbooks/k3s.yaml $CHECK_FLAG
