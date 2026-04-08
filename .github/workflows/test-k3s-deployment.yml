@@ -168,6 +168,7 @@ jobs:
             "argocd/pihole"                          # Liveness probe checks DNS functionality unavailable in CI
             "argocd/vault"                           # Requires manual Vault initialization
             "argocd/vault-secrets-operator"          # upgrade-crds job remains Pending in CI
+            "argocd/cleanuparr"                      # Requires iSCSI NAS storage (192.168.42.42)
           )
 
           is_excluded() {
