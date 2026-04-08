@@ -17,18 +17,20 @@ echo "# Importing existing Authentik resources into Terraform state"
 echo ""
 
 # Proxy providers (skip cleanuparr — it's new, Terraform will create it)
-declare -A PROVIDERS=(
-  ["argocd"]="ArgoCD Provider"
-  ["bazarr"]="Bazarr Provider"
-  ["prowlarr"]="Prowlarr Provider"
-  ["qbittorrent"]="qBittorrent Provider"
-  ["radarr"]="Radarr Provider"
-  ["sonarr"]="Sonarr Provider"
+# Format: "key:Provider Name"
+PROVIDERS=(
+  "argocd:ArgoCD Provider"
+  "bazarr:Bazarr Provider"
+  "prowlarr:Prowlarr Provider"
+  "qbittorrent:qBittorrent Provider"
+  "radarr:Radarr Provider"
+  "sonarr:Sonarr Provider"
 )
 
-for key in "${!PROVIDERS[@]}"; do
-  name="${PROVIDERS[$key]}"
-  encoded=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$name'))")
+for entry in "${PROVIDERS[@]}"; do
+  key="${entry%%:*}"
+  name="${entry#*:}"
+  encoded=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$name")
   id=$(api "providers/proxy/?name=$encoded" | jq -r '.results[0].pk // empty')
   if [ -n "$id" ]; then
     echo "terraform import 'authentik_provider_proxy.apps[\"$key\"]' $id"

@@ -29,12 +29,12 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -parallelism=1
         env:
           TF_VAR_authentik_token: ${{ secrets.AUTHENTIK_TOKEN }}
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -parallelism=1
         env:
           TF_VAR_authentik_token: ${{ secrets.AUTHENTIK_TOKEN }}

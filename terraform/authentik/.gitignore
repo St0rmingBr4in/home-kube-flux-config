@@ -1,3 +1,4 @@
 .terraform/
 *.tfvars
 *.tfvars.json
+# .terraform.lock.hcl is intentionally committed

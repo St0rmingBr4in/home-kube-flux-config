@@ -6,8 +6,8 @@ resource "authentik_outpost" "embedded" {
     for k, v in authentik_provider_proxy.apps : v.id
   ]
 
-  # Preserve existing Kubernetes deployment config — only providers list is managed here.
+  # Only manage providers list — config and service_connection are Authentik-managed.
   lifecycle {
-    ignore_changes = [config]
+    ignore_changes = [config, service_connection]
   }
 }
