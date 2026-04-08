@@ -39,27 +39,6 @@ server:
     #   - secretName: authentik-tls
     #     hosts:
     #       - authentik.st0rmingbr4in.com
-  volumes:
-    - name: blueprints
-      projected:
-        sources:
-          - configMap:
-              name: authentik-blueprint-argocd
-          - configMap:
-              name: authentik-blueprint-sonarr
-          - configMap:
-              name: authentik-blueprint-radarr
-          - configMap:
-              name: authentik-blueprint-prowlarr
-          - configMap:
-              name: authentik-blueprint-bazarr
-          - configMap:
-              name: authentik-blueprint-qbittorrent
-  volumeMounts:
-    - name: blueprints
-      mountPath: /blueprints/custom
-      readOnly: true
-
 worker:
   replicas: 1
   resources:
@@ -68,27 +47,6 @@ worker:
       memory: 512Mi
     limits:
       memory: 1Gi
-  volumes:
-    - name: blueprints
-      projected:
-        sources:
-          - configMap:
-              name: authentik-blueprint-argocd
-          - configMap:
-              name: authentik-blueprint-sonarr
-          - configMap:
-              name: authentik-blueprint-radarr
-          - configMap:
-              name: authentik-blueprint-prowlarr
-          - configMap:
-              name: authentik-blueprint-bazarr
-          - configMap:
-              name: authentik-blueprint-qbittorrent
-  volumeMounts:
-    - name: blueprints
-      mountPath: /blueprints/custom
-      readOnly: true
-
 postgresql:
   enabled: true
   auth:

@@ -6,9 +6,3 @@ resources:
   - postgres-pv.yaml
   - postgres-pvc.yaml
   - secret-vault.yaml
-  - blueprint-argocd.yaml
-  - blueprint-sonarr.yaml
-  - blueprint-radarr.yaml
-  - blueprint-prowlarr.yaml
-  - blueprint-bazarr.yaml
-  - blueprint-qbittorrent.yaml
