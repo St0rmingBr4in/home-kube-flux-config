@@ -20,3 +20,17 @@
   ansible.builtin.command:
     cmd: /usr/local/bin/inlet-qos.sh
   listen: "Apply QoS rules"
+
+- name: Restart inlet-qos-watch
+  ansible.builtin.systemd:
+    name: inlet-qos-watch
+    state: restarted
+    daemon_reload: true
+  listen: "Restart inlet-qos-watch"
+
+- name: Reload systemd and restart inlet-qos-watch
+  ansible.builtin.systemd:
+    name: inlet-qos-watch
+    state: restarted
+    daemon_reload: true
+  listen: "Reload systemd and restart inlet-qos-watch"

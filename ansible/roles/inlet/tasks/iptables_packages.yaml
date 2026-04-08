@@ -1,9 +1,11 @@
 ---
-- name: Install iptables-persistent and netfilter-persistent
+- name: Install iptables-persistent, netfilter-persistent and ipset
   ansible.builtin.apt:
     name:
       - iptables-persistent
       - netfilter-persistent
+      - ipset
+      - ipset-persistent
     state: present
     update_cache: true
     cache_valid_time: 86400

@@ -6,10 +6,14 @@
 # 100+ Mbps through the shared tailscale0 interface. This saturates the TX
 # queue and causes queuing latency that interrupts Jellyfin streams.
 #
-# Fix: mark qbittorrent Tailscale peer traffic as DSCP CS1 (scavenger/bulk)
-# via iptables mangle, then apply CAKE with diffserv3 on tailscale0.
-# CAKE dequeues CS0 (Traefik/web) before CS1 (qbittorrent) whenever both
-# are competing, eliminating the latency spikes.
+# Fix:
+#   1. CAKE qdisc on tailscale0 (diffserv3): CS1 (scavenger) < CS0 (best-effort).
+#   2. An ipset named "qbittorrent-peers" holds the Tailscale IPs of qbittorrent
+#      peers. A single iptables mangle rule marks all traffic to those IPs as
+#      DSCP CS1 so CAKE deprioritises it.
+#   3. inlet-qos-watch.service watches the Tailscale LocalAPI event stream and
+#      atomically updates the ipset whenever peer IPs change — no static IPs
+#      are stored anywhere.
 
 - name: Install iproute2 for tc/CAKE support
   ansible.builtin.apt:
@@ -18,18 +22,20 @@
     update_cache: true
     cache_valid_time: 86400
 
-- name: Deploy inlet-qos script
+# ── Boot-time script: CAKE qdisc + ipset initialisation ──────────────────────
+
+- name: Deploy inlet-qos.sh (CAKE qdisc + ipset bootstrap)
   ansible.builtin.copy:
     dest: /usr/local/bin/inlet-qos.sh
     mode: "0755"
     content: |
       #!/bin/bash
-      # Apply CAKE QoS on tailscale0.
-      # Traefik traffic (CS0, best-effort) is scheduled before
-      # qbittorrent traffic (CS1, scavenger) in CAKE's diffserv3 tiers.
+      # Apply CAKE QoS on tailscale0 and bootstrap the qbittorrent-peers ipset.
+      # Runs once at boot (oneshot), before inlet-qos-watch.service populates the set.
       set -e
 
       IFACE=tailscale0
+      IPSET=qbittorrent-peers
 
       # Wait up to 30s for tailscale0 to come up after tailscaled starts
       for i in $(seq 1 30); do
@@ -44,9 +50,16 @@
       # CAKE with diffserv3: CS1 (scavenger) < CS0 (best-effort) < higher tiers.
       # bandwidth 1gbit matches the DO VPS NIC; CAKE uses it to tune AQM targets.
       tc qdisc add dev "$IFACE" root cake bandwidth 1gbit diffserv3
+
+      # Create the ipset if it does not exist yet (idempotent).
+      # The watcher will populate/refresh it; we just ensure the iptables rule
+      # has a valid set to reference from the moment it is installed.
+      ipset create "$IPSET" hash:ip 2>/dev/null || true
   notify: Apply QoS rules
 
-- name: Deploy inlet-qos systemd service
+# ── Systemd oneshot: run inlet-qos.sh at boot ────────────────────────────────
+
+- name: Deploy inlet-qos.service (oneshot CAKE bootstrap)
   ansible.builtin.copy:
     dest: /etc/systemd/system/inlet-qos.service
     mode: "0644"
@@ -65,7 +78,7 @@
       WantedBy=multi-user.target
   notify: Reload systemd
 
-- name: Ensure inlet-qos service is enabled for boot persistence
+- name: Ensure inlet-qos.service is enabled and started
   ansible.builtin.systemd:
     name: inlet-qos
     enabled: true
@@ -78,29 +91,164 @@
   changed_when: false
   failed_when: false
 
-- name: Apply CAKE qdisc on tailscale0 (if not already active)
+- name: Apply CAKE qdisc + bootstrap ipset (if not already active)
   ansible.builtin.command:
     cmd: /usr/local/bin/inlet-qos.sh
   when: "'cake' not in tc_qdisc_state.stdout"
 
-- name: Mark qbittorrent-torrent Tailscale traffic as CS1 (scavenger)
+# ── iptables: single static rule matching the ipset ──────────────────────────
+# The rule itself never changes; only the ipset membership is updated dynamically
+# by inlet-qos-watch.service whenever Tailscale peer IPs change.
+
+- name: Mark qbittorrent peer traffic as DSCP CS1 via ipset
   ansible.builtin.iptables:
     table: mangle
     chain: POSTROUTING
     out_interface: tailscale0
-    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
+    match: set
+    match_set: qbittorrent-peers
+    match_set_flags: dst
     jump: DSCP
     set_dscp_mark_class: CS1
-    comment: "inlet: mark qbittorrent-torrent as CS1 for CAKE deprioritization"
+    comment: "inlet: mark qbittorrent peers as CS1 for CAKE deprioritization"
   notify: Save iptables rules
 
-- name: Mark qbittorrent exit-node Tailscale traffic as CS1 (scavenger)
+# ── Remove stale per-IP DSCP rules left by previous approach ─────────────────
+
+- name: Remove stale DSCP rule for qbittorrent-torrent (static IP, now managed by ipset)
   ansible.builtin.iptables:
     table: mangle
     chain: POSTROUTING
     out_interface: tailscale0
-    destination: "{{ qbittorrent_tailscale_ip }}"
+    destination: "{{ item }}"
     jump: DSCP
     set_dscp_mark_class: CS1
-    comment: "inlet: mark qbittorrent exit-node as CS1 for CAKE deprioritization"
+    state: absent
+  loop: "{{ qos_stale_iptables_destinations }}"
   notify: Save iptables rules
+
+# ── Watcher script: event-driven ipset refresh via Tailscale LocalAPI ────────
+
+- name: Deploy inlet-qos-watch.sh (event-driven ipset updater)
+  ansible.builtin.copy:
+    dest: /usr/local/bin/inlet-qos-watch.sh
+    mode: "0755"
+    content: |
+      #!/bin/bash
+      # Watch the Tailscale LocalAPI event bus and atomically refresh the
+      # qbittorrent-peers ipset whenever peer IPs change.
+      #
+      # The Tailscale LocalAPI streams newline-delimited JSON objects from:
+      #   http://local-tailscaled.sock/localapi/v0/watch-ipn-bus
+      # Each object may carry a "NetMap" key when the network map changes
+      # (peer added/removed/IP changed). We re-resolve on every such event.
+      #
+      # ipset swap is used for atomic replacement so the iptables rule always
+      # matches a valid, consistent set — never an empty or partial one.
+
+      set -euo pipefail
+
+      IPSET=qbittorrent-peers
+      IPSET_TMP="${IPSET}-tmp"
+      TAILSCALE_SOCK=/var/run/tailscale/tailscaled.sock
+      LOCALAPI=http://local-tailscaled.sock
+
+      # Hostnames of Tailscale peers whose traffic must be deprioritised.
+      # Short MagicDNS names — resolved at runtime by tailscale ip --4.
+      PEERS=({{ qbittorrent_hostnames | join(' ') }})
+
+      log() { echo "[inlet-qos-watch] $*"; }
+
+      resolve_peers() {
+        local ips=()
+        for peer in "${PEERS[@]}"; do
+          ip=$(tailscale ip --4 "$peer" 2>/dev/null) || { log "WARN: could not resolve $peer, skipping"; continue; }
+          [ -n "$ip" ] && ips+=("$ip")
+        done
+        printf '%s\n' "${ips[@]}"
+      }
+
+      apply_ipset() {
+        local ips
+        mapfile -t ips < <(resolve_peers)
+
+        if [ "${#ips[@]}" -eq 0 ]; then
+          log "WARN: no peers resolved, leaving ipset unchanged"
+          return
+        fi
+
+        # Build a fresh temporary set, then swap atomically
+        ipset destroy "$IPSET_TMP" 2>/dev/null || true
+        ipset create "$IPSET_TMP" hash:ip
+
+        for ip in "${ips[@]}"; do
+          ipset add "$IPSET_TMP" "$ip"
+          log "ipset $IPSET_TMP: added $ip"
+        done
+
+        # Ensure the live set exists before swapping
+        ipset create "$IPSET" hash:ip 2>/dev/null || true
+        ipset swap "$IPSET_TMP" "$IPSET"
+        ipset destroy "$IPSET_TMP"
+
+        log "ipset $IPSET updated: ${ips[*]}"
+      }
+
+      # Apply immediately on startup so the set is populated before the first event
+      log "startup: initial ipset population"
+      apply_ipset
+
+      log "watching Tailscale LocalAPI for peer changes..."
+      curl --silent --no-buffer \
+           --unix-socket "$TAILSCALE_SOCK" \
+           "${LOCALAPI}/localapi/v0/watch-ipn-bus" \
+        | while IFS= read -r line; do
+            # Only act on events that carry a NetMap update (peer IP changes)
+            if echo "$line" | python3 -c "
+      import sys, json
+      try:
+          d = json.load(sys.stdin)
+          sys.exit(0 if d.get('NetMap') is not None else 1)
+      except Exception:
+          sys.exit(1)
+      " 2>/dev/null; then
+              log "NetMap update received, refreshing ipset"
+              apply_ipset
+            fi
+          done
+
+      log "curl exited — will be restarted by systemd"
+  notify: Restart inlet-qos-watch
+
+# ── Systemd service: long-running watcher ────────────────────────────────────
+
+- name: Deploy inlet-qos-watch.service (event-driven watcher)
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/inlet-qos-watch.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Dynamically update qbittorrent-peers ipset from Tailscale peer events
+      After=network.target tailscaled.service inlet-qos.service
+      Requires=inlet-qos.service
+      Wants=tailscaled.service
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/local/bin/inlet-qos-watch.sh
+      Restart=always
+      RestartSec=5
+      # Give tailscaled a moment after a restart before reconnecting
+      StartLimitIntervalSec=60
+      StartLimitBurst=10
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Reload systemd and restart inlet-qos-watch
+
+- name: Ensure inlet-qos-watch.service is enabled and started
+  ansible.builtin.systemd:
+    name: inlet-qos-watch
+    enabled: true
+    daemon_reload: true
+    state: started

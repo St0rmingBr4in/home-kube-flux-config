@@ -3,8 +3,23 @@ tailscale_extra_args: "--advertise-exit-node --accept-routes"
 
 traefik_tailscale_ip: "100.92.78.42"
 
+# Tailscale LoadBalancer IP for the qbittorrent-torrent k8s service (assigned by
+# tailscale-operator). Used only for torrent port DNAT rules in iptables_nat.yaml.
+# This is the service VIP, not the node IP — it is stable across reconnects.
 qbittorrent_torrent_tailscale_ip: "100.122.130.88"
-qbittorrent_tailscale_ip: "100.78.60.10"
+
+# MagicDNS short hostnames of qbittorrent peers whose Tailscale traffic must be
+# deprioritised via DSCP CS1 / CAKE. Resolved dynamically at runtime by
+# inlet-qos-watch.service — no static IPs needed.
+qbittorrent_hostnames:
+  - qbittorrent         # exit-node user (internet-bound torrent traffic)
+  - qbittorrent-torrent # torrent peer (direct Tailscale peer traffic)
+
+# IPs from the old static approach that must be removed from iptables mangle.
+# Can be dropped once the Ansible run has cleaned up the stale rules.
+qos_stale_iptables_destinations:
+  - "100.122.130.88"  # qbittorrent-torrent (was qbittorrent_torrent_tailscale_ip)
+  - "100.78.60.10"    # stale/wrong IP that was qbittorrent_tailscale_ip
 
 torrent_port: 6881
 http_port: 80
