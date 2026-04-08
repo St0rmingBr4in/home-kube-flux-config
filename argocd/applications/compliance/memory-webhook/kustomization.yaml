@@ -16,10 +16,11 @@ images:
     newTag: latest@sha256:49339e70a5517f6dcb185677a12258a1191162fb1ebf886d6bdb992857b96232
 
 # Common labels
-commonLabels:
-  app.kubernetes.io/name: memory-webhook
-  app.kubernetes.io/component: admission-controller
-  app.kubernetes.io/part-of: oom-prevention
+labels:
+  - pairs:
+      app.kubernetes.io/name: memory-webhook
+      app.kubernetes.io/component: admission-controller
+      app.kubernetes.io/part-of: oom-prevention
 
 # Common annotations
 commonAnnotations:
