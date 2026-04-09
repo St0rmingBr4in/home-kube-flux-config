@@ -2,6 +2,7 @@
   "extends": [
     "config:best-practices"
   ],
+  "minimumReleaseAge": "30 days",
   "packageRules": [
     {
       "description": "Auto-merge minor and patch updates when CI passes",
