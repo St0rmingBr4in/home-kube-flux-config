@@ -64,15 +64,15 @@ lint-shell: ## Lint shell scripts with shellcheck (skips if not installed locall
 lint-go: ## Lint Go code with go vet and golangci-lint (skipped if go not installed locally)
 	@if command -v go >/dev/null 2>&1; then \
 		echo "==> go vet"; \
-		cd memory-webhook && go vet ./...; \
+		(cd memory-webhook && go vet ./...); \
 		if [ -n "$(GITHUB_ACTIONS)" ]; then \
 			echo "==> Installing golangci-lint"; \
 			curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
 				| sh -s -- -b "$$(go env GOPATH)/bin" latest; \
-			cd memory-webhook && golangci-lint run ./...; \
-		elif command -v golangci-lint >/dev/null 2>&1; then \
+		fi; \
+		if [ -n "$(GITHUB_ACTIONS)" ] || command -v golangci-lint >/dev/null 2>&1; then \
 			echo "==> golangci-lint"; \
-			cd memory-webhook && golangci-lint run ./...; \
+			(cd memory-webhook && golangci-lint run ./...); \
 		else \
 			echo "  golangci-lint not found, skipping (install from https://golangci-lint.run)"; \
 		fi; \
