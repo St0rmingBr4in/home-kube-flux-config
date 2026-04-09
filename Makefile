@@ -2,11 +2,15 @@
 .PHONY: help install-hooks \
         pre-commit kustomize-validate terraform-fmt \
         terraform-init terraform-plan terraform-apply \
+        terraform-tfe-init terraform-tfe-plan terraform-tfe-apply \
+        terraform-datadog-init terraform-datadog-plan terraform-datadog-apply \
         ansible-k3s ansible-k3s-check ansible-inlet ansible-inlet-check \
         memory-webhook-test
 
-ANSIBLE_FLAGS ?=
-TF_DIR        := terraform/authentik
+ANSIBLE_FLAGS  ?=
+TF_DIR         := terraform/authentik
+TF_TFE_DIR     := terraform/tfe
+TF_DATADOG_DIR := terraform/datadog
 
 # ── Help ─────────────────────────────────────────────────────────────────────
 
@@ -33,20 +37,44 @@ kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 			|| { echo "  ✗ $$f"; exit 1; }; \
 	done
 
-terraform-fmt: ## Check Terraform formatting (non-destructive)
+terraform-fmt: ## Check Terraform formatting across all modules (non-destructive)
 	@echo "==> Checking Terraform format"
-	@terraform -chdir=$(TF_DIR) fmt -check -recursive
+	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR); do \
+		terraform -chdir=$$dir fmt -check -recursive || exit 1; \
+	done
 
-# ── Terraform ────────────────────────────────────────────────────────────────
+# ── Terraform: Authentik ──────────────────────────────────────────────────────
 
-terraform-init: ## Initialise Terraform (connects to HCP Terraform)
+terraform-init: ## Initialise Authentik Terraform
 	terraform -chdir=$(TF_DIR) init
 
-terraform-plan: ## Run Terraform plan
+terraform-plan: ## Plan Authentik Terraform
 	terraform -chdir=$(TF_DIR) plan -parallelism=1
 
-terraform-apply: ## Run Terraform apply
+terraform-apply: ## Apply Authentik Terraform
 	terraform -chdir=$(TF_DIR) apply -auto-approve -parallelism=1
+
+# ── Terraform: TFE workspaces ─────────────────────────────────────────────────
+
+terraform-tfe-init: ## Initialise TFE workspace Terraform
+	terraform -chdir=$(TF_TFE_DIR) init
+
+terraform-tfe-plan: ## Plan TFE workspace Terraform
+	terraform -chdir=$(TF_TFE_DIR) plan -parallelism=1
+
+terraform-tfe-apply: ## Apply TFE workspace Terraform
+	terraform -chdir=$(TF_TFE_DIR) apply -auto-approve -parallelism=1
+
+# ── Terraform: Datadog ────────────────────────────────────────────────────────
+
+terraform-datadog-init: ## Initialise Datadog Terraform
+	terraform -chdir=$(TF_DATADOG_DIR) init
+
+terraform-datadog-plan: ## Plan Datadog Terraform
+	terraform -chdir=$(TF_DATADOG_DIR) plan -parallelism=1
+
+terraform-datadog-apply: ## Apply Datadog Terraform
+	terraform -chdir=$(TF_DATADOG_DIR) apply -auto-approve -parallelism=1
 
 # ── Ansible ──────────────────────────────────────────────────────────────────
 

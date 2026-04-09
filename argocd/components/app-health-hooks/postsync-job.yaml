@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postsync-health-check
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  activeDeadlineSeconds: 360
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: app-health-hook
+      restartPolicy: Never
+      containers:
+        - name: hook
+          image: alpine:3.21
+          command:
+            - sh
+            - -c
+            - apk add --no-cache curl jq -q && sh /scripts/postsync.sh
+          env:
+            - name: APP_NAME
+              value: "" # Override via patch: set to the ArgoCD application name
+          envFrom:
+            - secretRef:
+                name: datadog-credentials
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: hook-scripts
+            defaultMode: 0755

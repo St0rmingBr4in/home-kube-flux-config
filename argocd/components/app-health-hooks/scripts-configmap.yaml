@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hook-scripts
+data:
+  postsync.sh: |
+    #!/bin/sh
+    set -e
+
+    echo "=== PostSync health check for '${APP_NAME}' ==="
+
+    if [ -z "${APP_NAME}" ]; then
+      echo "APP_NAME is not set — patch this Job in your kustomization; skipping"
+      exit 0
+    fi
+
+    DD_BASE_URL="https://api.${DD_SITE:-datadoghq.eu}"
+
+    # Look up a synthetic test tagged argocd_app:<app>
+    echo "Querying Datadog for synthetics tagged argocd_app:${APP_NAME}..."
+    SYNTHETICS=$(curl -sf \
+      "${DD_BASE_URL}/api/v1/synthetics/tests?tags[]=argocd_app:${APP_NAME}" \
+      -H "DD-API-KEY: ${DD_API_KEY}" \
+      -H "DD-APPLICATION-KEY: ${DD_APP_KEY}")
+
+    PUBLIC_ID=$(printf '%s' "${SYNTHETICS}" | jq -r '.tests[0].public_id // empty')
+
+    if [ -z "${PUBLIC_ID}" ]; then
+      echo "No synthetic test found for argocd_app:${APP_NAME} — skipping Datadog check"
+      exit 0
+    fi
+
+    echo "Found synthetic test: ${PUBLIC_ID}"
+
+    # Trigger an on-demand run
+    echo "Triggering synthetic test..."
+    TRIGGER=$(curl -sf -X POST \
+      "${DD_BASE_URL}/api/v1/synthetics/tests/trigger/ci" \
+      -H "DD-API-KEY: ${DD_API_KEY}" \
+      -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
+      -H "Content-Type: application/json" \
+      -d "{\"tests\":[{\"public_id\":\"${PUBLIC_ID}\"}]}")
+
+    BATCH_ID=$(printf '%s' "${TRIGGER}" | jq -r '.batch_id // empty')
+    if [ -z "${BATCH_ID}" ]; then
+      echo "Failed to trigger synthetic test (no batch_id in response)"
+      exit 1
+    fi
+
+    echo "Synthetic triggered — batch ID: ${BATCH_ID}"
+
+    # Poll until finished or 5-minute timeout
+    TIMEOUT=300
+    ELAPSED=0
+    INTERVAL=10
+
+    while [ "${ELAPSED}" -lt "${TIMEOUT}" ]; do
+      BATCH=$(curl -sf \
+        "${DD_BASE_URL}/api/v2/synthetics/ci/batch/${BATCH_ID}" \
+        -H "DD-API-KEY: ${DD_API_KEY}" \
+        -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" 2>/dev/null || true)
+
+      STATUS=$(printf '%s' "${BATCH}" | jq -r '.data.attributes.status // "in_progress"')
+      echo "  [${ELAPSED}s] batch status: ${STATUS}"
+
+      case "${STATUS}" in
+        passed)
+          echo "✓ Synthetic test passed for '${APP_NAME}'"
+          exit 0
+          ;;
+        failed)
+          echo "✗ Synthetic test FAILED for '${APP_NAME}'"
+          exit 1
+          ;;
+      esac
+
+      sleep "${INTERVAL}"
+      ELAPSED=$((ELAPSED + INTERVAL))
+    done
+
+    echo "✗ Synthetic test timed out after ${TIMEOUT}s for '${APP_NAME}'"
+    exit 1
+
+  syncfail.sh: |
+    #!/bin/sh
+    set -e
+
+    echo "=== SyncFail rollback for '${APP_NAME}' ==="
+
+    if [ -z "${APP_NAME}" ]; then
+      echo "APP_NAME is not set — cannot rollback"
+      exit 1
+    fi
+
+    SERVER="${ARGOCD_SERVER:-argocd-server.argocd.svc.cluster.local}"
+
+    # Fetch application history
+    echo "Fetching history for application '${APP_NAME}'..."
+    APP=$(curl -sf -k \
+      "https://${SERVER}/api/v1/applications/${APP_NAME}" \
+      -H "Authorization: Bearer ${ARGOCD_AUTH_TOKEN}")
+
+    HISTORY_LEN=$(printf '%s' "${APP}" | jq '.status.history // [] | length')
+    echo "History entries: ${HISTORY_LEN}"
+
+    if [ "${HISTORY_LEN}" -lt 2 ]; then
+      echo "No previous deployment to roll back to — aborting"
+      exit 1
+    fi
+
+    PREV_ID=$(printf '%s' "${APP}" | jq '(.status.history // [])[-2].id')
+    PREV_REV=$(printf '%s' "${APP}" | jq -r '(.status.history // [])[-2].revision')
+
+    echo "Rolling back to history ID ${PREV_ID} (revision ${PREV_REV})..."
+
+    curl -sf -k -X POST \
+      "https://${SERVER}/api/v1/applications/${APP_NAME}/rollback" \
+      -H "Authorization: Bearer ${ARGOCD_AUTH_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "{\"id\":${PREV_ID},\"dryRun\":false,\"prune\":false,\"force\":false}"
+
+    echo "✓ Rollback initiated for '${APP_NAME}'"

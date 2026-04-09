@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# Adds ArgoCD PostSync and SyncFail hook Jobs to an application.
+#
+# The hooks require two Secrets to pre-exist in the application namespace:
+#   datadog-credentials:  DD_API_KEY, DD_APP_KEY, DD_SITE (e.g. datadoghq.eu)
+#   argocd-credentials:   ARGOCD_SERVER, ARGOCD_AUTH_TOKEN
+#
+# Usage in an app's kustomization.yaml:
+#
+#   components:
+#     - ../../../components/app-health-hooks
+#
+#   patches:
+#     - target:
+#         kind: Job
+#       patch: |-
+#         apiVersion: batch/v1
+#         kind: Job
+#         metadata:
+#           name: postsync-health-check
+#         spec:
+#           template:
+#             spec:
+#               containers:
+#                 - name: hook
+#                   env:
+#                     - name: APP_NAME
+#                       value: sonarr   # <-- set to the ArgoCD app name
+
+resources:
+  - serviceaccount.yaml
+  - scripts-configmap.yaml
+  - postsync-job.yaml
+  - syncfail-job.yaml
