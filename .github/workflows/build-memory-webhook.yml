@@ -22,6 +22,7 @@ jobs:
         with:
           go-version-file: "./memory-webhook/go.mod"
 
+      - run: make lint-go
       - run: make memory-webhook-test
 
       - name: Report to Datadog CI Visibility

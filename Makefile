@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 .PHONY: help install-hooks \
         pre-commit kustomize-validate terraform-fmt \
+        lint lint-shell lint-go lint-ansible lint-terraform \
         ci-report \
         terraform-init terraform-plan terraform-apply \
         terraform-tfe-init terraform-tfe-plan terraform-tfe-apply \
@@ -10,16 +11,12 @@
         ansible-inlet ansible-inlet-check \
         ansible-k3s ansible-k3s-check \
         memory-webhook-test \
-        k3s-prepare k3s-wait-ready k3s-install-argocd k3s-configure-argocd \
-        k3s-apply-apps k3s-validate-apps k3s-summary
 
 ANSIBLE_FLAGS  ?=
 TF_DIR         := terraform/authentik
 TF_TFE_DIR     := terraform/tfe
 TF_DATADOG_DIR := terraform/datadog
 DD_SITE        ?= datadoghq.eu
-# In GitHub Actions GITHUB_SHA is exported automatically; fall back to git locally.
-COMMIT_SHA     ?= $(if $(GITHUB_SHA),$(GITHUB_SHA),$(shell git rev-parse HEAD))
 
 # ── Help ─────────────────────────────────────────────────────────────────────
 
@@ -51,6 +48,33 @@ terraform-fmt: ## Check Terraform formatting across all modules (non-destructive
 	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR); do \
 		terraform -chdir=$$dir fmt -check -recursive || exit 1; \
 	done
+
+# ── Linting ───────────────────────────────────────────────────────────────────
+
+lint: lint-shell lint-go lint-ansible lint-terraform ## Run all linters
+
+lint-shell: ## Lint shell scripts with shellcheck
+	@echo "==> Shellcheck"
+	@find ansible/scripts/ -name "*.sh" | xargs shellcheck
+
+lint-go: ## Lint Go code with go vet and golangci-lint
+	@echo "==> go vet"
+	cd memory-webhook && go vet ./...
+	@if [ -n "$(GITHUB_ACTIONS)" ]; then \
+		echo "==> Installing golangci-lint"; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
+			| sh -s -- -b "$$(go env GOPATH)/bin" latest; \
+	fi
+	@echo "==> golangci-lint"
+	cd memory-webhook && golangci-lint run ./...
+
+lint-ansible: ## Lint Ansible playbooks with ansible-lint
+	@echo "==> ansible-lint"
+	pip install ansible-lint --quiet
+	ansible-lint ansible/
+
+lint-terraform: ## Check Terraform formatting across all modules
+	$(MAKE) terraform-fmt
 
 # ── CI / Datadog ──────────────────────────────────────────────────────────────
 
@@ -155,44 +179,3 @@ memory-webhook-test: ## Run Go tests; uploads JUnit results to Datadog in CI
 			--tags "runtime:go" \
 			memory-webhook/junit.xml; \
 	fi
-
-# ── K3s deployment test ───────────────────────────────────────────────────────
-
-k3s-prepare: ## Patch targetRevision to COMMIT_SHA and validate kustomizations
-	@echo "==> Patching targetRevision to $(COMMIT_SHA)"
-	@find argocd/applications -name "application.yaml" -type f | while read -r f; do \
-		if grep -q "github.com/St0rmingBr4in/home-kube-flux-config" "$$f"; then \
-			echo "  $$f"; \
-			sed -i.bak "s|targetRevision: HEAD|targetRevision: $(COMMIT_SHA)|g" "$$f"; \
-			rm -f "$$f.bak"; \
-		fi; \
-	done
-	$(MAKE) kustomize-validate
-
-k3s-wait-ready: ## Wait for K3s node and CoreDNS to be ready
-	kubectl wait --for=condition=Ready nodes --all --timeout=300s
-	@echo "Waiting for CoreDNS pods to appear..."
-	timeout 120 sh -c 'until kubectl get pods -n kube-system -l k8s-app=kube-dns -o name 2>/dev/null | grep -q pod; do sleep 2; done'
-	kubectl wait --for=condition=Ready pod -l k8s-app=kube-dns -n kube-system --timeout=120s
-	kubectl get nodes -o wide
-
-k3s-install-argocd: ## Install ArgoCD into the K3s cluster
-	kubectl create namespace argocd
-	kubectl apply --server-side -n argocd \
-		-f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-	kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
-	kubectl wait --for=condition=available --timeout=600s deployment/argocd-repo-server -n argocd
-	kubectl wait --for=condition=available --timeout=600s deployment/argocd-applicationset-controller -n argocd
-
-k3s-configure-argocd: ## Download ArgoCD CLI and log in to the local cluster
-	bash scripts/k3s-configure-argocd.sh
-
-k3s-apply-apps: ## Apply ArgoCD ApplicationSets and verify apps are registered
-	kubectl apply -k argocd/applications/
-	kubectl get applications -n argocd
-
-k3s-validate-apps: ## Wait for non-excluded apps to become Synced+Healthy
-	bash scripts/k3s-validate-apps.sh
-
-k3s-summary: ## Dump cluster debug info (runs even on failure)
-	bash scripts/k3s-summary.sh

@@ -45,6 +45,7 @@ jobs:
           python-version: "3.14"
 
       - run: make ansible-install-k3s
+      - run: make lint-ansible
       - run: make ansible-setup-ssh-k3s
       - run: make ansible-k3s
 

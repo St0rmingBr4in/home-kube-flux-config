@@ -41,6 +41,7 @@ jobs:
           python-version: "3.14"
 
       - run: make ansible-install-inlet
+      - run: make lint-ansible
       - run: make ansible-setup-ssh-inlet
       - run: make ansible-inlet
 
