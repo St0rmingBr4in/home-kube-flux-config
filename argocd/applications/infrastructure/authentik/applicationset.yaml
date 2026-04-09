@@ -10,7 +10,7 @@ spec:
         elements:
           - name: authentik
             chart: authentik
-            chartVersion: 2026.2.1
+            chartVersion: 2026.2.2
             repoURL: https://charts.goauthentik.io
             namespace: prod-infra
             valuesPath: argocd/applications/infrastructure/authentik/authentik-values.yaml
