@@ -33,7 +33,7 @@ install-hooks: ## Install git hooks (run once after cloning)
 
 # ── Pre-commit ───────────────────────────────────────────────────────────────
 
-pre-commit: kustomize-validate terraform-fmt lint-shell lint-go ## Run all pre-commit checks
+pre-commit: kustomize-validate terraform-fmt lint-shell ## Run all pre-commit checks
 
 kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 	@echo "==> Validating kustomizations"
@@ -53,32 +53,20 @@ terraform-fmt: ## Check Terraform formatting across all modules (non-destructive
 
 lint: lint-shell lint-go lint-ansible lint-terraform ## Run all linters
 
-lint-shell: ## Lint shell scripts with shellcheck (skips if not installed locally)
+lint-shell: ## Lint shell scripts with shellcheck
 	@echo "==> Shellcheck"
-	@if [ -n "$(GITHUB_ACTIONS)" ] || command -v shellcheck >/dev/null 2>&1; then \
-		find ansible/scripts/ -name "*.sh" | xargs shellcheck; \
-	else \
-		echo "  shellcheck not found, skipping (install via brew install shellcheck)"; \
-	fi
+	find ansible/scripts/ -name "*.sh" | xargs shellcheck
 
-lint-go: ## Lint Go code with go vet and golangci-lint (skipped if go not installed locally)
-	@if command -v go >/dev/null 2>&1; then \
-		echo "==> go vet"; \
-		(cd memory-webhook && go vet ./...); \
-		if [ -n "$(GITHUB_ACTIONS)" ]; then \
-			echo "==> Installing golangci-lint"; \
-			curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
-				| sh -s -- -b "$$(go env GOPATH)/bin" latest; \
-		fi; \
-		if [ -n "$(GITHUB_ACTIONS)" ] || command -v golangci-lint >/dev/null 2>&1; then \
-			echo "==> golangci-lint"; \
-			(cd memory-webhook && golangci-lint run ./...); \
-		else \
-			echo "  golangci-lint not found, skipping (install from https://golangci-lint.run)"; \
-		fi; \
-	else \
-		echo "  go not found, skipping lint-go"; \
+lint-go: ## Lint Go code with go vet and golangci-lint
+	@echo "==> go vet"
+	(cd memory-webhook && go vet ./...)
+	@if [ -n "$(GITHUB_ACTIONS)" ]; then \
+		echo "==> Installing golangci-lint"; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh \
+			| sh -s -- -b "$$(go env GOPATH)/bin" latest; \
 	fi
+	@echo "==> golangci-lint"
+	(cd memory-webhook && golangci-lint run ./...)
 
 lint-ansible: ## Lint Ansible playbooks with ansible-lint
 	@echo "==> ansible-lint"
