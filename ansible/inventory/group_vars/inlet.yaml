@@ -1,3 +1,4 @@
+---
 tailscale_extra_args: "--advertise-exit-node --accept-routes"
 # tailscale_authkey: never stored here — pass via -e at runtime (only for re-registration)
 
