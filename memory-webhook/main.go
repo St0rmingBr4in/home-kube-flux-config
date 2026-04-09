@@ -31,9 +31,7 @@ func init() {
 	}
 }
 
-type WebhookServer struct {
-	server *http.Server
-}
+type WebhookServer struct{}
 
 type patchOperation struct {
 	Op    string      `json:"op"`
@@ -310,7 +308,9 @@ func (ws *WebhookServer) mutate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(responseBytes)
+	if _, err = w.Write(responseBytes); err != nil {
+		logger.Error("Failed to write response", zap.Error(err))
+	}
 
 	logger.Info("Mutation request completed successfully",
 		zap.String("namespace", pod.Namespace),
@@ -322,7 +322,7 @@ func readRequestBody(r *http.Request) ([]byte, error) {
 	if r.Body == nil {
 		return nil, fmt.Errorf("request body is empty")
 	}
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -333,7 +333,7 @@ func readRequestBody(r *http.Request) ([]byte, error) {
 }
 
 func main() {
-	defer logger.Sync()
+	defer func() { _ = logger.Sync() }()
 
 	certPath := os.Getenv("TLS_CERT_FILE")
 	keyPath := os.Getenv("TLS_KEY_FILE")
@@ -359,7 +359,9 @@ func main() {
 	mux.HandleFunc("/mutate", (&WebhookServer{}).mutate)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			logger.Error("Failed to write health response", zap.Error(err))
+		}
 		logger.Info("Health check request",
 			zap.String("remoteAddr", r.RemoteAddr))
 	})
