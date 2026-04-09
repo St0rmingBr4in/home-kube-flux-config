@@ -1,3 +1,4 @@
 ---
+profile: min
 exclude_paths:
   - inventory/group_vars/k3s_cluster/vault.yaml

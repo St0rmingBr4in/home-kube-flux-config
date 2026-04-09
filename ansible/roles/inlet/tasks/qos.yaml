@@ -169,13 +169,14 @@
       }
 
       apply_ipset() {
-        local ips
-        mapfile -t ips < <(resolve_peers)
-
-        if [ "${#ips[@]}" -eq 0 ]; then
+        local ips_out
+        ips_out=$(resolve_peers) || true
+        if [ -z "$ips_out" ]; then
           log "WARN: no peers resolved, leaving ipset unchanged"
           return
         fi
+        local ips
+        mapfile -t ips <<< "$ips_out"
 
         # Build a fresh temporary set, then swap atomically
         ipset destroy "$IPSET_TMP" 2>/dev/null || true
