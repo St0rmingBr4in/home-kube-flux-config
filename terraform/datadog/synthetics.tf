@@ -78,8 +78,8 @@ resource "datadog_synthetics_test" "apps" {
 
   assertion {
     type     = "statusCode"
-    operator = "lessThan"
-    target   = "500"
+    operator = "is"
+    target   = "200"
   }
 
   assertion {
