@@ -83,7 +83,7 @@ lint-go: ## Lint Go code with go vet and golangci-lint (skipped if go not instal
 lint-ansible: ## Lint Ansible playbooks with ansible-lint
 	@echo "==> ansible-lint"
 	pip install ansible-lint --quiet
-	ansible-galaxy role install -r ansible/requirements.yml
+	ansible-galaxy role install -r ansible/requirements.yml --roles-path ansible/roles
 	ansible-galaxy collection install -r ansible/requirements.yml
 	cd ansible && ansible-lint
 
@@ -141,7 +141,7 @@ ansible-install-inlet: ## Install Ansible + collections for the inlet playbook
 
 ansible-install-k3s: ## Install Ansible + roles + collections for the k3s playbook
 	pip install ansible
-	ansible-galaxy role install -r ansible/requirements.yml
+	ansible-galaxy role install -r ansible/requirements.yml --roles-path ansible/roles
 	ansible-galaxy collection install -r ansible/requirements.yml
 
 ansible-setup-ssh-inlet: ## Write inlet SSH key from INLET_SSH_PRIVATE_KEY env var
