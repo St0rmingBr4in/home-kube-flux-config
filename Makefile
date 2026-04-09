@@ -83,8 +83,8 @@ lint-go: ## Lint Go code with go vet and golangci-lint (skipped if go not instal
 lint-ansible: ## Lint Ansible playbooks with ansible-lint
 	@echo "==> ansible-lint"
 	pip install ansible-lint --quiet
-	ansible-galaxy role install -r ansible/requirements.yml -q
-	ansible-galaxy collection install -r ansible/requirements.yml -q
+	ansible-galaxy role install -r ansible/requirements.yml
+	ansible-galaxy collection install -r ansible/requirements.yml
 	cd ansible && ansible-lint
 
 lint-terraform: ## Check Terraform formatting across all modules
