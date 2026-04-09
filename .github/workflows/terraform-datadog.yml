@@ -37,3 +37,7 @@ jobs:
         env:
           TF_VAR_datadog_api_key: ${{ secrets.DATADOG_API_KEY }}
           TF_VAR_datadog_app_key: ${{ secrets.DATADOG_APP_KEY }}
+
+      - name: Report to Datadog CI Visibility
+        if: always()
+        run: make ci-report

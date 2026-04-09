@@ -14,6 +14,8 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
@@ -35,3 +37,7 @@ jobs:
         run: make terraform-apply
         env:
           TF_VAR_authentik_token: ${{ secrets.AUTHENTIK_TOKEN }}
+
+      - name: Report to Datadog CI Visibility
+        if: always()
+        run: make ci-report

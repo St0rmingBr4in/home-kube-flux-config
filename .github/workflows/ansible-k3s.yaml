@@ -32,6 +32,11 @@ on:
 jobs:
   ansible:
     runs-on: ubuntu-latest
+    env:
+      ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+      K3S_SSH_PRIVATE_KEY: ${{ secrets.K3S_SSH_PRIVATE_KEY }}
+      CHECK_MODE: ${{ inputs.check_mode }}
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -39,25 +44,10 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Install Ansible and collections
-        run: |
-          pip install ansible
-          ansible-galaxy role install -r ansible/requirements.yml
-          ansible-galaxy collection install -r ansible/requirements.yml
+      - run: make ansible-install-k3s
+      - run: make ansible-setup-ssh-k3s
+      - run: make ansible-k3s
 
-      - name: Write SSH private key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.K3S_SSH_PRIVATE_KEY }}" > ~/.ssh/k3s_id_ed25519
-          chmod 600 ~/.ssh/k3s_id_ed25519
-          printf 'Host *\n  IdentityFile ~/.ssh/k3s_id_ed25519\n  StrictHostKeyChecking no\n' >> ~/.ssh/config
-
-      - name: Run Ansible playbook
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-        run: |
-          if [ "${{ inputs.check_mode }}" = "true" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
-            make ansible-k3s-check
-          else
-            make ansible-k3s
-          fi
+      - name: Report to Datadog CI Visibility
+        if: always()
+        run: make ci-report

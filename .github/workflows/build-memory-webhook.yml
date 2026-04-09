@@ -13,6 +13,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -20,8 +22,11 @@ jobs:
         with:
           go-version-file: "./memory-webhook/go.mod"
 
-      - name: Run tests
-        run: make memory-webhook-test
+      - run: make memory-webhook-test
+
+      - name: Report to Datadog CI Visibility
+        if: always()
+        run: make ci-report
 
   build-and-publish:
     runs-on: ubuntu-latest
