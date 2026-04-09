@@ -96,6 +96,13 @@
     cmd: /usr/local/bin/inlet-qos.sh
   when: "'cake' not in tc_qdisc_state.stdout"
 
+- name: Ensure qbittorrent-peers ipset exists (idempotent; rc=1 means already exists)
+  ansible.builtin.command:
+    cmd: ipset create qbittorrent-peers hash:ip
+  register: ipset_create_result
+  changed_when: ipset_create_result.rc == 0
+  failed_when: ipset_create_result.rc not in [0, 1]
+
 # ── iptables: single static rule matching the ipset ──────────────────────────
 # The rule itself never changes; only the ipset membership is updated dynamically
 # by inlet-qos-watch.service whenever Tailscale peer IPs change.
