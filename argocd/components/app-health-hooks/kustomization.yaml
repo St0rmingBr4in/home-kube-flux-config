@@ -3,9 +3,10 @@ kind: Component
 
 # Adds ArgoCD PostSync and SyncFail hook Jobs to an application.
 #
-# The hooks require two Secrets to pre-exist in the application namespace:
-#   datadog-credentials:  DD_API_KEY, DD_APP_KEY, DD_SITE (e.g. datadoghq.eu)
-#   argocd-credentials:   ARGOCD_SERVER, ARGOCD_AUTH_TOKEN
+# Credentials are provisioned automatically via VaultStaticSecret from
+# shared Vault paths:
+#   secret/app-health-hooks/datadog  →  DD_API_KEY, DD_APP_KEY, DD_SITE
+#   secret/app-health-hooks/argocd   →  ARGOCD_SERVER, ARGOCD_AUTH_TOKEN
 #
 # Usage in an app's kustomization.yaml:
 #
@@ -15,6 +16,7 @@ kind: Component
 #   patches:
 #     - target:
 #         kind: Job
+#         name: postsync-health-check
 #       patch: |-
 #         apiVersion: batch/v1
 #         kind: Job
@@ -27,10 +29,12 @@ kind: Component
 #                 - name: hook
 #                   env:
 #                     - name: APP_NAME
-#                       value: sonarr   # <-- set to the ArgoCD app name
+#                       value: qbittorrent   # <-- set to the ArgoCD app name
 
 resources:
   - serviceaccount.yaml
   - scripts-configmap.yaml
   - postsync-job.yaml
   - syncfail-job.yaml
+  - datadog-credentials-vault.yaml
+  - argocd-credentials-vault.yaml

@@ -87,3 +87,12 @@ configs:
       - name: home-kube-flux-config
         type: git
         url: https://github.com/St0rmingBr4in/home-kube-flux-config
+
+    # Service account for PostSync/SyncFail health hooks
+    accounts.health-hook: apiKey
+
+  rbac:
+    policy.csv: |
+      p, role:health-hook, applications, get, */*, allow
+      p, role:health-hook, applications, sync, */*, allow
+      g, health-hook, role:health-hook

@@ -6,3 +6,24 @@ resources:
   - qbittorrent-config-pvc.yaml
   - tailscale-authkey-vault.yaml
   - ingressroute.yaml
+
+components:
+  - ../../../components/app-health-hooks
+
+patches:
+  - target:
+      kind: Job
+      name: postsync-health-check
+    patch: |-
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: postsync-health-check
+      spec:
+        template:
+          spec:
+            containers:
+              - name: hook
+                env:
+                  - name: APP_NAME
+                    value: qbittorrent
