@@ -9,6 +9,12 @@ data "digitalocean_droplet" "inlet" {
 # Subsequent Terraform applies keep the assignment in sync automatically.
 resource "digitalocean_reserved_ip" "inlet" {
   region = data.digitalocean_droplet.inlet.region
+
+  # droplet_id is managed by digitalocean_reserved_ip_assignment below;
+  # ignore it here to avoid the two resources fighting each other.
+  lifecycle {
+    ignore_changes = [droplet_id]
+  }
 }
 
 resource "digitalocean_reserved_ip_assignment" "inlet" {
