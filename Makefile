@@ -7,6 +7,7 @@
         terraform-tfe-init terraform-tfe-plan terraform-tfe-apply \
         terraform-datadog-init terraform-datadog-plan terraform-datadog-apply \
         terraform-digitalocean-init terraform-digitalocean-plan terraform-digitalocean-apply \
+        terraform-tailscale-init terraform-tailscale-plan terraform-tailscale-apply \
         ansible-install-inlet ansible-install-k3s \
         ansible-setup-ssh-inlet ansible-setup-ssh-k3s \
         ansible-inlet ansible-inlet-check \
@@ -18,6 +19,7 @@ TF_DIR              := terraform/authentik
 TF_TFE_DIR          := terraform/tfe
 TF_DATADOG_DIR      := terraform/datadog
 TF_DIGITALOCEAN_DIR := terraform/digitalocean
+TF_TAILSCALE_DIR    := terraform/tailscale
 DD_SITE        ?= datadoghq.eu
 
 # ── Help ─────────────────────────────────────────────────────────────────────
@@ -47,7 +49,7 @@ kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 
 terraform-fmt: ## Check Terraform formatting across all modules (non-destructive)
 	@echo "==> Checking Terraform format"
-	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR) $(TF_DIGITALOCEAN_DIR); do \
+	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR) $(TF_DIGITALOCEAN_DIR) $(TF_TAILSCALE_DIR); do \
 		terraform -chdir=$$dir fmt -check -recursive || exit 1; \
 	done
 
@@ -133,6 +135,17 @@ terraform-digitalocean-plan: ## Plan DigitalOcean Terraform
 
 terraform-digitalocean-apply: ## Apply DigitalOcean Terraform
 	terraform -chdir=$(TF_DIGITALOCEAN_DIR) apply -auto-approve
+
+# ── Terraform: Tailscale ──────────────────────────────────────────────────────
+
+terraform-tailscale-init: ## Initialise Tailscale Terraform
+	terraform -chdir=$(TF_TAILSCALE_DIR) init
+
+terraform-tailscale-plan: ## Plan Tailscale Terraform
+	terraform -chdir=$(TF_TAILSCALE_DIR) plan
+
+terraform-tailscale-apply: ## Apply Tailscale Terraform
+	terraform -chdir=$(TF_TAILSCALE_DIR) apply -auto-approve
 
 # ── Ansible ───────────────────────────────────────────────────────────────────
 

@@ -9,6 +9,8 @@
 #   terraform import tfe_workspace_settings.homelab                St0rmingBr4in/homelab
 #   terraform import tfe_workspace_settings.homelab_datadog        St0rmingBr4in/homelab-datadog
 #   terraform import tfe_workspace_settings.homelab_digitalocean   St0rmingBr4in/homelab-digitalocean
+#   terraform import tfe_workspace.homelab_tailscale               St0rmingBr4in/homelab-tailscale
+#   terraform import tfe_workspace_settings.homelab_tailscale      St0rmingBr4in/homelab-tailscale
 
 locals {
   workspaces = {
@@ -16,6 +18,7 @@ locals {
     homelab              = "homelab"
     homelab_datadog      = "homelab-datadog"
     homelab_digitalocean = "homelab-digitalocean"
+    homelab_tailscale    = "homelab-tailscale"
   }
 }
 
