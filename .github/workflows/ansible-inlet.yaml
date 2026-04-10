@@ -30,7 +30,7 @@ jobs:
     env:
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       INLET_SSH_PRIVATE_KEY: ${{ secrets.INLET_SSH_PRIVATE_KEY }}
-      TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+      TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
       QBITTORRENT_TAILSCALE_IP: ${{ inputs.qbittorrent_torrent_tailscale_ip }}
       CHECK_MODE: ${{ inputs.check_mode }}
       DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
