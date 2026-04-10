@@ -28,28 +28,10 @@
 - name: Bring up Tailscale exit node
   ansible.builtin.command:
     cmd: "tailscale up --authkey={{ tailscale_authkey }} {{ tailscale_extra_args }}"
-  register: tailscale_up_result
   when:
     - tailscale_authkey is defined
     - tailscale_status.BackendState != "Running"
   no_log: true
-  ignore_errors: true
-
-- name: Show tailscale up error (stderr only, no secrets)
-  ansible.builtin.debug:
-    msg: "tailscale up stderr: {{ tailscale_up_result.stderr | default('(empty)') }}"
-  when:
-    - tailscale_up_result is defined
-    - tailscale_up_result.rc is defined
-    - tailscale_up_result.rc != 0
-
-- name: Fail if tailscale up failed
-  ansible.builtin.fail:
-    msg: "tailscale up failed — see stderr above"
-  when:
-    - tailscale_up_result is defined
-    - tailscale_up_result.rc is defined
-    - tailscale_up_result.rc != 0
 
 - name: Verify Tailscale exit node is active
   ansible.builtin.command:
