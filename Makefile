@@ -6,6 +6,7 @@
         terraform-init terraform-plan terraform-apply \
         terraform-tfe-init terraform-tfe-plan terraform-tfe-apply \
         terraform-datadog-init terraform-datadog-plan terraform-datadog-apply \
+        terraform-digitalocean-init terraform-digitalocean-plan terraform-digitalocean-apply \
         ansible-install-inlet ansible-install-k3s \
         ansible-setup-ssh-inlet ansible-setup-ssh-k3s \
         ansible-inlet ansible-inlet-check \
@@ -13,9 +14,10 @@
         memory-webhook-test \
 
 ANSIBLE_FLAGS  ?=
-TF_DIR         := terraform/authentik
-TF_TFE_DIR     := terraform/tfe
-TF_DATADOG_DIR := terraform/datadog
+TF_DIR              := terraform/authentik
+TF_TFE_DIR          := terraform/tfe
+TF_DATADOG_DIR      := terraform/datadog
+TF_DIGITALOCEAN_DIR := terraform/digitalocean
 DD_SITE        ?= datadoghq.eu
 
 # ── Help ─────────────────────────────────────────────────────────────────────
@@ -45,7 +47,7 @@ kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 
 terraform-fmt: ## Check Terraform formatting across all modules (non-destructive)
 	@echo "==> Checking Terraform format"
-	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR); do \
+	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR) $(TF_DIGITALOCEAN_DIR); do \
 		terraform -chdir=$$dir fmt -check -recursive || exit 1; \
 	done
 
@@ -120,6 +122,17 @@ terraform-datadog-plan: ## Plan Datadog Terraform
 
 terraform-datadog-apply: ## Apply Datadog Terraform
 	terraform -chdir=$(TF_DATADOG_DIR) apply -auto-approve
+
+# ── Terraform: DigitalOcean ───────────────────────────────────────────────────
+
+terraform-digitalocean-init: ## Initialise DigitalOcean Terraform
+	terraform -chdir=$(TF_DIGITALOCEAN_DIR) init
+
+terraform-digitalocean-plan: ## Plan DigitalOcean Terraform
+	terraform -chdir=$(TF_DIGITALOCEAN_DIR) plan
+
+terraform-digitalocean-apply: ## Apply DigitalOcean Terraform
+	terraform -chdir=$(TF_DIGITALOCEAN_DIR) apply -auto-approve
 
 # ── Ansible ───────────────────────────────────────────────────────────────────
 

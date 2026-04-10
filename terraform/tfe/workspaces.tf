@@ -1,18 +1,21 @@
 # Manages HCP Terraform workspaces for the St0rmingBr4in homelab.
 #
 # Import commands (run once):
-#   terraform import tfe_workspace.tfe           St0rmingBr4in/tfe
-#   terraform import tfe_workspace.homelab       St0rmingBr4in/homelab
-#   terraform import tfe_workspace.homelab_datadog St0rmingBr4in/homelab-datadog
-#   terraform import tfe_workspace_settings.tfe           St0rmingBr4in/tfe
-#   terraform import tfe_workspace_settings.homelab       St0rmingBr4in/homelab
-#   terraform import tfe_workspace_settings.homelab_datadog St0rmingBr4in/homelab-datadog
+#   terraform import tfe_workspace.tfe                    St0rmingBr4in/tfe
+#   terraform import tfe_workspace.homelab                St0rmingBr4in/homelab
+#   terraform import tfe_workspace.homelab_datadog        St0rmingBr4in/homelab-datadog
+#   terraform import tfe_workspace.homelab_digitalocean   St0rmingBr4in/homelab-digitalocean
+#   terraform import tfe_workspace_settings.tfe                    St0rmingBr4in/tfe
+#   terraform import tfe_workspace_settings.homelab                St0rmingBr4in/homelab
+#   terraform import tfe_workspace_settings.homelab_datadog        St0rmingBr4in/homelab-datadog
+#   terraform import tfe_workspace_settings.homelab_digitalocean   St0rmingBr4in/homelab-digitalocean
 
 locals {
   workspaces = {
-    tfe             = "tfe"
-    homelab         = "homelab"
-    homelab_datadog = "homelab-datadog"
+    tfe                  = "tfe"
+    homelab              = "homelab"
+    homelab_datadog      = "homelab-datadog"
+    homelab_digitalocean = "homelab-digitalocean"
   }
 }
 
