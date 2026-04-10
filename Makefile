@@ -160,7 +160,10 @@ ansible-setup-ssh-k3s: ## Write k3s SSH key from K3S_SSH_PRIVATE_KEY env var
 ansible-inlet: ## Run inlet playbook (check+diff on PRs or CHECK_MODE=true)
 	@EXTRA_VARS=""; \
 	if [ -n "$${QBITTORRENT_TAILSCALE_IP:-}" ]; then \
-		EXTRA_VARS="-e qbittorrent_torrent_tailscale_ip=$${QBITTORRENT_TAILSCALE_IP}"; \
+		EXTRA_VARS="$$EXTRA_VARS -e qbittorrent_torrent_tailscale_ip=$${QBITTORRENT_TAILSCALE_IP}"; \
+	fi; \
+	if [ -n "$${TAILSCALE_AUTHKEY:-}" ]; then \
+		EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"; \
 	fi; \
 	if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
 		cd ansible && ansible-playbook playbooks/inlet.yaml --check --diff $$EXTRA_VARS $(ANSIBLE_FLAGS); \
