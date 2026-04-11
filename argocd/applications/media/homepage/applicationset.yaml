@@ -13,7 +13,6 @@ spec:
             chartVersion: 12.1.4
             namespace: prod-media
             valuesPath: argocd/applications/media/homepage/homepage-values.yaml
-            ciOverridesPath: media/homepage/ci-overrides.yaml
             manifestPath: argocd/applications/media/homepage
 
   template:

@@ -13,7 +13,6 @@ spec:
             chartVersion: 26.0.1
             namespace: prod-media
             valuesPath: argocd/applications/media/sonarr/sonarr-values.yaml
-            ciOverridesPath: media/sonarr/ci-overrides.yaml
             manifestPath: argocd/applications/media/sonarr
 
   template:

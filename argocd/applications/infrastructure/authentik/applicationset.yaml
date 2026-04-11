@@ -14,7 +14,6 @@ spec:
             repoURL: https://charts.goauthentik.io
             namespace: prod-infra
             valuesPath: argocd/applications/infrastructure/authentik/authentik-values.yaml
-            ciOverridesPath: infrastructure/authentik/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/authentik
 
   template:

@@ -59,64 +59,57 @@ secret:
     data:
       TS_AUTHKEY: "placeholder"
 
-# Tailscale sidecar to route qBittorrent traffic through inlet exit node
+# Image used by the TrueCharts Tailscale addon (routes traffic through inlet exit node)
 tailscaleImage:
   repository: ghcr.io/tailscale/tailscale
   tag: latest
   pullPolicy: Always
 
-# Allow Tailscale containerboot to init its K8s client (needed even with TS_KUBE_SECRET="")
 podOptions:
   automountServiceAccountToken: true
-  dnsPolicy: "None"
-  dnsConfig:
-    nameservers:
-      - "8.8.8.8"
-      - "1.1.1.1"
-    searches:
-      - "prod-media.svc.cluster.local"
-      - "svc.cluster.local"
-      - "cluster.local"
 
 workload:
   main:
     podSpec:
-      containers:
-        main:
-          env: {}
-        tailscale:
+      initContainers:
+        vpn-kill-switch:
           enabled: true
-          primary: false
           imageSelector: tailscaleImage
-          env:
-            TS_AUTHKEY:
-              secretKeyRef:
-                name: tailscale-authkey
-                key: TS_AUTHKEY
-            TS_HOSTNAME: qbittorrent
-            TS_EXTRA_ARGS: "--exit-node=100.123.88.118 --exit-node-allow-lan-access"
-            TS_STATE_DIR: /tmp/tailscale
-            TS_ACCEPT_DNS: "false"
-            TS_KUBE_SECRET: ""
-            TS_USERSPACE: "true"
-          probes:
-            liveness:
-              enabled: false
-            readiness:
-              enabled: false
-            startup:
-              enabled: false
           securityContext:
-            runAsUser: 0
-            runAsNonRoot: false
             capabilities:
               add:
                 - NET_ADMIN
-                - NET_RAW
-            privileged: true
-          resources:
-            limits:
-              memory: 128Mi
-            requests:
-              cpu: 50m
-              memory: 64Mi
+          command:
+            - sh
+            - -c
+            - |
+              # Allow loopback and Tailscale traffic, then drop everything else.
+              # This ensures qbittorrent cannot route traffic outside of inlet
+              # if the Tailscale exit node is unavailable.
+              iptables -A OUTPUT -o lo -j ACCEPT
+              iptables -A OUTPUT -d 100.64.0.0/10 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 41641 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+              iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+              iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+              iptables -A OUTPUT -j DROP
+
+addons:
+  tailscale:
+    enabled: true
+    container:
+      env:
+        TS_AUTH_KEY:
+          secretKeyRef:
+            name: tailscale-authkey
+            key: TS_AUTHKEY
+        TS_HOSTNAME: qbittorrent
+        TS_EXTRA_ARGS: "--exit-node=inlet-1 --exit-node-allow-lan-access"
+        TS_ACCEPT_DNS: "false"
+        TS_KUBE_SECRET: ""
+      resources:
+        limits:
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi

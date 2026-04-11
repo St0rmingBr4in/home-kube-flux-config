@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author: st0rmingbr4in
+  description: Configures EdgeRouter X SFP home router
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: edgeos
+dependencies: []

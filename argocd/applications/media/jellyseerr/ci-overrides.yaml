@@ -1,5 +1,0 @@
-# CI Override: Jellyseerr optimized for testing
-# Disable all persistence
-persistence:
-  config:
-    enabled: false

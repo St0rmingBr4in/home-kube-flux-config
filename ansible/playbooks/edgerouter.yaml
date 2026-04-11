@@ -1,0 +1,6 @@
+---
+- name: Configure EdgeRouter X SFP
+  hosts: edgerouter
+  gather_facts: false
+  roles:
+    - role: edgerouter

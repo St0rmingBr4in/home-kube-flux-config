@@ -10,6 +10,9 @@
         terraform-tailscale-init terraform-tailscale-plan terraform-tailscale-apply \
         ansible-install-inlet ansible-install-k3s \
         ansible-setup-ssh-inlet ansible-setup-ssh-k3s \
+        ansible-install-edgerouter \
+        ansible-setup-ssh-edgerouter \
+        ansible-edgerouter ansible-edgerouter-check \
         ansible-inlet ansible-inlet-check \
         ansible-k3s ansible-k3s-check \
         memory-webhook-test \
@@ -148,6 +151,26 @@ terraform-tailscale-apply: ## Apply Tailscale Terraform
 	terraform -chdir=$(TF_TAILSCALE_DIR) apply -auto-approve
 
 # ── Ansible ───────────────────────────────────────────────────────────────────
+
+ansible-install-edgerouter: ## Install Ansible + collections for the edgerouter playbook
+	pip install ansible
+	ansible-galaxy collection install -r ansible/requirements.yml
+
+ansible-setup-ssh-edgerouter: ## Write EdgeRouter SSH key from EDGEROUTER_SSH_PRIVATE_KEY env var
+	@mkdir -p ~/.ssh
+	@printf '%s\n' "$${EDGEROUTER_SSH_PRIVATE_KEY}" > ~/.ssh/edgerouter_id_ed25519
+	@chmod 600 ~/.ssh/edgerouter_id_ed25519
+	@printf 'IdentityFile ~/.ssh/edgerouter_id_ed25519\n' >> ~/.ssh/config
+
+ansible-edgerouter: ## Run edgerouter playbook (check+diff on PRs or CHECK_MODE=true)
+	@if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
+		cd ansible && ansible-playbook playbooks/edgerouter.yaml --check --diff $(ANSIBLE_FLAGS); \
+	else \
+		cd ansible && ansible-playbook playbooks/edgerouter.yaml $(ANSIBLE_FLAGS); \
+	fi
+
+ansible-edgerouter-check: ## Run edgerouter playbook in check/diff mode (local dev)
+	CHECK_MODE=true $(MAKE) ansible-edgerouter
 
 ansible-install-inlet: ## Install Ansible + collections for the inlet playbook
 	pip install ansible

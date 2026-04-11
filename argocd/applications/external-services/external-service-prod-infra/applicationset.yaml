@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://storage.googleapis.com/t3n-helm-charts
             valuesPath: argocd/applications/external-services/external-service-prod-infra/external-service-values.yaml
-            ciOverridesPath: external-services/external-service-prod-infra/ci-overrides.yaml
 
   template:
     metadata:

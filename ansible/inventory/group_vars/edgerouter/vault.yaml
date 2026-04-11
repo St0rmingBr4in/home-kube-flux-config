@@ -1,0 +1,12 @@
+---
+# This file must be encrypted with ansible-vault:
+#   ansible-vault encrypt ansible/inventory/group_vars/edgerouter/vault.yaml
+#
+# To edit:
+#   ansible-vault edit ansible/inventory/group_vars/edgerouter/vault.yaml
+
+vault_snmp_community: "REPLACE_ME"
+vault_dyndns_password: "REPLACE_ME"
+vault_unms_connection: "REPLACE_ME"
+vault_wan_dhcp_rfc3118_auth: "REPLACE_ME"
+vault_wan_dhcp_client_identifier: "REPLACE_ME"

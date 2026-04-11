@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://helm.releases.hashicorp.com
             valuesPath: argocd/applications/infrastructure/vault-secrets-operator/vault-secrets-operator-values.yaml
-            ciOverridesPath: infrastructure/vault-secrets-operator/ci-overrides.yaml
 
   template:
     metadata:

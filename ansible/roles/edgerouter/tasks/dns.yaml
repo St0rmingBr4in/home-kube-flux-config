@@ -1,0 +1,24 @@
+---
+- name: Configure DNS forwarding
+  community.network.edgeos_config:
+    lines:
+      - set service dns forwarding cache-size 150
+      - set service dns forwarding listen-on switch0
+      - set service dns forwarding options dnssec
+      - set service dns forwarding options dnssec-check-unsigned
+      - set service dns forwarding options dnssec-no-timecheck
+      - >-
+        set service dns forwarding options
+        trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D
+      - >-
+        set service dns forwarding options
+        trust-anchor=.,19036,8,2,49AAC11D7B6F6446702E54A1607371607A1A41855200FD2CE1CDDE32F24E8FB5
+    save: true
+
+- name: Configure dynamic DNS (DynDNS for julien.likescandy.com)
+  community.network.edgeos_config:
+    lines:
+      - set service dns dynamic interface eth5.832 service dyndns host-name julien.likescandy.com
+      - set service dns dynamic interface eth5.832 service dyndns login FRD
+      - set service dns dynamic interface eth5.832 service dyndns password {{ dyndns_password }}
+    save: true

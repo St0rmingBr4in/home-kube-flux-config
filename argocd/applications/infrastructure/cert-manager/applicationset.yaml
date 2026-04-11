@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://charts.jetstack.io
             valuesPath: argocd/applications/infrastructure/cert-manager/cert-manager-values.yaml
-            ciOverridesPath: infrastructure/cert-manager/ci-overrides.yaml
 
   template:
     metadata:

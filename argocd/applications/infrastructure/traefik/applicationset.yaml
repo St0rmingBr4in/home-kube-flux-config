@@ -14,7 +14,6 @@ spec:
             namespace: kube-system
             repoURL: https://helm.traefik.io/traefik
             valuesPath: argocd/applications/infrastructure/traefik/traefik-values.yaml
-            ciOverridesPath: infrastructure/traefik/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/traefik
 
   template:

@@ -1,0 +1,18 @@
+---
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: community.network.edgeos
+ansible_user: st0rmingbr4in
+ansible_ssh_private_key_file: ~/.ssh/edgerouter_id_ed25519
+
+# Sensitive values — stored in vault.yaml
+snmp_community: "{{ vault_snmp_community }}"
+dyndns_password: "{{ vault_dyndns_password }}"
+unms_connection: "{{ vault_unms_connection }}"
+# Orange France ISP DHCP auth credential (line-specific, do not commit plaintext)
+wan_dhcp_rfc3118_auth: "{{ vault_wan_dhcp_rfc3118_auth }}"
+# WAN interface MAC address (used as DHCP client identifier)
+wan_dhcp_client_identifier: "{{ vault_wan_dhcp_client_identifier }}"
+
+# Set to true to disable hardware NAT offload so DPI inspects all flows.
+# This gives complete torrent blocking but reduces NAT throughput.
+edgerouter_disable_hwnat_for_full_dpi: false

@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://mojo2600.github.io/pihole-kubernetes/
             valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
-            ciOverridesPath: infrastructure/pihole/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/pihole
 
   template:

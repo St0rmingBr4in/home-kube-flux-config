@@ -1,0 +1,77 @@
+---
+- name: Configure port forwarding base settings
+  community.network.edgeos_config:
+    lines:
+      - set port-forward auto-firewall enable
+      - set port-forward hairpin-nat enable
+      - set port-forward lan-interface switch0
+      - set port-forward lan-interface switch0.42
+      - set port-forward lan-interface switch0.69
+      - set port-forward lan-interface tailscale0
+      - set port-forward wan-interface eth5.832
+    save: true
+
+- name: Configure port forwarding rules
+  community.network.edgeos_config:
+    lines:
+      - set port-forward rule 1 description http
+      - set port-forward rule 1 forward-to address 100.87.211.20
+      - set port-forward rule 1 forward-to port 80
+      - set port-forward rule 1 original-port 80
+      - set port-forward rule 1 protocol tcp_udp
+      - set port-forward rule 2 description https
+      - set port-forward rule 2 forward-to address 100.87.211.20
+      - set port-forward rule 2 forward-to port 443
+      - set port-forward rule 2 original-port 443
+      - set port-forward rule 2 protocol tcp_udp
+      - set port-forward rule 3 description minecraft
+      - set port-forward rule 3 forward-to address 192.168.62.18
+      - set port-forward rule 3 forward-to port 25565
+      - set port-forward rule 3 original-port 25565
+      - set port-forward rule 3 protocol tcp_udp
+      - set port-forward rule 4 description "rcon minecraft"
+      - set port-forward rule 4 forward-to address 192.168.62.18
+      - set port-forward rule 4 forward-to port 25575
+      - set port-forward rule 4 original-port 25575
+      - set port-forward rule 4 protocol tcp_udp
+      - set port-forward rule 5 description "nas http"
+      - set port-forward rule 5 forward-to address 192.168.42.42
+      - set port-forward rule 5 forward-to port 5000
+      - set port-forward rule 5 original-port 5000
+      - set port-forward rule 5 protocol tcp_udp
+      - set port-forward rule 6 description vpn
+      - set port-forward rule 6 forward-to address 192.168.42.42
+      - set port-forward rule 6 forward-to port 1701
+      - set port-forward rule 6 original-port 1701
+      - set port-forward rule 6 protocol tcp_udp
+      - set port-forward rule 7 description vpn
+      - set port-forward rule 7 forward-to address 192.168.42.42
+      - set port-forward rule 7 forward-to port 500
+      - set port-forward rule 7 original-port 500
+      - set port-forward rule 7 protocol tcp_udp
+      - set port-forward rule 8 description vpn
+      - set port-forward rule 8 forward-to address 192.168.42.42
+      - set port-forward rule 8 forward-to port 4500
+      - set port-forward rule 8 original-port 4500
+      - set port-forward rule 8 protocol tcp_udp
+      - set port-forward rule 9 description vpn
+      - set port-forward rule 9 forward-to address 192.168.42.42
+      - set port-forward rule 9 forward-to port 1194
+      - set port-forward rule 9 original-port 1194
+      - set port-forward rule 9 protocol tcp_udp
+      - set port-forward rule 10 description "nas https"
+      - set port-forward rule 10 forward-to address 192.168.42.42
+      - set port-forward rule 10 forward-to port 5001
+      - set port-forward rule 10 original-port 5001
+      - set port-forward rule 10 protocol tcp_udp
+      - set port-forward rule 11 description "minecraft aphorya"
+      - set port-forward rule 11 forward-to address 192.168.62.18
+      - set port-forward rule 11 forward-to port 25555
+      - set port-forward rule 11 original-port 25555
+      - set port-forward rule 11 protocol tcp_udp
+      - set port-forward rule 12 description palworld
+      - set port-forward rule 12 forward-to address 192.168.62.18
+      - set port-forward rule 12 forward-to port 8211
+      - set port-forward rule 12 original-port 8211
+      - set port-forward rule 12 protocol tcp_udp
+    save: true

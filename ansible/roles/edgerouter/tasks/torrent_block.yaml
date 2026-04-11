@@ -1,0 +1,50 @@
+---
+# Block BitTorrent traffic from LAN clients using DPI + port-based rules.
+#
+# DPI CAVEAT: hardware NAT offloading (system offload hwnat enable) bypasses
+# the DPI engine for offloaded flows — only new/non-offloaded flows get
+# inspected. Set edgerouter_disable_hwnat_for_full_dpi: true in group_vars
+# to disable hwnat and get full DPI coverage (at the cost of NAT throughput).
+#
+# The port-based rules (200+) serve as a reliable backstop regardless of hwnat.
+
+- name: Disable hwnat for full DPI coverage (optional, off by default)
+  community.network.edgeos_config:
+    lines:
+      - delete system offload hwnat
+    save: true
+  when: edgerouter_disable_hwnat_for_full_dpi | default(false)
+
+- name: Enable DPI traffic analysis
+  community.network.edgeos_config:
+    lines:
+      - set system traffic-analysis dpi enable
+    save: true
+
+- name: Configure LAN_OUT firewall ruleset for torrent blocking
+  community.network.edgeos_config:
+    lines:
+      - set firewall name LAN_OUT default-action accept
+      - set firewall name LAN_OUT description "LAN to WAN — torrent blocking"
+      - set firewall name LAN_OUT rule 10 action accept
+      - set firewall name LAN_OUT rule 10 description "Allow established/related"
+      - set firewall name LAN_OUT rule 10 state established enable
+      - set firewall name LAN_OUT rule 10 state related enable
+      - set firewall name LAN_OUT rule 100 action drop
+      - set firewall name LAN_OUT rule 100 description "Block BitTorrent (DPI)"
+      - set firewall name LAN_OUT rule 100 application category bittorrent
+      - set firewall name LAN_OUT rule 200 action drop
+      - set firewall name LAN_OUT rule 200 description "Block classic BitTorrent ports (TCP)"
+      - set firewall name LAN_OUT rule 200 destination port 6881-6889
+      - set firewall name LAN_OUT rule 200 protocol tcp
+      - set firewall name LAN_OUT rule 210 action drop
+      - set firewall name LAN_OUT rule 210 description "Block classic BitTorrent ports (UDP)"
+      - set firewall name LAN_OUT rule 210 destination port 6881-6889
+      - set firewall name LAN_OUT rule 210 protocol udp
+    save: true
+
+- name: Apply LAN_OUT firewall to WAN interface outbound
+  community.network.edgeos_config:
+    lines:
+      - set interfaces ethernet eth5 vif 832 firewall out name LAN_OUT
+    save: true

@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://helm.datadoghq.com
             valuesPath: argocd/applications/infrastructure/datadog/datadog-values.yaml
-            ciOverridesPath: infrastructure/datadog/ci-overrides.yaml
             manifestPath: argocd/applications/infrastructure/datadog
 
   template:

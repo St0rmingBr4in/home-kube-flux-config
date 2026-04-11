@@ -14,7 +14,6 @@ spec:
             namespace: argocd
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/core/argocd/argocd-values.yaml
-            ciOverridesPath: core/argocd/ci-overrides.yaml
             manifestPath: argocd/applications/core/argocd
 
   template:

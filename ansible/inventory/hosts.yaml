@@ -1,6 +1,9 @@
 ---
 all:
   children:
+    edgerouter:
+      hosts:
+        router.hard.st0rmingbr4in.com:
     inlet:
       hosts:
         inlet.st0rmingbr4in.com:

@@ -1,0 +1,24 @@
+---
+- name: Configure system settings
+  ansible.builtin.import_tasks: system.yaml
+
+- name: Configure interfaces
+  ansible.builtin.import_tasks: interfaces.yaml
+
+- name: Configure firewall
+  ansible.builtin.import_tasks: firewall.yaml
+
+- name: Configure NAT
+  ansible.builtin.import_tasks: nat.yaml
+
+- name: Configure DHCP server
+  ansible.builtin.import_tasks: dhcp.yaml
+
+- name: Configure DNS
+  ansible.builtin.import_tasks: dns.yaml
+
+- name: Configure port forwarding
+  ansible.builtin.import_tasks: port_forward.yaml
+
+- name: Configure torrent blocking
+  ansible.builtin.import_tasks: torrent_block.yaml

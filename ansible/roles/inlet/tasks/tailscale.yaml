@@ -25,13 +25,21 @@
   ansible.builtin.set_fact:
     tailscale_status: "{{ tailscale_status_raw.stdout | from_json }}"
 
-- name: Bring up Tailscale exit node
+- name: Bring up Tailscale (first auth or re-auth)
   ansible.builtin.command:
     cmd: "tailscale up --authkey={{ tailscale_authkey }} {{ tailscale_extra_args }}"
   when:
     - tailscale_authkey is defined
     - tailscale_status.BackendState != "Running"
   no_log: true
+
+- name: Update Tailscale flags (exit node, routes, tags) when already running
+  ansible.builtin.command:
+    cmd: "tailscale up {{ tailscale_extra_args }}"
+  when:
+    - tailscale_authkey is not defined
+    - tailscale_status.BackendState == "Running"
+  changed_when: true
 
 - name: Verify Tailscale exit node is active
   ansible.builtin.command:

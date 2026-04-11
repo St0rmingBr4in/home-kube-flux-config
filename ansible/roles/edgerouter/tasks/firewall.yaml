@@ -1,0 +1,54 @@
+---
+- name: Configure global firewall settings
+  community.network.edgeos_config:
+    lines:
+      - set firewall all-ping enable
+      - set firewall broadcast-ping disable
+      - set firewall ipv6-receive-redirects disable
+      - set firewall ipv6-src-route disable
+      - set firewall ip-src-route disable
+      - set firewall log-martians enable
+      - set firewall receive-redirects disable
+      - set firewall send-redirects enable
+      - set firewall source-validation disable
+      - set firewall syn-cookies enable
+    save: true
+
+- name: Configure TAILSCALE_MARK modify ruleset
+  community.network.edgeos_config:
+    lines:
+      - set firewall modify TAILSCALE_MARK rule 10 action modify
+      - set firewall modify TAILSCALE_MARK rule 10 description "Mark traffic to Tailscale CGNAT range for masquerading"
+      - set firewall modify TAILSCALE_MARK rule 10 destination address 100.64.0.0/10
+      - set firewall modify TAILSCALE_MARK rule 10 modify mark 0x40000
+    save: true
+
+- name: Configure WAN_IN firewall ruleset
+  community.network.edgeos_config:
+    lines:
+      - set firewall name WAN_IN default-action drop
+      - set firewall name WAN_IN description "WAN to internal"
+      - set firewall name WAN_IN enable-default-log
+      - set firewall name WAN_IN rule 10 action accept
+      - set firewall name WAN_IN rule 10 description "Allow established/related"
+      - set firewall name WAN_IN rule 10 state established enable
+      - set firewall name WAN_IN rule 10 state related enable
+      - set firewall name WAN_IN rule 20 action drop
+      - set firewall name WAN_IN rule 20 description "Drop invalid state"
+      - set firewall name WAN_IN rule 20 state invalid enable
+    save: true
+
+- name: Configure WAN_LOCAL firewall ruleset
+  community.network.edgeos_config:
+    lines:
+      - set firewall name WAN_LOCAL default-action drop
+      - set firewall name WAN_LOCAL description "WAN to router"
+      - set firewall name WAN_LOCAL enable-default-log
+      - set firewall name WAN_LOCAL rule 10 action accept
+      - set firewall name WAN_LOCAL rule 10 description "Allow established/related"
+      - set firewall name WAN_LOCAL rule 10 state established enable
+      - set firewall name WAN_LOCAL rule 10 state related enable
+      - set firewall name WAN_LOCAL rule 20 action drop
+      - set firewall name WAN_LOCAL rule 20 description "Drop invalid state"
+      - set firewall name WAN_LOCAL rule 20 state invalid enable
+    save: true

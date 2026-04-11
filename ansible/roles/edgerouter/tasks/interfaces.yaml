@@ -1,0 +1,101 @@
+---
+- name: Configure local ethernet interfaces
+  community.network.edgeos_config:
+    lines:
+      - set interfaces ethernet eth0 description Local
+      - set interfaces ethernet eth0 duplex auto
+      - set interfaces ethernet eth0 speed auto
+      - set interfaces ethernet eth0 poe output off
+      - set interfaces ethernet eth1 description Local
+      - set interfaces ethernet eth1 duplex auto
+      - set interfaces ethernet eth1 speed auto
+      - set interfaces ethernet eth2 description Local
+      - set interfaces ethernet eth2 duplex auto
+      - set interfaces ethernet eth2 speed auto
+      - set interfaces ethernet eth3 description Local
+      - set interfaces ethernet eth3 duplex auto
+      - set interfaces ethernet eth3 speed auto
+      - set interfaces ethernet eth3 poe output off
+      - set interfaces ethernet eth4 description Local
+      - set interfaces ethernet eth4 duplex auto
+      - set interfaces ethernet eth4 speed auto
+      - set interfaces ethernet eth4 poe output off
+    save: true
+
+- name: Configure WAN interface (eth5) and VDSL VLAN
+  community.network.edgeos_config:
+    lines:
+      - set interfaces ethernet eth5 duplex auto
+      - set interfaces ethernet eth5 speed auto
+      - set interfaces ethernet eth5 vif 832 address dhcp
+      - set interfaces ethernet eth5 vif 832 dhcp-options default-route update
+      - set interfaces ethernet eth5 vif 832 dhcp-options default-route-distance 210
+      - set interfaces ethernet eth5 vif 832 dhcp-options name-server update
+      - set interfaces ethernet eth5 vif 832 dhcp-options global-option "option rfc3118-auth code 90 = string;"
+      - set interfaces ethernet eth5 vif 832 firewall in modify TAILSCALE_MARK
+      - set interfaces ethernet eth5 vif 832 firewall in name WAN_IN
+      - set interfaces ethernet eth5 vif 832 firewall local name WAN_LOCAL
+    save: true
+
+# Orange France / Livebox4 ISP-specific DHCP client options.
+# These authenticate the ONT/router to the ISP's DHCP server.
+- name: Configure WAN DHCP client options (Orange France / Livebox4)
+  community.network.edgeos_config:
+    lines:
+      - 'set interfaces ethernet eth5 vif 832 dhcp-options client-option "send user-class \"\053FSVDSL_livebox.Internet.softathome.Livebox4\";"'
+      - 'set interfaces ethernet eth5 vif 832 dhcp-options client-option "send vendor-class-identifier \"sagem\";"'
+      - >-
+        set interfaces ethernet eth5 vif 832 dhcp-options client-option
+        "send rfc3118-auth {{ wan_dhcp_rfc3118_auth }};"
+      - >-
+        set interfaces ethernet eth5 vif 832 dhcp-options client-option
+        "request subnet-mask, routers, domain-name-servers, domain-name,
+        broadcast-address, dhcp-lease-time, dhcp-renewal-time,
+        dhcp-rebinding-time, rfc3118-auth;"
+      - >-
+        set interfaces ethernet eth5 vif 832 dhcp-options client-option
+        "send dhcp-client-identifier {{ wan_dhcp_client_identifier }};"
+    save: true
+
+- name: Configure switch0 base interface
+  community.network.edgeos_config:
+    lines:
+      - set interfaces switch switch0 address 192.168.1.1/24
+      - set interfaces switch switch0 description Local
+      - set interfaces switch switch0 ip enable-proxy-arp
+      - set interfaces switch switch0 mtu 1500
+      - set interfaces switch switch0 switch-port vlan-aware enable
+    save: true
+
+- name: Configure switch0 port VLAN assignments
+  community.network.edgeos_config:
+    lines:
+      - set interfaces switch switch0 switch-port interface eth0 vlan vid 42
+      - set interfaces switch switch0 switch-port interface eth0 vlan vid 52
+      - set interfaces switch switch0 switch-port interface eth0 vlan vid 62
+      - set interfaces switch switch0 switch-port interface eth0 vlan vid 69
+      - set interfaces switch switch0 switch-port interface eth1 vlan pvid 52
+      - set interfaces switch switch0 switch-port interface eth2 vlan vid 42
+      - set interfaces switch switch0 switch-port interface eth2 vlan vid 62
+      - set interfaces switch switch0 switch-port interface eth2 vlan vid 69
+      - set interfaces switch switch0 switch-port interface eth2 vlan vid 72
+      - set interfaces switch switch0 switch-port interface eth3 vlan pvid 69
+      - set interfaces switch switch0 switch-port interface eth4 vlan pvid 69
+    save: true
+
+- name: Configure switch0 VLANs
+  community.network.edgeos_config:
+    lines:
+      - set interfaces switch switch0 vif 42 address 192.168.42.1/24
+      - set interfaces switch switch0 vif 42 description servers
+      - set interfaces switch switch0 vif 52 address 192.168.52.1/24
+      - set interfaces switch switch0 vif 52 description bmc
+      - set interfaces switch switch0 vif 52 mtu 1500
+      - set interfaces switch switch0 vif 62 address 192.168.62.1/24
+      - set interfaces switch switch0 vif 62 description vms
+      - set interfaces switch switch0 vif 62 mtu 1500
+      - set interfaces switch switch0 vif 69 address 192.168.69.1/24
+      - set interfaces switch switch0 vif 69 description guest
+      - set interfaces switch switch0 vif 72 address 192.168.72.1/24
+      - set interfaces switch switch0 vif 72 description "SVC IPS"
+    save: true

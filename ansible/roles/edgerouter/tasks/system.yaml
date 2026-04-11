@@ -1,0 +1,87 @@
+---
+- name: Configure system hostname and timezone
+  community.network.edgeos_config:
+    lines:
+      - set system host-name ubnt
+      - set system time-zone UTC
+      - set system analytics-handler send-analytics-report false
+      - set system crash-handler send-crash-report false
+    save: true
+
+- name: Configure NTP servers
+  community.network.edgeos_config:
+    lines:
+      - set system ntp server 0.ubnt.pool.ntp.org
+      - set system ntp server 1.ubnt.pool.ntp.org
+      - set system ntp server 2.ubnt.pool.ntp.org
+      - set system ntp server 3.ubnt.pool.ntp.org
+    save: true
+
+- name: Configure hardware offload
+  community.network.edgeos_config:
+    lines:
+      - set system offload hwnat enable
+      - set system offload ipsec enable
+    save: true
+
+- name: Configure conntrack
+  community.network.edgeos_config:
+    lines:
+      - set system conntrack expect-table-size 2048
+      - set system conntrack hash-size 32768
+      - set system conntrack table-size 262144
+      - set system conntrack modules sip disable
+    save: true
+
+- name: Configure syslog
+  community.network.edgeos_config:
+    lines:
+      - set system syslog global archive files 5
+      - set system syslog global archive size 5000
+      - set system syslog global facility all level info
+      - set system syslog global facility local2 level debug
+      - set system syslog global facility protocols level debug
+      - set system syslog host 192.168.62.28 facility all level debug
+    save: true
+
+- name: Configure admin SSH keys
+  community.network.edgeos_config:
+    lines:
+      - set system login user st0rmingbr4in level admin
+      - set system login user st0rmingbr4in authentication public-keys github-actions-k3s type ssh-ed25519
+      - set system login user st0rmingbr4in authentication public-keys github-actions-k3s key AAAAC3NzaC1lZDI1NTE5AAAAIBqlmo+1m/sjauV2GTjDzdJjzOEvgAuFs/b0hEbEEUi1
+      - set system login user st0rmingbr4in authentication public-keys homelab type ssh-ed25519
+      - set system login user st0rmingbr4in authentication public-keys homelab key AAAAC3NzaC1lZDI1NTE5AAAAIMXLPvmMDlh3tgvRqz1Vu1e6U6idSvFEw+crHVPi+Mds
+    save: true
+
+- name: Configure SSH service
+  community.network.edgeos_config:
+    lines:
+      - set service ssh disable-password-authentication
+      - set service ssh port 22
+      - set service ssh protocol-version v2
+    save: true
+
+- name: Configure GUI service
+  community.network.edgeos_config:
+    lines:
+      - set service gui http-port 80
+      - set service gui https-port 443
+      - set service gui listen-address 192.168.42.1
+      - set service gui listen-address 192.168.52.1
+      - set service gui listen-address 192.168.62.1
+      - set service gui listen-address 192.168.69.1
+      - set service gui older-ciphers enable
+    save: true
+
+- name: Configure SNMP
+  community.network.edgeos_config:
+    lines:
+      - set service snmp community {{ snmp_community }} authorization ro
+    save: true
+
+- name: Configure UNMS
+  community.network.edgeos_config:
+    lines:
+      - set service unms connection {{ unms_connection }}
+    save: true

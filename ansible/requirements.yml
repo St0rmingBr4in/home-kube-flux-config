@@ -8,3 +8,7 @@ collections:
     version: ">=7.0.0"
   - name: ansible.posix
     version: ">=1.5.0"
+  - name: ansible.netcommon
+    version: ">=5.0.0"
+  - name: community.network
+    version: ">=5.0.0"

@@ -11,7 +11,6 @@ spec:
           - name: memory-webhook
             namespace: prod-infra
             manifestPath: argocd/applications/compliance/memory-webhook
-            ciOverridesPath: compliance/memory-webhook/ci-overrides.yaml
 
   template:
     metadata:
