@@ -19,6 +19,11 @@ metadata:
 spec:
   serviceAccountName: argo-ci
   entrypoint: main
+  synchronization:
+    semaphore:
+      configMapKeyRef:
+        name: ci-semaphore
+        key: ci
   arguments:
     parameters:
       - name: git-ref
