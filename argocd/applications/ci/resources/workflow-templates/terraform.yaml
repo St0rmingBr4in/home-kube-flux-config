@@ -30,6 +30,7 @@ spec:
         name: workspace
       spec:
         accessModes: [ReadWriteOnce]
+        storageClassName: local-path
         resources:
           requests:
             storage: 512Mi
@@ -37,6 +38,7 @@ spec:
         name: secrets
       spec:
         accessModes: [ReadWriteOnce]
+        storageClassName: local-path
         resources:
           requests:
             storage: 1Mi
