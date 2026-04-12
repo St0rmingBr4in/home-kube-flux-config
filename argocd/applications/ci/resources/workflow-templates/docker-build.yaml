@@ -1,6 +1,7 @@
 ---
-# Go image build and push using ko (no daemon, no Dockerfile, no privileges required).
-# https://ko.build
+# Container image build and push using rootless BuildKit (no daemon, no privileged pod).
+# Requires kernel unprivileged user namespaces (unprivileged_userns_clone=1) — confirmed
+# on k3s-clusterv2-node1 (kernel 6.1.0-43-amd64, Debian 12).
 #
 # Vault secret layout (kv-v2):
 #   secret/ci/docker → username, password (Docker Hub credentials)
@@ -19,7 +20,7 @@ spec:
         value: "memory-webhook"
       - name: image
         value: "docker.io/st0rmingbr4in/memory-webhook"
-      - name: workdir
+      - name: context
         value: "memory-webhook"
   volumeClaimTemplates:
     - metadata:
@@ -59,7 +60,7 @@ spec:
             template: docker-creds
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
         - - name: build-push
-            template: ko-build
+            template: buildkit-build
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
 
     - name: docker-creds
@@ -85,22 +86,26 @@ spec:
           - name: secrets
             mountPath: /secrets
 
-    - name: ko-build
+    - name: buildkit-build
       container:
-        # chainguard/ko — actively maintained, distroless-based
-        image: chainguard/ko@sha256:4d8e0f595a347993168897be598c5e490141df7cf17580892b8efae71ad3b29f
-        env:
-          - name: DOCKER_CONFIG
-            value: /secrets/docker
-          - name: KO_DOCKER_REPO
-            value: "{{workflow.parameters.image}}"
-        command: [ko]
+        image: moby/buildkit@sha256:93efd7f1c17f16cea080c34f68e19863b9fe541db550bf607221ce425c0ab9ef
+        command: [buildctl-daemonless.sh]
         args:
           - build
-          - --bare
-          - --tags=latest,master
-          - .
-        workingDir: /workspace/{{workflow.parameters.workdir}}
+          - --frontend=dockerfile.v0
+          - --local=context=/workspace/{{workflow.parameters.context}}
+          - --local=dockerfile=/workspace/{{workflow.parameters.context}}
+          - --output=type=image,name={{workflow.parameters.image}}:latest,push=true
+        env:
+          - name: BUILDKITD_FLAGS
+            value: "--oci-worker-no-process-sandbox"
+          - name: DOCKER_CONFIG
+            value: /secrets/docker
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          seccompProfile:
+            type: Unconfined
         volumeMounts:
           - name: workspace
             mountPath: /workspace
