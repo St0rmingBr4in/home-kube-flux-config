@@ -115,20 +115,14 @@ func TestMutateMemoryResources_OnlyRequestSet(t *testing.T) {
 }
 
 func TestMutateMemoryResources_BothSetButDifferent(t *testing.T) {
+	// When both limit and request are explicitly set (even if different), the webhook
+	// must not modify them — the caller chose Burstable QoS intentionally.
 	resources := createResourceRequirements("2Gi", "1Gi")
 	pod := createTestPod("test-pod", resources)
 
 	patches := mutateMemoryResources(pod)
 
-	require.Len(t, patches, 1, "Expected exactly 1 patch for pod with different limit and request")
-
-	expectedPatch := patchOperation{
-		Op:    "replace",
-		Path:  "/spec/containers/0/resources/requests/memory",
-		Value: "2Gi",
-	}
-
-	require.Equal(t, expectedPatch, patches[0], "Patch should replace request to match limit for Guaranteed QoS")
+	require.Empty(t, patches, "No patches should be applied when both limit and request are already set")
 }
 
 func TestMutateMemoryResources_BothSetAndEqual(t *testing.T) {

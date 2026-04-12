@@ -125,23 +125,10 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 	}
 
 	if hasMemoryLimit && hasMemoryRequest {
-		if memoryLimit != memoryRequest {
-			patches = append(patches, patchOperation{
-				Op:    "replace",
-				Path:  basePath + "/requests/memory",
-				Value: memoryLimit,
-			})
-			logger.Info("Adjusted memory request to match limit for Guaranteed QoS",
-				zap.String("container", container.Name),
-				zap.String("previousRequest", memoryRequest.(string)),
-				zap.String("newRequest", memoryLimit.(string)),
-				zap.String("action", "guarantee_qos"))
-		} else {
-			logger.Info("Memory resources already optimal",
-				zap.String("container", container.Name),
-				zap.String("memory", memoryLimit.(string)),
-				zap.String("qos", "Guaranteed"))
-		}
+		logger.Info("Memory already set, skipping",
+			zap.String("container", container.Name),
+			zap.String("limit", memoryLimit.(string)),
+			zap.String("request", memoryRequest.(string)))
 	} else if hasMemoryLimit && !hasMemoryRequest {
 		if container.Resources.Requests == nil {
 			patches = append(patches, patchOperation{
