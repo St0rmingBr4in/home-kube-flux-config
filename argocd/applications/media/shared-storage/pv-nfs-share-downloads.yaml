@@ -16,4 +16,4 @@ spec:
     - ReadWriteMany
   nfs:
     path: /volume1/Downloads/
-    server: nasse.hard.st0rmingbr4in.lan
+    server: nasse.hard.st0rmingbr4in.com
