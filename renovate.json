@@ -8,6 +8,21 @@
       "description": "Auto-merge minor and patch updates when CI passes",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true
+    },
+    {
+      "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",
+      "matchPackageNames": ["go", "golang"],
+      "groupName": "go toolchain"
+    },
+    {
+      "description": "Group Vault image updates across workflow templates (vault-login in common.yaml and docker-creds in docker-build.yaml)",
+      "matchPackageNames": ["hashicorp/vault"],
+      "groupName": "hashicorp vault image"
+    },
+    {
+      "description": "Group alpine image updates across app-health-hook jobs",
+      "matchPackageNames": ["alpine"],
+      "groupName": "alpine image"
     }
   ],
   "argocd": {
