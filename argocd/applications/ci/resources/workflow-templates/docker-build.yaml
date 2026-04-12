@@ -79,6 +79,12 @@ spec:
       container:
         image: golang:1.25-alpine@sha256:7a00384194cf2cb68924bbb918d675f1517357433c8541bac0ab2f929b9d5447
         command: [sh, -c]
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 500m
+          limits:
+            memory: 512Mi
         args:
           - |
             cd /workspace/{{workflow.parameters.context}}
@@ -92,6 +98,12 @@ spec:
       script:
         image: hashicorp/vault:1.17
         command: [sh]
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
         env:
           - name: VAULT_ADDR
             value: "https://vault.prod-infra.svc.cluster.local:8200"
@@ -115,6 +127,12 @@ spec:
       container:
         image: moby/buildkit@sha256:93efd7f1c17f16cea080c34f68e19863b9fe541db550bf607221ce425c0ab9ef
         command: [buildctl-daemonless.sh]
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 500m
+          limits:
+            memory: 1Gi
         args:
           - build
           - --frontend=dockerfile.v0

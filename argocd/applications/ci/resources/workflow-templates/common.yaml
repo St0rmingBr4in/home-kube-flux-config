@@ -12,6 +12,12 @@ spec:
       script:
         image: alpine/git@sha256:d453f54c83320412aa89c391b076930bd8569bc1012285e8c68ce2d4435826a3
         command: [sh]
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
         source: |
           git clone --depth=2 \
             https://github.com/St0rmingBr4in/home-kube-flux-config \
@@ -24,6 +30,12 @@ spec:
       script:
         image: hashicorp/vault:1.17
         command: [sh]
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
         env:
           - name: VAULT_ADDR
             value: "https://vault.prod-infra.svc.cluster.local:8200"
@@ -46,6 +58,12 @@ spec:
       script:
         image: alpine/git@sha256:d453f54c83320412aa89c391b076930bd8569bc1012285e8c68ce2d4435826a3
         command: [sh]
+        resources:
+          requests:
+            memory: 32Mi
+            cpu: 50m
+          limits:
+            memory: 128Mi
         source: |
           cd /workspace
           CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
