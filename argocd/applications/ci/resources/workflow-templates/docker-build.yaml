@@ -1,5 +1,6 @@
 ---
-# Docker image build and push using kaniko (no daemon required).
+# Go image build and push using ko (no daemon, no Dockerfile, no privileges required).
+# https://ko.build
 #
 # Vault secret layout (kv-v2):
 #   secret/ci/docker → username, password (Docker Hub credentials)
@@ -17,11 +18,9 @@ spec:
       - name: path-filter
         value: "memory-webhook"
       - name: image
-        value: "st0rmingbr4in/memory-webhook"
-      - name: context
+        value: "docker.io/st0rmingbr4in/memory-webhook"
+      - name: workdir
         value: "memory-webhook"
-      - name: dockerfile
-        value: "memory-webhook/Dockerfile"
   volumeClaimTemplates:
     - metadata:
         name: workspace
@@ -60,7 +59,7 @@ spec:
             template: docker-creds
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
         - - name: build-push
-            template: kaniko-build
+            template: ko-build
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
 
     - name: docker-creds
@@ -86,19 +85,22 @@ spec:
           - name: secrets
             mountPath: /secrets
 
-    - name: kaniko-build
+    - name: ko-build
       container:
-        image: gcr.io/kaniko-project/executor:latest
+        # chainguard/ko — actively maintained, distroless-based
+        image: chainguard/ko@sha256:4d8e0f595a347993168897be598c5e490141df7cf17580892b8efae71ad3b29f
         env:
           - name: DOCKER_CONFIG
             value: /secrets/docker
+          - name: KO_DOCKER_REPO
+            value: "{{workflow.parameters.image}}"
+        command: [ko]
         args:
-          - --context=/workspace/{{workflow.parameters.context}}
-          - --dockerfile=/workspace/{{workflow.parameters.dockerfile}}
-          - --destination={{workflow.parameters.image}}:latest
-          - --destination={{workflow.parameters.image}}:master
-          - --cache=true
-          - --cache-repo={{workflow.parameters.image}}-cache
+          - build
+          - --bare
+          - --tags=latest,master
+          - .
+        workingDir: /workspace/{{workflow.parameters.workdir}}
         volumeMounts:
           - name: workspace
             mountPath: /workspace
