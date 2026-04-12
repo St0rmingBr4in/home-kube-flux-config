@@ -20,7 +20,7 @@ rules:
     verbs: [get, list, watch]
   # Argo Events sensor pods need to create Workflows
   - apiGroups: [argoproj.io]
-    resources: [workflows, workflowtemplates]
+    resources: [workflows, workflowtemplates, workflowtaskresults]
     verbs: [get, list, watch, create, update, patch, delete]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
