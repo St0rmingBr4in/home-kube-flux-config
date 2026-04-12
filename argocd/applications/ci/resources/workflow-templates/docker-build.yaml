@@ -3,6 +3,9 @@
 # Requires kernel unprivileged user namespaces (unprivileged_userns_clone=1) — confirmed
 # on k3s-clusterv2-node1 (kernel 6.1.0-43-amd64, Debian 12).
 #
+# Build strategy: Go binary is compiled natively in a go-build step then packaged by
+# BuildKit using a thin Dockerfile (no Go toolchain inside the image).
+#
 # Vault secret layout (kv-v2):
 #   secret/ci/docker → username, password (Docker Hub credentials)
 apiVersion: argoproj.io/v1alpha1
@@ -57,12 +60,31 @@ spec:
               parameters:
                 - name: path-filter
                   value: "{{workflow.parameters.path-filter}}"
+        - - name: go-build
+            template: go-build
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
         - - name: setup-docker-creds
             template: docker-creds
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
         - - name: build-push
             template: buildkit-build
             when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
+
+    # Compile the Go binary natively on amd64. The resulting binary is placed in the
+    # context directory so BuildKit can COPY it into the thin runtime image.
+    # Image version must match the `go` directive in go.mod — kept in sync by Renovate.
+    - name: go-build
+      container:
+        image: golang:1.25-alpine@sha256:7a00384194cf2cb68924bbb918d675f1517357433c8541bac0ab2f929b9d5447
+        command: [sh, -c]
+        args:
+          - |
+            cd /workspace/{{workflow.parameters.context}}
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+              go build -a -installsuffix cgo -o webhook main.go
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
 
     - name: docker-creds
       script:
