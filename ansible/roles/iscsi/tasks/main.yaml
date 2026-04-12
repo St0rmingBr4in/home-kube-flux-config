@@ -1,0 +1,39 @@
+---
+# Configure iSCSI session keepalives so dropped sessions are detected
+# and recovered in ~10s instead of the default 120s.
+#
+# iscsid.conf sets defaults for new connections.
+# iscsiadm --op update applies the timeout to existing node records
+# so it takes effect without requiring a full iSCSI logout/login.
+
+- name: Install open-iscsi
+  ansible.builtin.package:
+    name: open-iscsi
+    state: present
+
+- name: Configure iSCSI keepalive and timeout settings
+  ansible.builtin.lineinfile:
+    path: /etc/iscsi/iscsid.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    backup: true
+  loop:
+    # Time to wait for a transport-layer reconnect before declaring the
+    # session dead and returning I/O errors to the filesystem. Default: 120.
+    - regexp: '^node\.session\.timeo\.replacement_timeout'
+      line: 'node.session.timeo.replacement_timeout = 30'
+    # Send a NOP-Out keepalive every 5s to detect silent TCP drops.
+    - regexp: '^node\.conn\.timeo\.noop_out_interval'
+      line: 'node.conn.timeo.noop_out_interval = 5'
+    # Declare the connection dead if no NOP-In reply arrives within 5s.
+    - regexp: '^node\.conn\.timeo\.noop_out_timeout'
+      line: 'node.conn.timeo.noop_out_timeout = 5'
+  notify: Restart iscsid
+
+- name: Apply replacement_timeout to existing iSCSI node records
+  ansible.builtin.command:
+    cmd: >
+      iscsiadm -m node --op update
+      -n node.session.timeo.replacement_timeout -v 30
+  failed_when: false
+  changed_when: false

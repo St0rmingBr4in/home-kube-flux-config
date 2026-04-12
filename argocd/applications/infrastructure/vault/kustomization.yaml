@@ -8,3 +8,4 @@ resources:
   - vault-internal-tls-cert.yaml
   - vault-backend-transport.yaml
   - vault-ingressroute.yaml
+  - vault-unseal-rbac.yaml

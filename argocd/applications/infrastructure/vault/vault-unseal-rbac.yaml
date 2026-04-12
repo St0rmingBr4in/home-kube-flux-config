@@ -1,0 +1,30 @@
+---
+# Allows the Vault pod to read the unseal key secret mounted as a volume.
+# The secret itself must be created manually (never committed to git):
+#   kubectl create secret generic vault-unseal-key \
+#     --from-literal=key="<unseal-key>" \
+#     -n prod-infra
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vault-unseal
+  namespace: prod-infra
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [vault-unseal-key]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vault-unseal
+  namespace: prod-infra
+subjects:
+  - kind: ServiceAccount
+    name: vault
+    namespace: prod-infra
+roleRef:
+  kind: Role
+  name: vault-unseal
+  apiGroup: rbac.authorization.k8s.io

@@ -17,16 +17,46 @@ server:
     VAULT_TLSCERT: /vault/userconfig/vault-internal-tls-cert/tls.crt
     VAULT_TLSKEY: /vault/userconfig/vault-internal-tls-cert/tls.key
 
-  # Mount TLS certificates
+  # Mount TLS certificates and unseal key
   volumes:
     - name: vault-internal-tls-cert
       secret:
         secretName: vault-internal-tls-cert
+    - name: vault-unseal-key
+      secret:
+        secretName: vault-unseal-key
 
   volumeMounts:
     - mountPath: /vault/userconfig/vault-internal-tls-cert
       name: vault-internal-tls-cert
       readOnly: true
+    - mountPath: /vault/unseal-key
+      name: vault-unseal-key
+      readOnly: true
+
+  # Detect stale iSCSI volumes by writing to storage each cycle.
+  # If the write fails, Kubernetes restarts the pod which triggers a fresh
+  # iSCSI reconnect and re-mount before Vault starts again.
+  customLivenessProbe:
+    exec:
+      command:
+        - sh
+        - -c
+        - touch /vault/data/.liveness
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 3
+
+  # Auto-unseal on pod start using the key stored in the vault-unseal-key secret.
+  # Retries for up to ~60 s to give Vault time to finish initialising.
+  postStart:
+    - sh
+    - -c
+    - |
+      for i in $(seq 1 12); do
+        sleep 5
+        vault operator unseal "$(cat /vault/unseal-key/key)" && exit 0
+      done
 
   # Standalone mode with TLS
   standalone:

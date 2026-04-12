@@ -1,3 +1,4 @@
 roles/*
 !roles/inlet/
 !roles/edgerouter/
+!roles/iscsi/
