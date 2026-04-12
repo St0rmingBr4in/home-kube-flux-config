@@ -1,0 +1,120 @@
+---
+# Generic Terraform CI workflow. Triggered by sensors with module-specific parameters.
+#
+# Vault secret layout (kv-v2):
+#   secret/ci/terraform-cloud  → token   (HCP Terraform token, exported as TF_TOKEN_APP_TERRAFORM_IO)
+#   secret/ci/<module>         → TF_VAR_* fields (exported directly as env vars)
+#
+# Example Vault paths per module:
+#   secret/ci/datadog          → TF_VAR_datadog_api_key, TF_VAR_datadog_app_key
+#   secret/ci/digitalocean     → TF_VAR_digitalocean_token
+#   secret/ci/tailscale        → TF_VAR_tailscale_oauth_client_id, TF_VAR_tailscale_oauth_client_secret
+#   secret/ci/authentik        → TF_VAR_authentik_token
+#   secret/ci/tfe              → (empty, TFC token is sufficient)
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-terraform
+  namespace: argo
+spec:
+  serviceAccountName: argo-ci
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: git-ref
+      - name: module
+      - name: path-filter
+      - name: vault-secret-path
+  volumeClaimTemplates:
+    - metadata:
+        name: workspace
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 512Mi
+    - metadata:
+        name: secrets
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Mi
+  templates:
+    - name: main
+      steps:
+        - - name: clone
+            templateRef:
+              name: ci-common
+              template: git-clone
+          - name: vault-login
+            templateRef:
+              name: ci-common
+              template: vault-login
+        - - name: check-paths
+            templateRef:
+              name: ci-common
+              template: check-paths
+            arguments:
+              parameters:
+                - name: path-filter
+                  value: "{{workflow.parameters.path-filter}}"
+        - - name: plan
+            template: terraform-plan
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed'"
+        - - name: apply
+            template: terraform-apply
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
+
+    - name: terraform-plan
+      script:
+        image: hashicorp/terraform:1.9
+        command: [sh]
+        env:
+          - name: VAULT_ADDR
+            value: "https://vault.prod-infra.svc.cluster.local:8200"
+          - name: VAULT_SKIP_VERIFY
+            value: "true"
+        source: |
+          export VAULT_TOKEN=$(cat /secrets/vault-token)
+
+          # HCP Terraform Cloud credentials
+          export TF_TOKEN_APP_TERRAFORM_IO=$(vault kv get -field=token secret/ci/terraform-cloud)
+
+          # Module-specific secrets: all kv fields exported as env vars (TF_VAR_*)
+          eval "$(vault kv get -format=json {{workflow.parameters.vault-secret-path}} \
+            | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)')"
+
+          cd /workspace
+          make terraform-{{workflow.parameters.module}}-init
+          make terraform-{{workflow.parameters.module}}-plan
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: secrets
+            mountPath: /secrets
+
+    - name: terraform-apply
+      script:
+        image: hashicorp/terraform:1.9
+        command: [sh]
+        env:
+          - name: VAULT_ADDR
+            value: "https://vault.prod-infra.svc.cluster.local:8200"
+          - name: VAULT_SKIP_VERIFY
+            value: "true"
+        source: |
+          export VAULT_TOKEN=$(cat /secrets/vault-token)
+
+          export TF_TOKEN_APP_TERRAFORM_IO=$(vault kv get -field=token secret/ci/terraform-cloud)
+
+          eval "$(vault kv get -format=json {{workflow.parameters.vault-secret-path}} \
+            | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)')"
+
+          cd /workspace
+          make terraform-{{workflow.parameters.module}}-apply
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: secrets
+            mountPath: /secrets

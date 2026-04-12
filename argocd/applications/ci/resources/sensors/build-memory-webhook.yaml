@@ -1,0 +1,53 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: ci-build-memory-webhook
+  namespace: argo
+spec:
+  template:
+    serviceAccountName: argo-ci
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/master"
+  triggers:
+    - template:
+        name: trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-build-memory-webhook-
+                namespace: argo
+              spec:
+                workflowTemplateRef:
+                  name: ci-docker-build
+                arguments:
+                  parameters:
+                    - name: git-ref
+                      value: "refs/heads/master"
+                    - name: path-filter
+                      value: "memory-webhook"
+                    - name: image
+                      value: "st0rmingbr4in/memory-webhook"
+                    - name: context
+                      value: "memory-webhook"
+                    - name: dockerfile
+                      value: "memory-webhook/Dockerfile"
+          parameters:
+            - src:
+                dependencyName: push
+                dataKey: body.ref
+              dest: spec.arguments.parameters.0.value
+      retryStrategy:
+        steps: 3

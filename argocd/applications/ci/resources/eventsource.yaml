@@ -1,0 +1,21 @@
+---
+# GitHub push webhook receiver.
+# Register the webhook manually in GitHub:
+#   Payload URL: https://ci-webhook.st0rmingbr4in.com/push
+#   Content type: application/json
+#   Events: Just the push event
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+  namespace: argo
+spec:
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+  webhook:
+    push:
+      port: "12000"
+      endpoint: /push
+      method: POST

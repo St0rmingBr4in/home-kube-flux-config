@@ -1,0 +1,106 @@
+---
+# Docker image build and push using kaniko (no daemon required).
+#
+# Vault secret layout (kv-v2):
+#   secret/ci/docker → username, password (Docker Hub credentials)
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-docker-build
+  namespace: argo
+spec:
+  serviceAccountName: argo-ci
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: git-ref
+      - name: path-filter
+        value: "memory-webhook"
+      - name: image
+        value: "st0rmingbr4in/memory-webhook"
+      - name: context
+        value: "memory-webhook"
+      - name: dockerfile
+        value: "memory-webhook/Dockerfile"
+  volumeClaimTemplates:
+    - metadata:
+        name: workspace
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: secrets
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Mi
+  templates:
+    - name: main
+      steps:
+        - - name: clone
+            templateRef:
+              name: ci-common
+              template: git-clone
+          - name: vault-login
+            templateRef:
+              name: ci-common
+              template: vault-login
+        - - name: check-paths
+            templateRef:
+              name: ci-common
+              template: check-paths
+            arguments:
+              parameters:
+                - name: path-filter
+                  value: "{{workflow.parameters.path-filter}}"
+        - - name: setup-docker-creds
+            template: docker-creds
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
+        - - name: build-push
+            template: kaniko-build
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
+
+    - name: docker-creds
+      script:
+        image: hashicorp/vault:1.17
+        command: [sh]
+        env:
+          - name: VAULT_ADDR
+            value: "https://vault.prod-infra.svc.cluster.local:8200"
+          - name: VAULT_SKIP_VERIFY
+            value: "true"
+        source: |
+          export VAULT_TOKEN=$(cat /secrets/vault-token)
+
+          USERNAME=$(vault kv get -field=username secret/ci/docker)
+          PASSWORD=$(vault kv get -field=password secret/ci/docker)
+
+          mkdir -p /secrets/docker
+          printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
+            "$(printf '%s:%s' "$USERNAME" "$PASSWORD" | base64 -w0)" \
+            > /secrets/docker/config.json
+        volumeMounts:
+          - name: secrets
+            mountPath: /secrets
+
+    - name: kaniko-build
+      container:
+        image: gcr.io/kaniko-project/executor:latest
+        env:
+          - name: DOCKER_CONFIG
+            value: /secrets/docker
+        args:
+          - --context=/workspace/{{workflow.parameters.context}}
+          - --dockerfile=/workspace/{{workflow.parameters.dockerfile}}
+          - --destination={{workflow.parameters.image}}:latest
+          - --destination={{workflow.parameters.image}}:master
+          - --cache=true
+          - --cache-repo={{workflow.parameters.image}}-cache
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: secrets
+            mountPath: /secrets

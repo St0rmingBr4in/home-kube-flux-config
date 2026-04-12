@@ -1,0 +1,60 @@
+---
+# Reusable templates called by ci-terraform and ci-docker-build via templateRef.
+# Volumes named "workspace" and "secrets" must be declared in the calling WorkflowTemplate.
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-common
+  namespace: argo
+spec:
+  templates:
+    - name: git-clone
+      script:
+        image: alpine/git:latest
+        command: [sh]
+        source: |
+          git clone --depth=2 \
+            https://github.com/St0rmingBr4in/home-kube-flux-config \
+            /workspace
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+
+    - name: vault-login
+      script:
+        image: hashicorp/vault:1.17
+        command: [sh]
+        env:
+          - name: VAULT_ADDR
+            value: "https://vault.prod-infra.svc.cluster.local:8200"
+          - name: VAULT_SKIP_VERIFY
+            value: "true"
+        source: |
+          vault write -field=token auth/kubernetes/login \
+            role=argo-ci \
+            jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+            > /secrets/vault-token
+          echo "Vault login successful"
+        volumeMounts:
+          - name: secrets
+            mountPath: /secrets
+
+    - name: check-paths
+      inputs:
+        parameters:
+          - name: path-filter
+      script:
+        image: alpine/git:latest
+        command: [sh]
+        source: |
+          cd /workspace
+          CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
+            || git show --stat --format="" HEAD | awk '{print $1}')
+          if echo "$CHANGED" | grep -qE "{{inputs.parameters.path-filter}}"; then
+            echo "changed"
+          else
+            echo "unchanged"
+          fi
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace

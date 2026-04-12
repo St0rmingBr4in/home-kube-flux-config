@@ -22,3 +22,7 @@ resources:
 
   # Authentication
   - authentik/applicationset.yaml
+
+  # CI Platform
+  - argo-workflows/applicationset.yaml
+  - argo-events/applicationset.yaml

@@ -19,6 +19,7 @@ locals {
     homelab_datadog      = "homelab-datadog"
     homelab_digitalocean = "homelab-digitalocean"
     homelab_tailscale    = "homelab-tailscale"
+    homelab_vault        = "homelab-vault"
   }
 }
 

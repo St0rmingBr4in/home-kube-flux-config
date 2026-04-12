@@ -1,0 +1,18 @@
+---
+# Service name format: <eventsource-name>-eventsource-svc (created by Argo Events)
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ci-webhook
+  namespace: argo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`ci-webhook.st0rmingbr4in.com`)
+      services:
+        - name: github-eventsource-svc
+          port: 12000
+  tls:
+    secretName: st0rmingbr4in.com-cert

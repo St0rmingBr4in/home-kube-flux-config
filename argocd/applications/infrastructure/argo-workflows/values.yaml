@@ -1,0 +1,42 @@
+---
+workflow:
+  serviceAccount:
+    create: true
+    name: argo-workflow-default
+  rbac:
+    create: true
+
+controller:
+  serviceAccount:
+    create: true
+    name: argo-workflows-controller
+  workflowNamespaces:
+    - argo
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+server:
+  enabled: true
+  # No internal auth — protected by Authentik forward-auth via Traefik
+  authModes:
+    - server
+  ingress:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+executor:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      memory: 512Mi

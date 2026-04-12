@@ -1,0 +1,51 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: ci-terraform-digitalocean
+  namespace: argo
+spec:
+  template:
+    serviceAccountName: argo-ci
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/master"
+  triggers:
+    - template:
+        name: trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-terraform-digitalocean-
+                namespace: argo
+              spec:
+                workflowTemplateRef:
+                  name: ci-terraform
+                arguments:
+                  parameters:
+                    - name: git-ref
+                      value: "refs/heads/master"
+                    - name: module
+                      value: digitalocean
+                    - name: path-filter
+                      value: "terraform/digitalocean"
+                    - name: vault-secret-path
+                      value: "secret/ci/digitalocean"
+          parameters:
+            - src:
+                dependencyName: push
+                dataKey: body.ref
+              dest: spec.arguments.parameters.0.value
+      retryStrategy:
+        steps: 3
