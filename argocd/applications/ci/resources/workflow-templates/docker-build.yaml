@@ -31,23 +31,12 @@ spec:
         value: "docker.io/st0rmingbr4in/memory-webhook"
       - name: context
         value: "memory-webhook"
-  volumeClaimTemplates:
-    - metadata:
-        name: workspace
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: local-path
-        resources:
-          requests:
-            storage: 1Gi
-    - metadata:
-        name: secrets
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: local-path
-        resources:
-          requests:
-            storage: 1Mi
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: secrets
+      emptyDir:
+        medium: Memory
   templates:
     - name: main
       steps:

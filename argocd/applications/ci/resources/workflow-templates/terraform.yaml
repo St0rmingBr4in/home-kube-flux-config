@@ -30,23 +30,12 @@ spec:
       - name: module
       - name: path-filter
       - name: vault-secret-path
-  volumeClaimTemplates:
-    - metadata:
-        name: workspace
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: local-path
-        resources:
-          requests:
-            storage: 512Mi
-    - metadata:
-        name: secrets
-      spec:
-        accessModes: [ReadWriteOnce]
-        storageClassName: local-path
-        resources:
-          requests:
-            storage: 1Mi
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: secrets
+      emptyDir:
+        medium: Memory
   templates:
     - name: main
       steps:
