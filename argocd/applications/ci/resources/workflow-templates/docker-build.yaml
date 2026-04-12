@@ -16,6 +16,7 @@ spec:
   arguments:
     parameters:
       - name: git-ref
+      - name: git-sha
       - name: path-filter
         value: "memory-webhook"
       - name: image
@@ -95,7 +96,7 @@ spec:
           - --frontend=dockerfile.v0
           - --local=context=/workspace/{{workflow.parameters.context}}
           - --local=dockerfile=/workspace/{{workflow.parameters.context}}
-          - --output=type=image,name={{workflow.parameters.image}}:latest,push=true
+          - --output=type=image,"name={{workflow.parameters.image}}:latest,{{workflow.parameters.image}}:{{workflow.parameters.git-sha}}",push=true
         env:
           - name: BUILDKITD_FLAGS
             value: "--oci-worker-no-process-sandbox"

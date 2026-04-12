@@ -36,18 +36,22 @@ spec:
                   parameters:
                     - name: git-ref
                       value: "refs/heads/master"
+                    - name: git-sha
+                      value: ""
                     - name: path-filter
                       value: "memory-webhook"
                     - name: image
-                      value: "st0rmingbr4in/memory-webhook"
+                      value: "docker.io/st0rmingbr4in/memory-webhook"
                     - name: context
                       value: "memory-webhook"
-                    - name: dockerfile
-                      value: "memory-webhook/Dockerfile"
           parameters:
             - src:
                 dependencyName: push
                 dataKey: body.ref
               dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.1.value
       retryStrategy:
         steps: 3
