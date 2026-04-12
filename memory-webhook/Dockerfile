@@ -1,16 +1,19 @@
 # Build stage
-FROM golang:1.26-alpine@sha256:c2a1f7b2095d046ae14b286b18413a05bb82c9bca9b25fe7ff5efef0f0826166 AS builder
+# GO_VERSION is injected from go.mod at build time (see Makefile).
+# Do not edit this value here — update go.mod instead.
+ARG GO_VERSION
+FROM golang:${GO_VERSION}-alpine AS builder
 
 WORKDIR /app
 
-# Copy go.mod first for better Docker layer caching
-COPY go.mod ./
+# Copy go.mod + go.sum first for better Docker layer caching
+COPY go.mod go.sum ./
 
-# Copy source code
+# Download dependencies (avoids full graph resolution of go mod tidy)
+RUN go mod download
+
+# Copy source code and build
 COPY main.go ./
-
-# Download dependencies and build
-RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o webhook main.go
 
 # Runtime stage

@@ -1,0 +1,19 @@
+# Packages a pre-compiled linux/amd64 binary produced by the host Go toolchain.
+# Used by `make push` on Apple Silicon where Go under QEMU emulation is unstable.
+# CI uses the main Dockerfile which compiles natively on amd64 runners.
+FROM alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+
+RUN apk --no-cache add ca-certificates wget
+
+RUN adduser -D -s /bin/sh webhook
+
+WORKDIR /home/webhook
+
+COPY webhook-linux-amd64 ./webhook
+RUN chmod +x ./webhook && chown webhook:webhook ./webhook
+
+USER webhook
+
+EXPOSE 8443
+
+CMD ["./webhook"]
