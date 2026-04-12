@@ -258,6 +258,40 @@ func TestMutateContainerMemory_WithCPUOnly(t *testing.T) {
 	require.Equal(t, expectedPatches[1], patches[1], "Second patch should add memory request")
 }
 
+func TestMutateContainerMemory_CPURequestsOnlyNoLimits(t *testing.T) {
+	// Reproduces the Argo Events NATS eventbus pod: resources.requests.cpu is set
+	// but resources.limits is nil and neither side has memory. The webhook must not
+	// attempt to patch /limits/memory when the /limits parent does not yet exist.
+	container := corev1.Container{
+		Name:  "nats",
+		Image: "nats-streaming",
+		Resources: corev1.ResourceRequirements{
+			Limits: nil,
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU: resource.MustParse("0"),
+			},
+		},
+	}
+
+	patches := mutateContainerMemory(container, "/spec/containers/0/resources")
+
+	require.Len(t, patches, 2, "Expected 2 patches: add /limits and add /requests/memory")
+
+	require.Equal(t, patchOperation{
+		Op:   "add",
+		Path: "/spec/containers/0/resources/limits",
+		Value: map[string]interface{}{
+			"memory": "512Mi",
+		},
+	}, patches[0], "Should add entire limits block (not /limits/memory) since limits is nil")
+
+	require.Equal(t, patchOperation{
+		Op:    "add",
+		Path:  "/spec/containers/0/resources/requests/memory",
+		Value: "512Mi",
+	}, patches[1], "Should add memory to existing requests map")
+}
+
 func TestMutateContainerMemory_NilResourceObjects(t *testing.T) {
 	container := corev1.Container{
 		Name:  "test",

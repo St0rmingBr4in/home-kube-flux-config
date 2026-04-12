@@ -191,21 +191,37 @@ func mutateContainerMemory(container corev1.Container, basePath string) []patchO
 				zap.String("action", "add_memory_limit"))
 		}
 	} else {
+		// Either limits or requests exists (with CPU only) but neither has memory.
 		if container.Resources.Limits == nil {
-			logger.Warn("Resources block exists but both limits and requests are nil",
-				zap.String("container", container.Name))
+			patches = append(patches, patchOperation{
+				Op:   "add",
+				Path: basePath + "/limits",
+				Value: map[string]interface{}{
+					"memory": defaultMemory,
+				},
+			})
+		} else {
+			patches = append(patches, patchOperation{
+				Op:    "add",
+				Path:  basePath + "/limits/memory",
+				Value: defaultMemory,
+			})
 		}
-
-		patches = append(patches, patchOperation{
-			Op:    "add",
-			Path:  basePath + "/limits/memory",
-			Value: defaultMemory,
-		})
-		patches = append(patches, patchOperation{
-			Op:    "add",
-			Path:  basePath + "/requests/memory",
-			Value: defaultMemory,
-		})
+		if container.Resources.Requests == nil {
+			patches = append(patches, patchOperation{
+				Op:   "add",
+				Path: basePath + "/requests",
+				Value: map[string]interface{}{
+					"memory": defaultMemory,
+				},
+			})
+		} else {
+			patches = append(patches, patchOperation{
+				Op:    "add",
+				Path:  basePath + "/requests/memory",
+				Value: defaultMemory,
+			})
+		}
 		logger.Info("Added default memory resources",
 			zap.String("container", container.Name),
 			zap.String("defaultMemory", defaultMemory),
