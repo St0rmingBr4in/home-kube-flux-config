@@ -2,14 +2,14 @@
 # URL: https://argocd.st0rmingbr4in.com
 # CLI: argocd login argocd.st0rmingbr4in.com --username admin --grpc-web
 
-# Application Controller (main workload) - actual usage: 307m CPU, 294Mi memory
+# Application Controller (main workload) - actual usage: 307m CPU, 670Mi memory
 controller:
   resources:
     limits:
       memory: 1Gi # Increased from 512Mi after OOMKills
     requests:
       cpu: 300m # Based on actual usage
-      memory: 1Gi # Same as limit for guaranteed QoS
+      memory: 700Mi # Based on observed usage (~670Mi)
 
 # Repository Server - processes Helm charts and Git repos (was getting OOMKilled at 256Mi)
 repoServer:
@@ -18,7 +18,7 @@ repoServer:
       memory: 2Gi # Increased significantly for complex Helm chart processing (VSO, etc.)
     requests:
       cpu: 50m # Slightly increased for better performance
-      memory: 2Gi # Same as limit for guaranteed QoS
+      memory: 256Mi # Typical usage ~99Mi; 2Gi limit kept for chart processing spikes
 
 # ArgoCD Server - actual usage: 3m CPU, 25Mi memory
 server:
