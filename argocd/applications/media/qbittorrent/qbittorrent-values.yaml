@@ -126,7 +126,7 @@ addons:
             name: tailscale-authkey
             key: TS_AUTHKEY
         TS_HOSTNAME: qbittorrent
-        TS_EXTRA_ARGS: "--exit-node=inlet-1 --exit-node-allow-lan-access"
+        TS_EXTRA_ARGS: "--exit-node=100.90.236.95 --exit-node-allow-lan-access"
         TS_ACCEPT_DNS: "false"
         TS_KUBE_SECRET: ""
       resources:
