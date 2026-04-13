@@ -1,0 +1,49 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: ci-ansible-k3s
+  namespace: argo
+spec:
+  template:
+    serviceAccountName: argo-ci
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/master"
+  triggers:
+    - template:
+        name: trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-ansible-k3s-
+                namespace: argo
+              spec:
+                workflowTemplateRef:
+                  name: ci-ansible
+                arguments:
+                  parameters:
+                    - name: git-ref
+                      value: "refs/heads/master"
+                    - name: playbook
+                      value: k3s
+                    - name: path-filter
+                      value: "ansible/(ansible\\.cfg|scripts|requirements\\.yml|inventory/hosts\\.yaml|inventory/group_vars/k3s_cluster|playbooks/k3s\\.yaml)"
+          parameters:
+            - src:
+                dependencyName: push
+                dataKey: body.ref
+              dest: spec.arguments.parameters.0.value
+      retryStrategy:
+        steps: 3

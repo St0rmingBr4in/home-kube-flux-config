@@ -89,7 +89,8 @@ resource "datadog_synthetics_test" "apps" {
   }
 
   options_list {
-    tick_every = 300 # 5 minutes
+    tick_every       = 300 # 5 minutes
+    follow_redirects = true
   }
 
   locations = ["aws:eu-west-1"]

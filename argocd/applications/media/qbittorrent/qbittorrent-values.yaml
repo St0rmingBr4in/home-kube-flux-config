@@ -74,6 +74,7 @@ workload:
       initContainers:
         vpn-kill-switch:
           enabled: true
+          type: init
           imageSelector: tailscaleImage
           securityContext:
             capabilities:
@@ -83,12 +84,24 @@ workload:
             - sh
             - -c
             - |
-              # Allow loopback and Tailscale traffic, then drop everything else.
-              # This ensures qbittorrent cannot route traffic outside of inlet
-              # if the Tailscale exit node is unavailable.
+              # Kill switch: block all direct internet traffic; only allow:
+              #  - loopback
+              #  - traffic routed through tailscale0 (the exit-node tunnel)
+              #  - Tailscale CGNAT IPs (100.64.0.0/10) for control-plane packets
+              #  - WireGuard direct (UDP 41641)
+              #  - Tailscale coordination + DERP relays (TCP/UDP 443, UDP 3478)
+              #  - DNS
+              #  - ESTABLISHED/RELATED (replies to allowed connections)
+              #
+              # The "-o tailscale0" rule matches once Tailscale creates the
+              # interface, so there is no direct-routing window after startup.
               iptables -A OUTPUT -o lo -j ACCEPT
+              iptables -A OUTPUT -o tailscale0 -j ACCEPT
               iptables -A OUTPUT -d 100.64.0.0/10 -j ACCEPT
               iptables -A OUTPUT -p udp --dport 41641 -j ACCEPT
+              iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 443 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 3478 -j ACCEPT
               iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
               iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
               iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT

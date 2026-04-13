@@ -4,6 +4,12 @@ resource "tailscale_acl" "acl" {
       "tag:servers" = ["autogroup:admin"]
     }
 
+    # Auto-approve exit node advertisements from tagged servers so that
+    # re-provisioning inlet does not require manual admin-console approval.
+    autoApprovers = {
+      exitNode = ["tag:servers"]
+    }
+
     acls = [
       # Allow all traffic between all nodes (default permissive policy)
       {

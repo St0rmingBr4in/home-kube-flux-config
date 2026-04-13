@@ -60,12 +60,15 @@ spec:
         command: [sh]
         resources:
           requests:
-            memory: 32Mi
+            memory: 64Mi
             cpu: 50m
           limits:
-            memory: 128Mi
+            memory: 256Mi
         source: |
-          cd /workspace
+          git clone --depth=2 \
+            https://github.com/St0rmingBr4in/home-kube-flux-config \
+            /tmp/workspace
+          cd /tmp/workspace
           CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
             || git show --stat --format="" HEAD | awk '{print $1}')
           if echo "$CHANGED" | grep -qE "{{inputs.parameters.path-filter}}"; then
@@ -73,6 +76,3 @@ spec:
           else
             echo "unchanged"
           fi
-        volumeMounts:
-          - name: workspace
-            mountPath: /workspace

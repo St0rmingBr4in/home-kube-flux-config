@@ -60,6 +60,16 @@ postgresql:
     persistence:
       enabled: true
       existingClaim: "authentik-postgres"
+    customLivenessProbe:
+      exec:
+        command:
+          - sh
+          - -c
+          - touch /bitnami/postgresql/.liveness
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      failureThreshold: 5
+      timeoutSeconds: 5
     resources:
       requests:
         cpu: 100m

@@ -1,0 +1,119 @@
+---
+# Ansible CI workflow. Triggered by sensors for inlet and k3s playbooks.
+#
+# Vault secret layout (kv-v2):
+#   secret/ci/ansible   → vault_password, inlet_ssh_private_key, k3s_ssh_private_key
+#   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only, exported as TAILSCALE_AUTHKEY)
+#   secret/ci/datadog   → TF_VAR_datadog_api_key (inlet only, exported as DATADOG_API_KEY)
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-ansible
+  namespace: argo
+spec:
+  serviceAccountName: argo-ci
+  entrypoint: main
+  synchronization:
+    semaphore:
+      configMapKeyRef:
+        name: ci-semaphore
+        key: ci
+  arguments:
+    parameters:
+      - name: git-ref
+      - name: playbook      # inlet | k3s
+      - name: path-filter
+  templates:
+    - name: main
+      steps:
+        - - name: ansible-run
+            template: ansible-run
+
+    - name: ansible-run
+      script:
+        image: python:3.12-slim
+        command: [bash]
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 200m
+          limits:
+            memory: 1Gi
+        env:
+          - name: HOME
+            value: /root
+          - name: VAULT_ADDR
+            value: "https://vault.prod-infra.svc.cluster.local:8200"
+          - name: PLAYBOOK
+            value: "{{workflow.parameters.playbook}}"
+        source: |
+          set -e
+          apt-get update -qq && apt-get install -y -q git openssh-client curl jq
+
+          # Clone repo
+          git clone --depth=2 \
+            https://github.com/St0rmingBr4in/home-kube-flux-config \
+            /tmp/workspace
+
+          # Check if relevant paths changed
+          cd /tmp/workspace
+          CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
+            || git show --stat --format="" HEAD | awk '{print $1}')
+          if ! echo "$CHANGED" | grep -qE "{{workflow.parameters.path-filter}}"; then
+            echo "No relevant changes detected, skipping ansible-${PLAYBOOK}"
+            exit 0
+          fi
+          echo "Relevant changes detected, running ansible-${PLAYBOOK}"
+
+          # Vault login via Kubernetes service account JWT
+          VAULT_TOKEN=$(curl -sk \
+            --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
+            "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+            | jq -r '.auth.client_token')
+          [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+
+          # Ansible vault password (used by ansible.cfg → scripts/vault-password.sh)
+          export ANSIBLE_VAULT_PASSWORD=$(curl -sk \
+            -H "X-Vault-Token: $VAULT_TOKEN" \
+            "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+            | jq -r '.data.data.vault_password')
+
+          # SSH setup
+          mkdir -p /root/.ssh && chmod 700 /root/.ssh
+          if [ "$PLAYBOOK" = "inlet" ]; then
+            curl -sk \
+              -H "X-Vault-Token: $VAULT_TOKEN" \
+              "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+              | jq -r '.data.data.inlet_ssh_private_key' > /root/.ssh/inlet_id_ed25519
+            chmod 600 /root/.ssh/inlet_id_ed25519
+            export TAILSCALE_AUTHKEY=$(curl -sk \
+              -H "X-Vault-Token: $VAULT_TOKEN" \
+              "${VAULT_ADDR}/v1/secret/data/ci/tailscale" \
+              | jq -r '.data.data.TF_VAR_tailscale_oauth_client_secret')
+            export DATADOG_API_KEY=$(curl -sk \
+              -H "X-Vault-Token: $VAULT_TOKEN" \
+              "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
+              | jq -r '.data.data.TF_VAR_datadog_api_key')
+          else
+            curl -sk \
+              -H "X-Vault-Token: $VAULT_TOKEN" \
+              "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+              | jq -r '.data.data.k3s_ssh_private_key' > /root/.ssh/k3s_id_ed25519
+            chmod 600 /root/.ssh/k3s_id_ed25519
+          fi
+
+          pip install ansible ansible-lint --quiet
+
+          if [ "$PLAYBOOK" = "inlet" ]; then
+            ansible-galaxy collection install ansible.posix
+            EXTRA_VARS=""
+            [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
+            cd /tmp/workspace/ansible && ansible-lint
+            ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
+          else
+            ansible-galaxy role install -r /tmp/workspace/ansible/requirements.yml \
+              --roles-path /tmp/workspace/ansible/roles
+            ansible-galaxy collection install -r /tmp/workspace/ansible/requirements.yml
+            cd /tmp/workspace/ansible && ansible-lint
+            ansible-playbook playbooks/k3s.yaml
+          fi

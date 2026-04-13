@@ -49,12 +49,15 @@ spec:
               cpu: 200m
               memory: 256Mi
           livenessProbe:
-            httpGet:
-              path: /
-              port: http
+            exec:
+              command:
+                - sh
+                - -c
+                - touch /config/.liveness
             initialDelaySeconds: 30
-            periodSeconds: 30
+            periodSeconds: 15
             failureThreshold: 5
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /

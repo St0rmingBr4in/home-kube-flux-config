@@ -20,6 +20,25 @@ resources:
     cpu: 1000m
     memory: 512Mi
 
+workload:
+  main:
+    podSpec:
+      containers:
+        main:
+          probes:
+            liveness:
+              enabled: true
+              type: exec
+              command:
+                - sh
+                - -c
+                - touch /config/.liveness
+              spec:
+                initialDelaySeconds: 12
+                periodSeconds: 15
+                failureThreshold: 5
+                timeoutSeconds: 5
+
 persistence:
   config:
     enabled: true

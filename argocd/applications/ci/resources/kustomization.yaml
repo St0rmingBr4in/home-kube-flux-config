@@ -10,9 +10,13 @@ resources:
   - workflow-templates/common.yaml
   - workflow-templates/terraform.yaml
   - workflow-templates/docker-build.yaml
+  - workflow-templates/ansible.yaml
   - sensors/terraform-authentik.yaml
   - sensors/terraform-datadog.yaml
   - sensors/terraform-digitalocean.yaml
   - sensors/terraform-tailscale.yaml
   - sensors/terraform-tfe.yaml
   - sensors/build-memory-webhook.yaml
+  - sensors/terraform-vault.yaml
+  - sensors/ansible-inlet.yaml
+  - sensors/ansible-k3s.yaml

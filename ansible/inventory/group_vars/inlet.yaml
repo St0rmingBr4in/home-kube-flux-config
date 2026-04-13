@@ -1,5 +1,5 @@
 ---
-tailscale_extra_args: "--advertise-exit-node --accept-routes --advertise-tags=tag:servers"
+tailscale_extra_args: "--hostname=inlet --advertise-exit-node --accept-routes --advertise-tags=tag:servers"
 # tailscale_authkey: never stored here — pass via -e at runtime (only for re-registration)
 
 traefik_tailscale_ip: "100.92.78.42"

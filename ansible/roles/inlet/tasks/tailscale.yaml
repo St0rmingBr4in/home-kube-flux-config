@@ -37,7 +37,6 @@
   ansible.builtin.command:
     cmd: "tailscale up {{ tailscale_extra_args }}"
   when:
-    - tailscale_authkey is not defined
     - tailscale_status.BackendState == "Running"
   changed_when: true
 

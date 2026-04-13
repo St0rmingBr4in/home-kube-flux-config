@@ -1,0 +1,49 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: ci-ansible-inlet
+  namespace: argo
+spec:
+  template:
+    serviceAccountName: argo-ci
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/master"
+  triggers:
+    - template:
+        name: trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-ansible-inlet-
+                namespace: argo
+              spec:
+                workflowTemplateRef:
+                  name: ci-ansible
+                arguments:
+                  parameters:
+                    - name: git-ref
+                      value: "refs/heads/master"
+                    - name: playbook
+                      value: inlet
+                    - name: path-filter
+                      value: "ansible/"
+          parameters:
+            - src:
+                dependencyName: push
+                dataKey: body.ref
+              dest: spec.arguments.parameters.0.value
+      retryStrategy:
+        steps: 3
