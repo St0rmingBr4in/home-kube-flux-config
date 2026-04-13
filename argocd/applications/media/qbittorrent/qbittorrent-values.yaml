@@ -90,7 +90,12 @@ workload:
             - sh
             - -c
             - |
-              apk add --no-cache iptables
+              echo "PATH=$PATH"
+              ls /sbin/iptables /usr/sbin/iptables 2>&1 || true
+              apk add --no-cache iptables 2>&1
+              echo "apk exit: $?"
+              which iptables 2>&1 || true
+              ls /sbin/iptables /usr/sbin/iptables 2>&1 || true
               # Kill switch: block all direct internet traffic; only allow:
               #  - loopback
               #  - traffic routed through tailscale0 (the exit-node tunnel)
