@@ -65,6 +65,12 @@ tailscaleImage:
   tag: latest
   pullPolicy: Always
 
+# Alpine image for the kill-switch init container (Tailscale image is distroless, no shell/iptables)
+killSwitchImage:
+  repository: alpine
+  tag: "3.21"
+  pullPolicy: IfNotPresent
+
 podOptions:
   automountServiceAccountToken: true
 
@@ -75,7 +81,7 @@ workload:
         vpn-kill-switch:
           enabled: true
           type: init
-          imageSelector: tailscaleImage
+          imageSelector: killSwitchImage
           securityContext:
             capabilities:
               add:
@@ -84,6 +90,7 @@ workload:
             - sh
             - -c
             - |
+              apk add --no-cache iptables ip6tables 2>/dev/null
               # Kill switch: block all direct internet traffic; only allow:
               #  - loopback
               #  - traffic routed through tailscale0 (the exit-node tunnel)
