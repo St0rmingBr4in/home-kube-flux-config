@@ -83,6 +83,8 @@ workload:
           type: init
           imageSelector: killSwitchImage
           securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
             capabilities:
               add:
                 - NET_ADMIN
@@ -90,12 +92,7 @@ workload:
             - sh
             - -c
             - |
-              echo "PATH=$PATH"
-              ls /sbin/iptables /usr/sbin/iptables 2>&1 || true
-              apk add --no-cache iptables 2>&1
-              echo "apk exit: $?"
-              which iptables 2>&1 || true
-              ls /sbin/iptables /usr/sbin/iptables 2>&1 || true
+              apk add --no-cache iptables
               # Kill switch: block all direct internet traffic; only allow:
               #  - loopback
               #  - traffic routed through tailscale0 (the exit-node tunnel)
