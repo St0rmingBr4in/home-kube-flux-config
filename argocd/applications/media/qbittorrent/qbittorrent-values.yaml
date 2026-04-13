@@ -90,7 +90,7 @@ workload:
             - sh
             - -c
             - |
-              apk add --no-cache iptables ip6tables 2>/dev/null
+              apk add --no-cache iptables
               # Kill switch: block all direct internet traffic; only allow:
               #  - loopback
               #  - traffic routed through tailscale0 (the exit-node tunnel)
