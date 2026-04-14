@@ -79,6 +79,8 @@ spec:
             -H "X-Vault-Token: $VAULT_TOKEN" \
             "${VAULT_ADDR}/v1/secret/data/ci/terraform-cloud" \
             | jq -r '.data.data.token')
+          # TFE provider also needs TFE_TOKEN (same token, different env var)
+          export TFE_TOKEN="$TF_TOKEN_APP_TERRAFORM_IO"
 
           # Module-specific secrets: secret/ci/<module> → /v1/secret/data/ci/<module>
           SECRETS_API_PATH=$(echo "{{workflow.parameters.vault-secret-path}}" | sed 's|^secret/|secret/data/|')
