@@ -104,16 +104,16 @@ spec:
 
           pip install ansible ansible-lint --quiet
 
+          cd /tmp/workspace/ansible
+          ansible-galaxy role install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml
+
           if [ "$PLAYBOOK" = "inlet" ]; then
-            ansible-galaxy collection install ansible.posix
             EXTRA_VARS=""
             [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
-            cd /tmp/workspace/ansible && ansible-lint
+            ansible-lint
             ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
           else
-            ansible-galaxy role install -r /tmp/workspace/ansible/requirements.yml \
-              --roles-path /tmp/workspace/ansible/roles
-            ansible-galaxy collection install -r /tmp/workspace/ansible/requirements.yml
-            cd /tmp/workspace/ansible && ansible-lint
+            ansible-lint
             ansible-playbook playbooks/k3s.yaml
           fi
