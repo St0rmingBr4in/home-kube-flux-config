@@ -10,7 +10,7 @@ spec:
         elements:
           - name: argo-workflows
             chart: argo-workflows
-            chartVersion: 0.45.7
+            chartVersion: 0.47.5
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/infrastructure/argo-workflows/values.yaml
