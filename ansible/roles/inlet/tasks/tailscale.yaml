@@ -40,7 +40,27 @@
     - tailscale_status.BackendState == "Running"
   changed_when: true
 
-- name: Verify Tailscale exit node is active
+- name: Get Tailscale status after bring-up
+  ansible.builtin.command:
+    cmd: tailscale status --json
+  register: tailscale_status_after_raw
+  changed_when: false
+
+- name: Parse Tailscale status after bring-up
+  ansible.builtin.set_fact:
+    tailscale_status_after: "{{ tailscale_status_after_raw.stdout | from_json }}"
+
+- name: Assert hostname is exactly 'inlet' (not 'inlet-1', 'inlet-2', etc.)
+  ansible.builtin.assert:
+    that:
+      - tailscale_status_after.Self.HostName == "inlet"
+    fail_msg: >
+      Tailscale registered as '{{ tailscale_status_after.Self.HostName }}' instead of 'inlet'.
+      A stale device named 'inlet' already exists in the tailnet.
+      Delete it at https://login.tailscale.com/admin/machines then re-run this playbook.
+    success_msg: "Tailscale hostname is 'inlet'."
+
+- name: Get Tailscale status text
   ansible.builtin.command:
     cmd: tailscale status
   register: tailscale_status_text
