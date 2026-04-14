@@ -38,7 +38,7 @@ spec:
 
     - name: terraform-run
       script:
-        image: hashicorp/terraform:1.9
+        image: docker.io/st0rmingbr4in/ci-terraform:latest
         command: [sh]
         resources:
           requests:
@@ -51,7 +51,6 @@ spec:
             value: "https://vault.prod-infra.svc.cluster.local:8200"
         source: |
           set -e
-          apk add --no-cache git curl make jq 2>/dev/null
 
           # Clone repo
           git clone --depth=2 \

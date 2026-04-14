@@ -1,0 +1,57 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: ci-build-ci-ansible
+  namespace: argo
+spec:
+  template:
+    serviceAccountName: argo-ci
+  dependencies:
+    - name: push
+      eventSourceName: github
+      eventName: push
+      filters:
+        data:
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/master"
+  triggers:
+    - template:
+        name: trigger
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-build-ci-ansible-
+                namespace: argo
+              spec:
+                workflowTemplateRef:
+                  name: ci-image-build
+                arguments:
+                  parameters:
+                    - name: git-ref
+                      value: "refs/heads/master"
+                    - name: git-sha
+                      value: ""
+                    - name: path-filter
+                      value: "ci/images/ci-ansible|ansible/requirements\\.yml"
+                    - name: image
+                      value: "docker.io/st0rmingbr4in/ci-ansible"
+                    - name: context
+                      value: "ci/images/ci-ansible"
+          parameters:
+            - src:
+                dependencyName: push
+                dataKey: body.ref
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.1.value
+      retryStrategy:
+        steps: 3

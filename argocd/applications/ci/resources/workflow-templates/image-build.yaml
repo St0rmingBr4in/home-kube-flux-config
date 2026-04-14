@@ -1,0 +1,127 @@
+---
+# Generic Dockerfile image build and push using rootless BuildKit.
+# No shared emptyDir volumes across pods — uses Kubernetes initContainers
+# within a single pod to share /workspace (cloned repo) and /docker-config
+# (Docker Hub credentials fetched from Vault at runtime).
+#
+# Vault secret layout (kv-v2):
+#   secret/ci/docker → username, password (Docker Hub credentials)
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ci-image-build
+  namespace: argo
+spec:
+  serviceAccountName: argo-ci
+  entrypoint: main
+  synchronization:
+    semaphore:
+      configMapKeyRef:
+        name: ci-semaphore
+        key: ci
+  arguments:
+    parameters:
+      - name: git-ref
+      - name: git-sha
+      - name: path-filter
+      - name: image          # e.g. docker.io/st0rmingbr4in/ci-ansible
+      - name: context        # repo-relative path containing Dockerfile, e.g. ci/images/ci-ansible
+  templates:
+    - name: main
+      steps:
+        - - name: check-paths
+            templateRef:
+              name: ci-common
+              template: check-paths
+            arguments:
+              parameters:
+                - name: path-filter
+                  value: "{{workflow.parameters.path-filter}}"
+        - - name: build-push
+            template: build-push
+            when: "'{{steps.check-paths.outputs.result}}' == 'changed' && '{{workflow.parameters.git-ref}}' == 'refs/heads/master'"
+
+    - name: build-push
+      # initContainers run sequentially before the main container in the same pod,
+      # sharing the emptyDir volumes defined here.
+      volumes:
+        - name: workspace
+          emptyDir: {}
+        - name: docker-config
+          emptyDir:
+            medium: Memory
+      initContainers:
+        - name: clone
+          image: alpine/git@sha256:d453f54c83320412aa89c391b076930bd8569bc1012285e8c68ce2d4435826a3
+          command: [sh, -c]
+          args:
+            - git clone https://github.com/St0rmingBr4in/home-kube-flux-config /workspace
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+        - name: fetch-docker-creds
+          image: alpine:3.21
+          command: [sh, -c]
+          args:
+            - |
+              apk add --no-cache curl jq -q 2>/dev/null
+              VAULT_TOKEN=$(curl -sk \
+                --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
+                https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+                | jq -r '.auth.client_token')
+              [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] \
+                || { echo "Vault login failed"; exit 1; }
+              USERNAME=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+                https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/docker \
+                | jq -r '.data.data.username')
+              PASSWORD=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+                https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/docker \
+                | jq -r '.data.data.password')
+              printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
+                "$(printf '%s:%s' "$USERNAME" "$PASSWORD" | base64 | tr -d '\n')" \
+                > /docker-config/config.json
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: docker-config
+              mountPath: /docker-config
+      container:
+        image: moby/buildkit@sha256:93efd7f1c17f16cea080c34f68e19863b9fe541db550bf607221ce425c0ab9ef
+        command: [buildctl-daemonless.sh]
+        args:
+          - build
+          - --frontend=dockerfile.v0
+          - --local=context=/workspace
+          - --local=dockerfile=/workspace/{{workflow.parameters.context}}
+          - --output=type=image,"name={{workflow.parameters.image}}:latest,{{workflow.parameters.image}}:{{workflow.parameters.git-sha}}",push=true
+        env:
+          - name: BUILDKITD_FLAGS
+            value: "--oci-worker-no-process-sandbox"
+          - name: DOCKER_CONFIG
+            value: /docker-config
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          seccompProfile:
+            type: Unconfined
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 500m
+          limits:
+            memory: 2Gi
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: docker-config
+            mountPath: /docker-config

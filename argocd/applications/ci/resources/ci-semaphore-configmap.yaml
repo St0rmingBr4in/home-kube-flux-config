@@ -1,11 +1,11 @@
 ---
-# Argo Workflows semaphore: limits concurrent CI runs to 1.
+# Argo Workflows semaphore: limits concurrent CI runs to 3.
 # All workflow templates reference this configmap via synchronization.semaphore.
-# To allow more concurrent runs, increase the value.
+# To allow more/fewer concurrent runs, increase/decrease the value.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ci-semaphore
   namespace: argo
 data:
-  ci: "1"
+  ci: "3"
