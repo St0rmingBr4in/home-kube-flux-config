@@ -3,6 +3,17 @@
   hosts: k3s_cluster
   gather_facts: true
   become: true
+  pre_tasks:
+    - name: Raise inotify limits for Kubernetes workloads
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        sysctl_file: /etc/sysctl.d/99-k8s-inotify.conf
+        reload: true
+      loop:
+        - { name: fs.inotify.max_user_instances, value: "512" }
+        - { name: fs.inotify.max_user_watches, value: "524288" }
   roles:
     - role: xanmanning.k3s
     - role: iscsi
