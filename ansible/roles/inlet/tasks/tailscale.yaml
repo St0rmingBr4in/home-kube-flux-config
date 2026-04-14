@@ -50,15 +50,16 @@
   ansible.builtin.set_fact:
     tailscale_status_after: "{{ tailscale_status_after_raw.stdout | from_json }}"
 
-- name: Assert hostname is exactly 'inlet' (not 'inlet-1', 'inlet-2', etc.)
+- name: Assert tailnet DNS name starts with 'inlet.' (not 'inlet-1.', 'inlet-2.', etc.)
   ansible.builtin.assert:
     that:
-      - tailscale_status_after.Self.HostName == "inlet"
+      - tailscale_status_after.Self.DNSName is defined
+      - tailscale_status_after.Self.DNSName | regex_search('^inlet\\.') is not none
     fail_msg: >
-      Tailscale registered as '{{ tailscale_status_after.Self.HostName }}' instead of 'inlet'.
-      A stale device named 'inlet' already exists in the tailnet.
+      Tailscale assigned DNS name '{{ tailscale_status_after.Self.DNSName }}' instead of 'inlet.*'.
+      A stale device named 'inlet' already exists in the tailnet and claimed the name first.
       Delete it at https://login.tailscale.com/admin/machines then re-run this playbook.
-    success_msg: "Tailscale hostname is 'inlet'."
+    success_msg: "Tailscale DNS name is '{{ tailscale_status_after.Self.DNSName }}' — hostname is 'inlet'."
 
 - name: Get Tailscale status text
   ansible.builtin.command:
