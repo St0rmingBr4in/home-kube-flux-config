@@ -50,13 +50,14 @@ spec:
           set -e
           apt-get update -qq && apt-get install -y -q git openssh-client curl jq
 
-          # Clone repo
+          # Clone repo to /root/workspace (not /tmp) so ansible.cfg is not ignored
+          # Ansible silently ignores ansible.cfg in world-writable directories (/tmp is 1777)
           git clone --depth=2 \
             https://github.com/St0rmingBr4in/home-kube-flux-config \
-            /tmp/workspace
+            /root/workspace
 
           # Check if relevant paths changed
-          cd /tmp/workspace
+          cd /root/workspace
           CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
             || git show --stat --format="" HEAD | awk '{print $1}')
           if ! echo "$CHANGED" | grep -qE "{{workflow.parameters.path-filter}}"; then
@@ -104,12 +105,9 @@ spec:
 
           pip install ansible ansible-lint --quiet
 
-          cd /tmp/workspace/ansible
-          # Install roles/collections from requirements.yml to default location
+          cd /root/workspace/ansible
           ansible-galaxy role install -r requirements.yml
           ansible-galaxy collection install -r requirements.yml
-          # Include local roles (e.g. iscsi) from the repo alongside installed ones
-          export ANSIBLE_ROLES_PATH=/tmp/workspace/ansible/roles:/root/.ansible/roles
 
           if [ "$PLAYBOOK" = "inlet" ]; then
             EXTRA_VARS=""
