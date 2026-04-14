@@ -70,7 +70,8 @@ spec:
           command: [sh, -c]
           args:
             - |
-              apk add --no-cache curl jq -q 2>/dev/null
+              set -e
+              apk add --no-cache curl jq -q
               VAULT_TOKEN=$(curl -sk \
                 --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
                 https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
