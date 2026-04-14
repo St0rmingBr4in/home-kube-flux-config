@@ -106,15 +106,10 @@ spec:
           - --local=dockerfile=/workspace/{{workflow.parameters.context}}
           - --output=type=image,"name={{workflow.parameters.image}}:latest,{{workflow.parameters.image}}:{{workflow.parameters.git-sha}}",push=true
         env:
-          - name: BUILDKITD_FLAGS
-            value: "--oci-worker-no-process-sandbox"
           - name: DOCKER_CONFIG
             value: /docker-config
         securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          seccompProfile:
-            type: Unconfined
+          privileged: true
         resources:
           requests:
             memory: 512Mi
