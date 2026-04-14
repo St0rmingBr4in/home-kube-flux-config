@@ -87,3 +87,50 @@ Copy `.github/workflows/terraform-datadog.yml` as a template. Key points:
 Any `sensitive` variables need a matching GitHub Actions secret
 (`TF_VAR_my_secret` → secret name `MY_SECRET`, referenced as
 `${{ secrets.MY_SECRET }}`).
+
+---
+
+## Re-provisioning the inlet VPS
+
+inlet's Tailscale hostname is pinned to `inlet` via `--hostname=inlet` in
+`ansible/inventory/group_vars/inlet.yaml`. Tailscale appends a `-N` suffix
+(`inlet-1`, `inlet-2`) when a device with the same name already exists in the
+tailnet. **Always follow this order to keep the name stable:**
+
+### 1. Delete the old device from the Tailscale admin console
+
+Before provisioning a new inlet droplet (or re-running `tailscale up` with a
+new OAuth key):
+
+1. Go to <https://login.tailscale.com/admin/machines>
+2. Find the old `inlet` device (it will be offline)
+3. Click `…` → **Delete**
+
+Skipping this step causes the new device to register as `inlet-1`, which
+breaks the `--exit-node=inlet` reference in qbittorrent's Tailscale addon.
+
+### 2. Run Ansible
+
+```bash
+make ansible-inlet
+```
+
+The `tailscale up --hostname=inlet ...` task will now claim the `inlet` name
+cleanly. No authkey is needed if the node is already running (re-auth case:
+pass `-e tailscale_authkey=<oauth-secret>`).
+
+### 3. Update qbittorrent exit node reference (if needed)
+
+If the qbittorrent values still reference an IP address (`--exit-node=100.x.x.x`)
+from a previous workaround, update it back to `--exit-node=inlet`:
+
+```yaml
+TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-access"
+```
+
+### Why `-N` suffixes happen on other nodes (traefik-2, pihole-1, etc.)
+
+The Tailscale Kubernetes operator assigns hostnames via the
+`tailscale.com/hostname` annotation. Old StatefulSet pods leave stale Tailscale
+devices behind when they are deleted. Remove stale devices from the admin
+console whenever you see unexpected `-N` suffixes.
