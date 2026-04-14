@@ -10,7 +10,7 @@ spec:
         elements:
           - name: argo-events
             chart: argo-events
-            chartVersion: 2.4.9
+            chartVersion: 2.4.20
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/infrastructure/argo-events/values.yaml
