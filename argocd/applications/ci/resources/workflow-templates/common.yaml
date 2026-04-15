@@ -111,3 +111,157 @@ spec:
           HTTP_CODE=$(echo "$RESP" | tail -1)
           echo "GitHub status API: $HTTP_CODE"
           [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
+
+    - name: datadog-notify
+      inputs:
+        parameters:
+          - name: name      # pipeline name e.g. "ci/terraform-datadog"
+          - name: status    # running | success | failure (failure mapped to error)
+          - name: sha       # git commit SHA
+          - name: branch    # git ref e.g. "refs/heads/master"
+          - name: start     # RFC3339 workflow start time
+          - name: final     # "true" to include end timestamp
+      script:
+        image: alpine:3.21
+        command: [sh]
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
+        source: |
+          set -e
+          apk add --no-cache curl jq -q
+          VAULT_TOKEN=$(curl -sk \
+            --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
+            https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+            | jq -r '.auth.client_token')
+          [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+          DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+            https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/datadog \
+            | jq -r '.data.data.TF_VAR_datadog_api_key')
+          STATUS="{{inputs.parameters.status}}"
+          [ "$STATUS" = "failure" ] && STATUS="error"
+          BRANCH=$(echo "{{inputs.parameters.branch}}" | sed 's|refs/heads/||')
+          PAYLOAD=$(jq -n \
+            --arg name "{{inputs.parameters.name}}" \
+            --arg uid "{{workflow.uid}}" \
+            --arg url "https://argo.st0rmingbr4in.com/workflows/argo/{{workflow.name}}" \
+            --arg start "{{inputs.parameters.start}}" \
+            --arg status "$STATUS" \
+            --arg sha "{{inputs.parameters.sha}}" \
+            --arg branch "$BRANCH" \
+            '{
+              "data": {
+                "type": "cipipeline_resource_request",
+                "attributes": {
+                  "provider_name": "argo-workflows",
+                  "resource": {
+                    "level": "pipeline",
+                    "unique_id": $uid,
+                    "name": $name,
+                    "url": $url,
+                    "start": $start,
+                    "status": $status,
+                    "git": {
+                      "repository_url": "https://github.com/St0rmingBr4in/home-kube-flux-config",
+                      "sha": $sha,
+                      "branch": $branch
+                    }
+                  }
+                }
+              }
+            }')
+          if [ "{{inputs.parameters.final}}" = "true" ]; then
+            PAYLOAD=$(echo "$PAYLOAD" | jq --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              '.data.attributes.resource.end = $end')
+          fi
+          RESP=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: $DD_API_KEY" \
+            -d "$PAYLOAD" \
+            "https://api.datadoghq.eu/api/v2/ci/pipeline")
+          HTTP_CODE=$(echo "$RESP" | tail -1)
+          echo "Datadog CI API: $HTTP_CODE"
+          [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
+
+    # Combined running-state notification: GitHub (pending) + Datadog (running) in parallel.
+    # Used as the `running` lifecycle hook in ci-terraform and ci-ansible.
+    - name: ci-notify-running
+      inputs:
+        parameters:
+          - name: sha
+          - name: context     # e.g. "ci/terraform-datadog"
+          - name: description
+          - name: branch      # git ref e.g. "refs/heads/master"
+          - name: start       # RFC3339 — pass {{workflow.creationTimestamp}}
+      steps:
+        - - name: github
+            template: github-notify
+            arguments:
+              parameters:
+                - name: sha
+                  value: "{{inputs.parameters.sha}}"
+                - name: state
+                  value: pending
+                - name: context
+                  value: "{{inputs.parameters.context}}"
+                - name: description
+                  value: "{{inputs.parameters.description}}"
+          - name: datadog
+            template: datadog-notify
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{inputs.parameters.context}}"
+                - name: status
+                  value: running
+                - name: sha
+                  value: "{{inputs.parameters.sha}}"
+                - name: branch
+                  value: "{{inputs.parameters.branch}}"
+                - name: start
+                  value: "{{inputs.parameters.start}}"
+                - name: final
+                  value: "false"
+
+    # Combined exit notification: GitHub (success/failure) + Datadog (success/error) in parallel.
+    # Used as the `exit` lifecycle hook in ci-terraform and ci-ansible.
+    - name: ci-notify-exit
+      inputs:
+        parameters:
+          - name: sha
+          - name: context
+          - name: status    # "success" or "failure"
+          - name: branch
+          - name: start     # RFC3339 — pass {{workflow.creationTimestamp}}
+      steps:
+        - - name: github
+            template: github-notify
+            arguments:
+              parameters:
+                - name: sha
+                  value: "{{inputs.parameters.sha}}"
+                - name: state
+                  value: "{{inputs.parameters.status}}"
+                - name: context
+                  value: "{{inputs.parameters.context}}"
+                - name: description
+                  value: "{{= inputs.parameters.status == 'success' ? 'passed' : 'failed'}}"
+          - name: datadog
+            template: datadog-notify
+            arguments:
+              parameters:
+                - name: name
+                  value: "{{inputs.parameters.context}}"
+                - name: status
+                  value: "{{inputs.parameters.status}}"
+                - name: sha
+                  value: "{{inputs.parameters.sha}}"
+                - name: branch
+                  value: "{{inputs.parameters.branch}}"
+                - name: start
+                  value: "{{inputs.parameters.start}}"
+                - name: final
+                  value: "true"

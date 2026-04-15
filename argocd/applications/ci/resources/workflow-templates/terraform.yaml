@@ -36,31 +36,35 @@ spec:
       expression: workflow.status == "Running"
       templateRef:
         name: ci-common
-        template: github-notify
+        template: ci-notify-running
       arguments:
         parameters:
           - name: sha
             value: "{{workflow.parameters.git-sha}}"
-          - name: state
-            value: pending
           - name: context
             value: "ci/terraform-{{workflow.parameters.module}}"
           - name: description
             value: "Running ci-terraform-{{workflow.parameters.module}}"
+          - name: branch
+            value: "{{workflow.parameters.git-ref}}"
+          - name: start
+            value: "{{workflow.creationTimestamp}}"
     exit:
       templateRef:
         name: ci-common
-        template: github-notify
+        template: ci-notify-exit
       arguments:
         parameters:
           - name: sha
             value: "{{workflow.parameters.git-sha}}"
-          - name: state
-            value: "{{= workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
           - name: context
             value: "ci/terraform-{{workflow.parameters.module}}"
-          - name: description
-            value: "{{= workflow.status == 'Succeeded' ? 'passed' : 'failed'}}"
+          - name: status
+            value: "{{= workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
+          - name: branch
+            value: "{{workflow.parameters.git-ref}}"
+          - name: start
+            value: "{{workflow.creationTimestamp}}"
   templates:
     - name: main
       steps:

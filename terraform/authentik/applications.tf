@@ -7,6 +7,13 @@ locals {
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png"
       description = "GitOps Continuous Delivery"
     }
+    argo_workflows = {
+      name        = "Argo Workflows"
+      slug        = "argo-workflows"
+      url         = "https://argo.st0rmingbr4in.com"
+      icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argo-workflows.png"
+      description = "CI Workflow Engine"
+    }
     bazarr = {
       name        = "Bazarr"
       slug        = "bazarr"
