@@ -17,6 +17,11 @@ spec:
             type: string
             value:
               - "refs/heads/master"
+          - path: body
+            type: string
+            jqFilter: '.head_commit | ((.modified // []) + (.added // []) + (.removed // [])) | map(test("^ansible/(ansible\\.cfg|scripts|requirements\\.yml|inventory/hosts\\.yaml|inventory/group_vars/k3s_cluster|playbooks/k3s\\.yaml)")) | any'
+            value:
+              - "true"
   triggers:
     - template:
         name: trigger

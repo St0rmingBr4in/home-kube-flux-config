@@ -19,6 +19,11 @@ spec:
             type: string
             value:
               - "refs/heads/master"
+          - path: body
+            type: string
+            jqFilter: '.head_commit | ((.modified // []) + (.added // []) + (.removed // [])) | map(test("^terraform/tfe")) | any'
+            value:
+              - "true"
   triggers:
     - template:
         name: trigger
