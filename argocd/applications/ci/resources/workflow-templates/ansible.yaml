@@ -53,7 +53,7 @@ spec:
           - name: context
             value: "ci/ansible-{{workflow.parameters.playbook}}"
           - name: description
-            value: "{{= workflow.status == 'Succeeded' ? 'ci-ansible-{{workflow.parameters.playbook}} passed' : 'ci-ansible-{{workflow.parameters.playbook}} failed'}}"
+            value: "{{= workflow.status == 'Succeeded' ? 'passed' : 'failed'}}"
   templates:
     - name: main
       steps:

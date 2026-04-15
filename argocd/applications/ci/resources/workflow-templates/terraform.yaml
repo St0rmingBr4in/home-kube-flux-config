@@ -60,7 +60,7 @@ spec:
           - name: context
             value: "ci/terraform-{{workflow.parameters.module}}"
           - name: description
-            value: "{{= workflow.status == 'Succeeded' ? 'ci-terraform-{{workflow.parameters.module}} passed' : 'ci-terraform-{{workflow.parameters.module}} failed'}}"
+            value: "{{= workflow.status == 'Succeeded' ? 'passed' : 'failed'}}"
   templates:
     - name: main
       steps:
