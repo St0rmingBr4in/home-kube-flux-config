@@ -79,6 +79,9 @@ spec:
             template: terraform-run
 
     - name: terraform-run
+      podMetadata:
+        annotations:
+          ad.datadoghq.com/main.logs: "[{\"source\":\"argo-workflows\",\"service\":\"ci\",\"tags\":[\"ci.pipeline.id:{{workflow.uid}}\",\"ci.pipeline.name:ci/terraform-{{workflow.parameters.module}}\"]}]"
       script:
         image: docker.io/st0rmingbr4in/ci-terraform:latest
         command: [sh]

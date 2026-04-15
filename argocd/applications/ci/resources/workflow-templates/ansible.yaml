@@ -72,6 +72,9 @@ spec:
             template: ansible-run
 
     - name: ansible-run
+      podMetadata:
+        annotations:
+          ad.datadoghq.com/main.logs: "[{\"source\":\"argo-workflows\",\"service\":\"ci\",\"tags\":[\"ci.pipeline.id:{{workflow.uid}}\",\"ci.pipeline.name:ci/ansible-{{workflow.parameters.playbook}}\"]}]"
       script:
         image: docker.io/st0rmingbr4in/ci-ansible:latest
         command: [bash]
