@@ -124,6 +124,7 @@ spec:
           - name: start        # RFC3339 workflow start time
           - name: final        # "true" to include end timestamp
           - name: author-email # commit author email
+            default: ""
       script:
         image: alpine:3.21
         command: [sh]
@@ -147,6 +148,8 @@ spec:
           STATUS="{{inputs.parameters.status}}"
           [ "$STATUS" = "failure" ] && STATUS="error"
           BRANCH=$(echo "{{inputs.parameters.branch}}" | sed 's|refs/heads/||')
+          AUTHOR_EMAIL="{{inputs.parameters.author-email}}"
+          [ -z "$AUTHOR_EMAIL" ] && AUTHOR_EMAIL="ci@st0rmingbr4in.com"
           PAYLOAD=$(jq -n \
             --arg name "{{inputs.parameters.name}}" \
             --arg uid "{{workflow.uid}}" \
@@ -155,7 +158,7 @@ spec:
             --arg status "$STATUS" \
             --arg sha "{{inputs.parameters.sha}}" \
             --arg branch "$BRANCH" \
-            --arg author_email "{{inputs.parameters.author-email}}" \
+            --arg author_email "$AUTHOR_EMAIL" \
             '{
               "data": {
                 "type": "cipipeline_resource_request",
@@ -183,7 +186,6 @@ spec:
             PAYLOAD=$(echo "$PAYLOAD" | jq --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
               '.data.attributes.resource.end = $end')
           fi
-          echo "Payload: $PAYLOAD"
           RESP=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             -H "DD-API-KEY: $DD_API_KEY" \
@@ -206,6 +208,7 @@ spec:
           - name: branch        # git ref e.g. "refs/heads/master"
           - name: start         # RFC3339 — pass {{workflow.creationTimestamp}}
           - name: author-email
+            default: ""
       steps:
         - - name: github
             template: github-notify
@@ -250,6 +253,7 @@ spec:
           - name: branch
           - name: start     # RFC3339 — pass {{workflow.creationTimestamp}}
           - name: author-email
+            default: ""
       steps:
         - - name: github
             template: github-notify
