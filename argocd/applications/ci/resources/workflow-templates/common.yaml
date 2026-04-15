@@ -117,12 +117,13 @@ spec:
       timeout: "2m"
       inputs:
         parameters:
-          - name: name      # pipeline name e.g. "ci/terraform-datadog"
-          - name: status    # running | success | failure (failure mapped to error)
-          - name: sha       # git commit SHA
-          - name: branch    # git ref e.g. "refs/heads/master"
-          - name: start     # RFC3339 workflow start time
-          - name: final     # "true" to include end timestamp
+          - name: name         # pipeline name e.g. "ci/terraform-datadog"
+          - name: status       # running | success | failure (failure mapped to error)
+          - name: sha          # git commit SHA
+          - name: branch       # git ref e.g. "refs/heads/master"
+          - name: start        # RFC3339 workflow start time
+          - name: final        # "true" to include end timestamp
+          - name: author-email # commit author email
       script:
         image: alpine:3.21
         command: [sh]
@@ -154,6 +155,7 @@ spec:
             --arg status "$STATUS" \
             --arg sha "{{inputs.parameters.sha}}" \
             --arg branch "$BRANCH" \
+            --arg author_email "{{inputs.parameters.author-email}}" \
             '{
               "data": {
                 "type": "cipipeline_resource_request",
@@ -166,10 +168,12 @@ spec:
                     "url": $url,
                     "start": $start,
                     "status": $status,
+                    "partial_retry": false,
                     "git": {
                       "repository_url": "https://github.com/St0rmingBr4in/home-kube-flux-config",
                       "sha": $sha,
-                      "branch": $branch
+                      "branch": $branch,
+                      "author_email": $author_email
                     }
                   }
                 }
@@ -197,10 +201,11 @@ spec:
       inputs:
         parameters:
           - name: sha
-          - name: context     # e.g. "ci/terraform-datadog"
+          - name: context       # e.g. "ci/terraform-datadog"
           - name: description
-          - name: branch      # git ref e.g. "refs/heads/master"
-          - name: start       # RFC3339 — pass {{workflow.creationTimestamp}}
+          - name: branch        # git ref e.g. "refs/heads/master"
+          - name: start         # RFC3339 — pass {{workflow.creationTimestamp}}
+          - name: author-email
       steps:
         - - name: github
             template: github-notify
@@ -230,6 +235,8 @@ spec:
                   value: "{{inputs.parameters.start}}"
                 - name: final
                   value: "false"
+                - name: author-email
+                  value: "{{inputs.parameters.author-email}}"
 
     # Combined exit notification: GitHub (success/failure) + Datadog (success/error) in parallel.
     # Used as the `exit` lifecycle hook in ci-terraform and ci-ansible.
@@ -242,6 +249,7 @@ spec:
           - name: status    # "success" or "failure"
           - name: branch
           - name: start     # RFC3339 — pass {{workflow.creationTimestamp}}
+          - name: author-email
       steps:
         - - name: github
             template: github-notify
@@ -271,3 +279,5 @@ spec:
                   value: "{{inputs.parameters.start}}"
                 - name: final
                   value: "true"
+                - name: author-email
+                  value: "{{inputs.parameters.author-email}}"

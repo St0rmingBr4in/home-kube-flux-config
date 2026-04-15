@@ -32,6 +32,8 @@ spec:
       - name: path-filter
       - name: vault-secret-path
       - name: git-sha
+      - name: git-author-email
+        default: ""
   hooks:
     running:
       expression: workflow.status == "Running"
@@ -50,6 +52,8 @@ spec:
             value: "{{workflow.parameters.git-ref}}"
           - name: start
             value: "{{workflow.creationTimestamp}}"
+          - name: author-email
+            value: "{{workflow.parameters.git-author-email}}"
     exit:
       templateRef:
         name: ci-common
@@ -66,6 +70,8 @@ spec:
             value: "{{workflow.parameters.git-ref}}"
           - name: start
             value: "{{workflow.creationTimestamp}}"
+          - name: author-email
+            value: "{{workflow.parameters.git-author-email}}"
   templates:
     - name: main
       steps:

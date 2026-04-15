@@ -46,6 +46,8 @@ spec:
                       value: "secret/ci/terraform-cloud"
                     - name: git-sha
                       value: ""
+                    - name: git-author-email
+                      value: ""
           parameters:
             - src:
                 dependencyName: push
@@ -55,5 +57,9 @@ spec:
                 dependencyName: push
                 dataKey: body.after
               dest: spec.arguments.parameters.4.value
+            - src:
+                dependencyName: push
+                dataKey: body.head_commit.author.email
+              dest: spec.arguments.parameters.5.value
       retryStrategy:
         steps: 3
