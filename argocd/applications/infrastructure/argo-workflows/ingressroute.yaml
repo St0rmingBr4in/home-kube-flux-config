@@ -11,7 +11,7 @@ spec:
     - kind: Rule
       match: Host(`argo.st0rmingbr4in.com`)
       middlewares:
-        - name: authentik
+        - name: authentik-forward-auth
           namespace: prod-infra
       services:
         - name: argo-workflows-server
