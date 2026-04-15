@@ -86,7 +86,7 @@ spec:
           - name: description
       script:
         image: alpine:3.21
-        command: [sh, -c]
+        command: [sh]
         resources:
           requests:
             memory: 64Mi
@@ -103,8 +103,11 @@ spec:
           GITHUB_TOKEN=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
             https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/github \
             | jq -r '.data.data.token')
-          curl -sf -X POST \
+          RESP=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"state\":\"{{inputs.parameters.state}}\",\"target_url\":\"https://argo.st0rmingbr4in.com/workflows/argo/{{workflow.name}}\",\"description\":\"{{inputs.parameters.description}}\",\"context\":\"{{inputs.parameters.context}}\"}" \
-            "https://api.github.com/repos/St0rmingBr4in/home-kube-flux-config/statuses/{{inputs.parameters.sha}}"
+            "https://api.github.com/repos/St0rmingBr4in/home-kube-flux-config/statuses/{{inputs.parameters.sha}}")
+          HTTP_CODE=$(echo "$RESP" | tail -1)
+          echo "GitHub status API: $HTTP_CODE"
+          [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
