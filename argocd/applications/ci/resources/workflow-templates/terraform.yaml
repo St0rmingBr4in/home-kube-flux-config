@@ -30,8 +30,39 @@ spec:
       - name: module
       - name: path-filter
       - name: vault-secret-path
+      - name: git-sha
   templates:
     - name: main
+      hooks:
+        running:
+          expression: workflow.status == "Running"
+          templateRef:
+            name: ci-common
+            template: github-notify
+          arguments:
+            parameters:
+              - name: sha
+                value: "{{workflow.parameters.git-sha}}"
+              - name: state
+                value: pending
+              - name: context
+                value: "ci/terraform-{{workflow.parameters.module}}"
+              - name: description
+                value: "Running ci-terraform-{{workflow.parameters.module}}"
+        exit:
+          templateRef:
+            name: ci-common
+            template: github-notify
+          arguments:
+            parameters:
+              - name: sha
+                value: "{{workflow.parameters.git-sha}}"
+              - name: state
+                value: "{{= workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
+              - name: context
+                value: "ci/terraform-{{workflow.parameters.module}}"
+              - name: description
+                value: "{{= workflow.status == 'Succeeded' ? 'ci-terraform-{{workflow.parameters.module}} passed' : 'ci-terraform-{{workflow.parameters.module}} failed'}}"
       steps:
         - - name: terraform-run
             template: terraform-run

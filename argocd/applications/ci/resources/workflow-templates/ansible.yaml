@@ -23,8 +23,39 @@ spec:
       - name: git-ref
       - name: playbook      # inlet | k3s
       - name: path-filter
+      - name: git-sha
   templates:
     - name: main
+      hooks:
+        running:
+          expression: workflow.status == "Running"
+          templateRef:
+            name: ci-common
+            template: github-notify
+          arguments:
+            parameters:
+              - name: sha
+                value: "{{workflow.parameters.git-sha}}"
+              - name: state
+                value: pending
+              - name: context
+                value: "ci/ansible-{{workflow.parameters.playbook}}"
+              - name: description
+                value: "Running ci-ansible-{{workflow.parameters.playbook}}"
+        exit:
+          templateRef:
+            name: ci-common
+            template: github-notify
+          arguments:
+            parameters:
+              - name: sha
+                value: "{{workflow.parameters.git-sha}}"
+              - name: state
+                value: "{{= workflow.status == 'Succeeded' ? 'success' : 'failure'}}"
+              - name: context
+                value: "ci/ansible-{{workflow.parameters.playbook}}"
+              - name: description
+                value: "{{= workflow.status == 'Succeeded' ? 'ci-ansible-{{workflow.parameters.playbook}} passed' : 'ci-ansible-{{workflow.parameters.playbook}} failed'}}"
       steps:
         - - name: ansible-run
             template: ansible-run

@@ -42,10 +42,16 @@ spec:
                       value: "terraform/tailscale"
                     - name: vault-secret-path
                       value: "secret/ci/tailscale"
+                    - name: git-sha
+                      value: ""
           parameters:
             - src:
                 dependencyName: push
                 dataKey: body.ref
               dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.4.value
       retryStrategy:
         steps: 3

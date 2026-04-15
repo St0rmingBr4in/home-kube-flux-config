@@ -76,3 +76,35 @@ spec:
           else
             echo "unchanged"
           fi
+
+    - name: github-notify
+      inputs:
+        parameters:
+          - name: sha
+          - name: state
+          - name: context
+          - name: description
+      script:
+        image: alpine:3.21
+        command: [sh, -c]
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
+        source: |
+          set -e
+          apk add --no-cache curl jq -q
+          VAULT_TOKEN=$(curl -sk \
+            --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
+            https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+            | jq -r '.auth.client_token')
+          GITHUB_TOKEN=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+            https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/github \
+            | jq -r '.data.data.token')
+          curl -sf -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"state\":\"{{inputs.parameters.state}}\",\"target_url\":\"https://argo.st0rmingbr4in.com/workflows/argo/{{workflow.name}}\",\"description\":\"{{inputs.parameters.description}}\",\"context\":\"{{inputs.parameters.context}}\"}" \
+            "https://api.github.com/repos/St0rmingBr4in/home-kube-flux-config/statuses/{{inputs.parameters.sha}}"

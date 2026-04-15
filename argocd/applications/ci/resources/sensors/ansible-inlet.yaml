@@ -40,10 +40,16 @@ spec:
                       value: inlet
                     - name: path-filter
                       value: "ansible/"
+                    - name: git-sha
+                      value: ""
           parameters:
             - src:
                 dependencyName: push
                 dataKey: body.ref
               dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: push
+                dataKey: body.after
+              dest: spec.arguments.parameters.3.value
       retryStrategy:
         steps: 3
