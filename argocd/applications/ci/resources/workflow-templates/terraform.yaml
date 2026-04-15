@@ -19,6 +19,7 @@ metadata:
 spec:
   serviceAccountName: argo-ci
   entrypoint: main
+  activeDeadlineSeconds: 900  # 15 min hard limit
   synchronization:
     semaphore:
       configMapKeyRef:

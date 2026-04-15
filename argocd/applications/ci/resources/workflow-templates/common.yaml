@@ -78,6 +78,7 @@ spec:
           fi
 
     - name: github-notify
+      timeout: "2m"
       inputs:
         parameters:
           - name: sha
@@ -113,6 +114,7 @@ spec:
           [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
 
     - name: datadog-notify
+      timeout: "2m"
       inputs:
         parameters:
           - name: name      # pipeline name e.g. "ci/terraform-datadog"
@@ -191,6 +193,7 @@ spec:
     # Combined running-state notification: GitHub (pending) + Datadog (running) in parallel.
     # Used as the `running` lifecycle hook in ci-terraform and ci-ansible.
     - name: ci-notify-running
+      timeout: "3m"
       inputs:
         parameters:
           - name: sha
@@ -231,6 +234,7 @@ spec:
     # Combined exit notification: GitHub (success/failure) + Datadog (success/error) in parallel.
     # Used as the `exit` lifecycle hook in ci-terraform and ci-ansible.
     - name: ci-notify-exit
+      timeout: "3m"
       inputs:
         parameters:
           - name: sha
