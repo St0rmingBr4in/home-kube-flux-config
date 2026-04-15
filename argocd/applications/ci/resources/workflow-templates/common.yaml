@@ -177,13 +177,15 @@ spec:
             PAYLOAD=$(echo "$PAYLOAD" | jq --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
               '.data.attributes.resource.end = $end')
           fi
+          echo "Payload: $PAYLOAD"
           RESP=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             -H "DD-API-KEY: $DD_API_KEY" \
             -d "$PAYLOAD" \
             "https://api.datadoghq.eu/api/v2/ci/pipeline")
           HTTP_CODE=$(echo "$RESP" | tail -1)
-          echo "Datadog CI API: $HTTP_CODE"
+          BODY=$(echo "$RESP" | head -1)
+          echo "Datadog CI API: $HTTP_CODE — $BODY"
           [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
 
     # Combined running-state notification: GitHub (pending) + Datadog (running) in parallel.
