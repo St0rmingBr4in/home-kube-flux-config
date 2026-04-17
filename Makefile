@@ -4,6 +4,7 @@
         lint lint-shell lint-go lint-ansible lint-terraform \
         ci-report \
         terraform-init terraform-plan terraform-apply \
+        terraform-authentik-init terraform-authentik-plan terraform-authentik-apply \
         terraform-tfe-init terraform-tfe-plan terraform-tfe-apply \
         terraform-datadog-init terraform-datadog-plan terraform-datadog-apply \
         terraform-digitalocean-init terraform-digitalocean-plan terraform-digitalocean-apply \
@@ -19,7 +20,8 @@
         memory-webhook-test \
 
 ANSIBLE_FLAGS  ?=
-TF_DIR              := terraform/authentik
+TF_AUTHENTIK_DIR    := terraform/authentik
+TF_DIR              := $(TF_AUTHENTIK_DIR)
 TF_TFE_DIR          := terraform/tfe
 TF_DATADOG_DIR      := terraform/datadog
 TF_DIGITALOCEAN_DIR := terraform/digitalocean
@@ -99,14 +101,19 @@ ci-report: ## Report pipeline to Datadog CI Visibility (no-op outside GitHub Act
 
 # ── Terraform: Authentik ──────────────────────────────────────────────────────
 
-terraform-init: ## Initialise Authentik Terraform
-	terraform -chdir=$(TF_DIR) init
+terraform-authentik-init: ## Initialise Authentik Terraform
+	terraform -chdir=$(TF_AUTHENTIK_DIR) init
 
-terraform-plan: ## Plan Authentik Terraform
-	terraform -chdir=$(TF_DIR) plan -parallelism=1
+terraform-authentik-plan: ## Plan Authentik Terraform
+	terraform -chdir=$(TF_AUTHENTIK_DIR) plan -parallelism=1
 
-terraform-apply: ## Apply Authentik Terraform
-	terraform -chdir=$(TF_DIR) apply -auto-approve -parallelism=1
+terraform-authentik-apply: ## Apply Authentik Terraform
+	terraform -chdir=$(TF_AUTHENTIK_DIR) apply -auto-approve -parallelism=1
+
+# Legacy aliases kept for backward compatibility
+terraform-init: terraform-authentik-init
+terraform-plan: terraform-authentik-plan
+terraform-apply: terraform-authentik-apply
 
 # ── Terraform: TFE workspaces ─────────────────────────────────────────────────
 
