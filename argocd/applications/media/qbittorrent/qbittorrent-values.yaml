@@ -62,8 +62,8 @@ secret:
 # Image used by the TrueCharts Tailscale addon (routes traffic through inlet exit node)
 tailscaleImage:
   repository: ghcr.io/tailscale/tailscale
-  tag: latest
-  pullPolicy: Always
+  tag: v1.96.4
+  pullPolicy: IfNotPresent
 
 # Alpine image for the kill-switch init container (Tailscale image is distroless, no shell/iptables)
 killSwitchImage:
