@@ -35,10 +35,6 @@ server:
     ingressClassName: traefik
     hosts:
       - authentik.st0rmingbr4in.com
-    # tls:
-    #   - secretName: authentik-tls
-    #     hosts:
-    #       - authentik.st0rmingbr4in.com
 worker:
   replicas: 1
   resources:
