@@ -16,12 +16,6 @@ qbittorrent_hostnames:
   - qbittorrent         # exit-node user (internet-bound torrent traffic)
   - qbittorrent-torrent # torrent peer (direct Tailscale peer traffic)
 
-# IPs from the old static approach that must be removed from iptables mangle.
-# Can be dropped once the Ansible run has cleaned up the stale rules.
-qos_stale_iptables_destinations:
-  - "100.122.130.88"  # qbittorrent-torrent (was qbittorrent_torrent_tailscale_ip)
-  - "100.78.60.10"    # stale/wrong IP that was qbittorrent_tailscale_ip
-
 torrent_port: 6881
 http_port: 80
 https_port: 443

@@ -122,20 +122,6 @@
     comment: "inlet: mark qbittorrent peers as CS1 for CAKE deprioritization"
   notify: Save iptables rules
 
-# ── Remove stale per-IP DSCP rules left by previous approach ─────────────────
-
-- name: Remove stale DSCP rule for qbittorrent-torrent (static IP, now managed by ipset)
-  ansible.builtin.iptables:
-    table: mangle
-    chain: POSTROUTING
-    out_interface: tailscale0
-    destination: "{{ item }}"
-    jump: DSCP
-    set_dscp_mark_class: CS1
-    state: absent
-  loop: "{{ qos_stale_iptables_destinations }}"
-  notify: Save iptables rules
-
 # ── Watcher script: event-driven ipset refresh via Tailscale LocalAPI ────────
 
 - name: Deploy inlet-qos-watch.sh (event-driven ipset updater)
