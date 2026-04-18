@@ -14,7 +14,6 @@ spec:
             namespace: prod-infra
             repoURL: https://mojo2600.github.io/pihole-kubernetes/
             valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
-            manifestPath: argocd/applications/infrastructure/pihole
 
   template:
     metadata:
@@ -33,9 +32,6 @@ spec:
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           ref: values
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc

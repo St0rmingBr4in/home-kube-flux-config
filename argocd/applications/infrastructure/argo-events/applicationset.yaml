@@ -14,7 +14,6 @@ spec:
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
             valuesPath: argocd/applications/infrastructure/argo-events/values.yaml
-            manifestPath: argocd/applications/infrastructure/argo-events
 
   template:
     metadata:
@@ -33,9 +32,6 @@ spec:
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           ref: values
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc
