@@ -50,7 +50,7 @@ ports:
 
 logs:
   general:
-    level: DEBUG
+    level: WARN
   access:
     enabled: true
     format: json
