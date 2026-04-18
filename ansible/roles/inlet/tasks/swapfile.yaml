@@ -8,6 +8,7 @@
   ansible.builtin.command:
     cmd: fallocate -l 512M /swapfile
   when: not swapfile_stat.stat.exists
+  changed_when: not swapfile_stat.stat.exists
 
 - name: Set swapfile permissions
   ansible.builtin.file:
@@ -19,11 +20,13 @@
   ansible.builtin.command:
     cmd: mkswap /swapfile
   when: not swapfile_stat.stat.exists
+  changed_when: not swapfile_stat.stat.exists
 
 - name: Enable swapfile
   ansible.builtin.command:
     cmd: swapon /swapfile
   when: not swapfile_stat.stat.exists
+  changed_when: not swapfile_stat.stat.exists
 
 - name: Persist swapfile in fstab
   ansible.builtin.lineinfile:
