@@ -8,4 +8,10 @@ resource "vault_kubernetes_auth_backend_role" "argo_ci" {
   bound_service_account_namespaces = ["argo"]
   token_ttl                        = 3600
   token_policies                   = [vault_policy.argo_ci.name]
+
+  # Sole authentication mechanism for all CI workflow pods; destroying this
+  # role breaks every CI pipeline immediately.
+  lifecycle {
+    prevent_destroy = true
+  }
 }

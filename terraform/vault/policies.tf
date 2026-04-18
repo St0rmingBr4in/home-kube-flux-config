@@ -3,6 +3,12 @@
 resource "vault_policy" "argo_ci" {
   name = "argo-ci"
 
+  # Sole authentication mechanism for all CI workflow pods; destroying this
+  # policy breaks every CI pipeline immediately.
+  lifecycle {
+    prevent_destroy = true
+  }
+
   policy = <<-EOT
     path "secret/data/ci/*" {
       capabilities = ["read"]
