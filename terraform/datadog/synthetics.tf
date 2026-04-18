@@ -19,6 +19,19 @@ locals {
   # apps return 200 because follow_redirects=true resolves the Authentik redirect inline.
   synthetic_expected_status = "200"
 
+  # Maximum acceptable response time in milliseconds. 5000 ms is conservative
+  # enough for a homelab connection going through Tailscale/Traefik.
+  synthetic_response_time_ms = 5000
+
+  # How often each synthetic test runs (seconds). 300 s = 5 minutes, the
+  # minimum interval on the Datadog free/pro tier for API tests.
+  synthetic_tick_every = 300
+
+  # Probe locations for all synthetic tests. eu-west-1 is geographically
+  # closest to the homelab; extend to a second location if false-positive
+  # alerts from PoP outages become an issue.
+  synthetic_locations = ["aws:eu-west-1"]
+
   synthetics = {
     argocd = {
       name = "API check on argocd.st0rmingbr4in.com"
@@ -89,15 +102,15 @@ resource "datadog_synthetics_test" "apps" {
   assertion {
     type     = "responseTime"
     operator = "lessThan"
-    target   = "5000"
+    target   = tostring(local.synthetic_response_time_ms)
   }
 
   options_list {
-    tick_every       = 300 # 5 minutes
+    tick_every       = local.synthetic_tick_every
     follow_redirects = true
   }
 
-  locations = ["aws:eu-west-1"]
+  locations = local.synthetic_locations
 
   tags = [
     "argocd_app:${each.key}",
