@@ -83,6 +83,9 @@ workload:
           type: init
           imageSelector: killSwitchImage
           securityContext:
+            # Required: iptables manipulation needs CAP_NET_ADMIN and must run as root
+            # because iptables-legacy writes to /run/xtables.lock (root-owned).
+            # This init container exits before the main qbittorrent process starts.
             runAsUser: 0
             runAsNonRoot: false
             capabilities:
