@@ -11,3 +11,5 @@ data:
   REPO_URL: "https://github.com/St0rmingBr4in/home-kube-flux-config"
   # Vault internal service address used by all CI pods to fetch secrets.
   VAULT_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
+  # Datadog site for API calls. Must match the site in datadog-values.yaml and Terraform.
+  DD_SITE: "datadoghq.eu"

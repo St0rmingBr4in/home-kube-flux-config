@@ -164,6 +164,11 @@ spec:
               configMapKeyRef:
                 name: ci-config
                 key: REPO_URL
+          - name: DD_SITE
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: DD_SITE
         source: |
           set -e
           apk add --no-cache curl jq -q
@@ -221,7 +226,7 @@ spec:
             -H "Content-Type: application/json" \
             -H "DD-API-KEY: $DD_API_KEY" \
             -d "$PAYLOAD" \
-            "https://api.datadoghq.eu/api/v2/ci/pipeline")
+            "https://api.${DD_SITE}/api/v2/ci/pipeline")
           HTTP_CODE=$(echo "$RESP" | tail -1)
           BODY=$(echo "$RESP" | head -1)
           echo "Datadog CI API: $HTTP_CODE — $BODY"
