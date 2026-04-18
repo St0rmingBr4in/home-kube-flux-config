@@ -15,6 +15,6 @@ terraform {
 }
 
 provider "authentik" {
-  url   = var.authentik_url
+  url   = "https://authentik.${local.base_domain}"
   token = var.authentik_token
 }

@@ -15,6 +15,6 @@ terraform {
 }
 
 provider "vault" {
-  address = var.vault_address
+  address = "https://vault.st0rmingbr4in.com"
   token   = var.vault_token
 }

@@ -1,4 +1,8 @@
 locals {
+  # Primary domain for all homelab services. All app URLs are constructed from
+  # this value so a domain change only requires updating one string.
+  base_domain = "st0rmingbr4in.com"
+
   # Session cookie lifetime for proxy-protected apps. 24 h is the Authentik
   # upstream default; a short TTL limits exposure time for stolen session cookies.
   app_token_validity = "hours=24"
@@ -7,56 +11,56 @@ locals {
     argocd = {
       name        = "ArgoCD"
       slug        = "argo-cd"
-      url         = "https://argocd.st0rmingbr4in.com"
+      url         = "https://argocd.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png"
       description = "GitOps Continuous Delivery"
     }
     argo_workflows = {
       name        = "Argo Workflows"
       slug        = "argo-workflows"
-      url         = "https://argo.st0rmingbr4in.com"
+      url         = "https://argo.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argo-workflows.png"
       description = "CI Workflow Engine"
     }
     bazarr = {
       name        = "Bazarr"
       slug        = "bazarr"
-      url         = "https://bazarr.st0rmingbr4in.com"
+      url         = "https://bazarr.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/bazarr.png"
       description = "Subtitles Manager"
     }
     cleanuparr = {
       name        = "Cleanuparr"
       slug        = "cleanuparr"
-      url         = "https://cleanuparr.st0rmingbr4in.com"
+      url         = "https://cleanuparr.${local.base_domain}"
       icon        = null
       description = "Automated Stalled Download Cleanup"
     }
     prowlarr = {
       name        = "Prowlarr"
       slug        = "prowlarr"
-      url         = "https://prowlarr.st0rmingbr4in.com"
+      url         = "https://prowlarr.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/prowlarr.png"
       description = "Indexer Manager"
     }
     qbittorrent = {
       name        = "qBittorrent"
       slug        = "qbittorrent"
-      url         = "https://qbittorrent.st0rmingbr4in.com"
+      url         = "https://qbittorrent.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/qbittorrent.png"
       description = "Download Client"
     }
     radarr = {
       name        = "Radarr"
       slug        = "radarr"
-      url         = "https://radarr.st0rmingbr4in.com"
+      url         = "https://radarr.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/radarr.png"
       description = "Movie Manager"
     }
     sonarr = {
       name        = "Sonarr"
       slug        = "sonarr"
-      url         = "https://sonarr.st0rmingbr4in.com"
+      url         = "https://sonarr.${local.base_domain}"
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/sonarr.png"
       description = "TV Show Manager"
     }

@@ -29,7 +29,7 @@ locals {
 resource "tfe_workspace" "workspaces" {
   for_each     = local.workspaces
   name         = each.value
-  organization = var.organization
+  organization = "St0rmingBr4in"
 }
 
 resource "tfe_workspace_settings" "workspaces" {

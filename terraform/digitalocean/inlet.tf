@@ -1,6 +1,6 @@
 # Looks up the inlet droplet by name so we can attach the reserved IP to it.
 data "digitalocean_droplet" "inlet" {
-  name = var.inlet_droplet_name
+  name = "inlet"
 }
 
 # A static IP that persists across droplet reprovisioning.

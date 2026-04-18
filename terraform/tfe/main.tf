@@ -15,5 +15,5 @@ terraform {
 }
 
 provider "tfe" {
-  organization = var.organization
+  organization = "St0rmingBr4in"
 }
