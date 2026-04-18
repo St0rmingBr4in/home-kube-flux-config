@@ -6,6 +6,6 @@ resources:
   - infrastructure/
   - core/
   - media/
-  - compliance/
-  - external-services/
+  - compliance/memory-webhook/applicationset.yaml
+  - external-services/external-service-prod-infra/applicationset.yaml
   - ci/
