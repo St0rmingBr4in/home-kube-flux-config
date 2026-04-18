@@ -6,6 +6,8 @@ metadata:
   namespace: prod-infra
   labels:
     app: memory-webhook
+    app.kubernetes.io/name: memory-webhook
+    app.kubernetes.io/instance: memory-webhook
 spec:
   type: ClusterIP
   ports:

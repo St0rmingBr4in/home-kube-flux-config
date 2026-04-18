@@ -5,7 +5,9 @@ metadata:
   name: memory-webhook
   namespace: prod-infra
   labels:
-    app: memory-webhook
+    app: memory-webhook  # kept for MutatingWebhookConfiguration objectSelector compat
+    app.kubernetes.io/name: memory-webhook
+    app.kubernetes.io/instance: memory-webhook
 spec:
   replicas: 1
   selector:
@@ -14,7 +16,9 @@ spec:
   template:
     metadata:
       labels:
-        app: memory-webhook
+        app: memory-webhook  # kept for MutatingWebhookConfiguration objectSelector compat
+        app.kubernetes.io/name: memory-webhook
+        app.kubernetes.io/instance: memory-webhook
     spec:
       serviceAccountName: memory-webhook
       containers:

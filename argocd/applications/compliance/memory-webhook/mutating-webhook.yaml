@@ -5,6 +5,8 @@ metadata:
   name: memory-webhook
   labels:
     app: memory-webhook
+    app.kubernetes.io/name: memory-webhook
+    app.kubernetes.io/instance: memory-webhook
   annotations:
     cert-manager.io/inject-ca-from: prod-infra/memory-webhook-cert
 webhooks:
