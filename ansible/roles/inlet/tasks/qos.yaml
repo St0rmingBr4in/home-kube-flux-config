@@ -89,7 +89,9 @@
     cmd: tc qdisc show dev tailscale0
   register: tc_qdisc_state
   changed_when: false
-  failed_when: false
+  # rc=1 means the interface doesn't exist yet (tailscale0 not yet up);
+  # any other non-zero exit code indicates an unexpected tc/iproute2 error.
+  failed_when: tc_qdisc_state.rc not in [0, 1]
 
 - name: Apply CAKE qdisc + bootstrap ipset (if not already active)
   ansible.builtin.command:
