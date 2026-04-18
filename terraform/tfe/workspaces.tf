@@ -18,7 +18,8 @@ locals {
   # so that plan/apply run on the GitHub Actions runner, not on TFC.
   workspaces = {
     tfe                  = "tfe"                  # this workspace (manages TFE resources)
-    homelab              = "homelab"              # Authentik SSO configuration
+    homelab              = "homelab"              # legacy shared workspace (kept for backward compat)
+    homelab_authentik    = "homelab-authentik"    # Authentik SSO configuration
     homelab_datadog      = "homelab-datadog"      # Datadog monitors and synthetics
     homelab_digitalocean = "homelab-digitalocean" # DigitalOcean droplet + DNS
     homelab_tailscale    = "homelab-tailscale"    # Tailscale ACL and OAuth keys

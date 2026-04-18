@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "St0rmingBr4in"
     workspaces {
-      name = "homelab"
+      name = "homelab-authentik"
     }
   }
 
