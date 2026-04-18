@@ -83,7 +83,7 @@ spec:
         annotations:
           ad.datadoghq.com/main.logs: "[{\"source\":\"argo-workflows\",\"service\":\"ci\",\"tags\":[\"ci.pipeline.id:{{workflow.uid}}\",\"ci.pipeline.name:ci/terraform-{{workflow.parameters.module}}\"]}]"
       script:
-        image: docker.io/st0rmingbr4in/ci-terraform:latest
+        image: docker.io/st0rmingbr4in/ci-terraform@sha256:5171795c1af588ae36303420add2646e634e4ad26210798022bb90f395b425cb
         command: [sh]
         resources:
           requests:
