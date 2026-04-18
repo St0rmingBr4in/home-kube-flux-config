@@ -77,6 +77,28 @@ podOptions:
 workload:
   main:
     podSpec:
+      containers:
+        main:
+          probes:
+            liveness:
+              enabled: true
+              type: exec
+              command:
+                - sh
+                - -c
+                - touch /config/.liveness
+              spec:
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                failureThreshold: 5
+                timeoutSeconds: 5
+            readiness:
+              enabled: true
+              type: http
+              path: /
+              spec:
+                initialDelaySeconds: 15
+                periodSeconds: 10
       initContainers:
         vpn-kill-switch:
           enabled: true
