@@ -15,6 +15,10 @@
 #   vxe-m89-trv  qbittorrent auth (browser)
 
 locals {
+  # Expected final HTTP status code after redirect resolution. All proxy-protected
+  # apps return 200 because follow_redirects=true resolves the Authentik redirect inline.
+  synthetic_expected_status = "200"
+
   synthetics = {
     argocd = {
       name = "API check on argocd.st0rmingbr4in.com"
@@ -79,7 +83,7 @@ resource "datadog_synthetics_test" "apps" {
   assertion {
     type     = "statusCode"
     operator = "is"
-    target   = "200"
+    target   = local.synthetic_expected_status
   }
 
   assertion {

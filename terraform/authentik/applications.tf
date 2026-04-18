@@ -1,4 +1,8 @@
 locals {
+  # Session cookie lifetime for proxy-protected apps. 24 h is the Authentik
+  # upstream default; a short TTL limits exposure time for stolen session cookies.
+  app_token_validity = "hours=24"
+
   apps = {
     argocd = {
       name        = "ArgoCD"
@@ -68,7 +72,7 @@ resource "authentik_provider_proxy" "apps" {
   mode               = "forward_single"
   external_host      = each.value.url
 
-  access_token_validity = "hours=24"
+  access_token_validity = local.app_token_validity
 
   # jwt_federation_* fields are auto-managed by Authentik — do not override.
   lifecycle {

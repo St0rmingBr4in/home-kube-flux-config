@@ -13,13 +13,16 @@
 #   terraform import tfe_workspace_settings.homelab_tailscale      St0rmingBr4in/homelab-tailscale
 
 locals {
+  # Map of Terraform resource key → HCP Terraform workspace name.
+  # Each workspace uses execution_mode = "local" (set via tfe_workspace_settings)
+  # so that plan/apply run on the GitHub Actions runner, not on TFC.
   workspaces = {
-    tfe                  = "tfe"
-    homelab              = "homelab"
-    homelab_datadog      = "homelab-datadog"
-    homelab_digitalocean = "homelab-digitalocean"
-    homelab_tailscale    = "homelab-tailscale"
-    homelab_vault        = "homelab-vault"
+    tfe                  = "tfe"                  # this workspace (manages TFE resources)
+    homelab              = "homelab"              # Authentik SSO configuration
+    homelab_datadog      = "homelab-datadog"      # Datadog monitors and synthetics
+    homelab_digitalocean = "homelab-digitalocean" # DigitalOcean droplet + DNS
+    homelab_tailscale    = "homelab-tailscale"    # Tailscale ACL and OAuth keys
+    homelab_vault        = "homelab-vault"        # Vault policies and auth roles
   }
 }
 
