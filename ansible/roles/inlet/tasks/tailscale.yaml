@@ -8,6 +8,7 @@
   ansible.builtin.shell:
     cmd: curl -fsSL https://tailscale.com/install.sh | sh
   when: not tailscale_binary.stat.exists
+  changed_when: true  # This task always changes state when it runs (binary was absent)
 
 - name: Enable and start tailscaled
   ansible.builtin.systemd:
