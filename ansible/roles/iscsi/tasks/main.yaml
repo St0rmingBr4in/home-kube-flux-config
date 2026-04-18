@@ -35,5 +35,8 @@
     cmd: >
       iscsiadm -m node --op update
       -n node.session.timeo.replacement_timeout -v 30
-  failed_when: false
-  changed_when: false
+  register: iscsiadm_result
+  # rc=21 means no node records exist yet (iSCSI not yet logged in) — skip gracefully.
+  # Any other non-zero exit code indicates a real failure and should be surfaced.
+  failed_when: iscsiadm_result.rc not in [0, 21]
+  changed_when: iscsiadm_result.rc == 0
