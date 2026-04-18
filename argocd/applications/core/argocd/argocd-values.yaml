@@ -91,6 +91,73 @@ configs:
     # Service account for PostSync/SyncFail health hooks
     accounts.health-hook: apiKey
 
+    # Custom health checks for Argo Events CRDs (not natively known to ArgoCD).
+    # Without these, EventBus/EventSource/Sensor stay Progressing forever, blocking
+    # PostSync hooks and masking real deployment failures.
+    resource.customizations.health.argoproj.io_EventBus: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.type == "Deployed" and condition.status == "True" then
+              hs.status = "Healthy"
+              hs.message = condition.message
+              return hs
+            end
+            if condition.type == "Deployed" and condition.status == "False" then
+              hs.status = "Degraded"
+              hs.message = condition.message
+              return hs
+            end
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for EventBus to be deployed"
+      return hs
+    resource.customizations.health.argoproj.io_EventSource: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.type == "DeployedSuccessfully" and condition.status == "True" then
+              hs.status = "Healthy"
+              hs.message = condition.message
+              return hs
+            end
+            if condition.type == "DeployedSuccessfully" and condition.status == "False" then
+              hs.status = "Degraded"
+              hs.message = condition.message
+              return hs
+            end
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for EventSource to be deployed"
+      return hs
+    resource.customizations.health.argoproj.io_Sensor: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.type == "DeployedSuccessfully" and condition.status == "True" then
+              hs.status = "Healthy"
+              hs.message = condition.message
+              return hs
+            end
+            if condition.type == "DeployedSuccessfully" and condition.status == "False" then
+              hs.status = "Degraded"
+              hs.message = condition.message
+              return hs
+            end
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for Sensor to be deployed"
+      return hs
+
   rbac:
     policy.csv: |
       p, role:health-hook, applications, get, */*, allow
