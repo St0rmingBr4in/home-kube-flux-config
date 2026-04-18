@@ -24,6 +24,9 @@ service:
     ports:
       torrent:
         enabled: true
+        # Must match torrent_port in ansible/inventory/group_vars/inlet.yaml
+        # (used for the inlet DNAT rule) and torrent_port in
+        # ansible/inventory/group_vars/edgerouter/vars.yaml (port-block rules).
         port: 6881
         targetPort: 6881
         protocol: tcp

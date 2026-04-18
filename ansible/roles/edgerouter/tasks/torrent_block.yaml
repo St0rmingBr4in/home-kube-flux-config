@@ -35,11 +35,11 @@
       - set firewall name LAN_OUT rule 100 application category bittorrent
       - set firewall name LAN_OUT rule 200 action drop
       - set firewall name LAN_OUT rule 200 description "Block classic BitTorrent ports (TCP)"
-      - set firewall name LAN_OUT rule 200 destination port 6881-6889
+      - "set firewall name LAN_OUT rule 200 destination port {{ torrent_port }}-{{ torrent_port + 8 }}"
       - set firewall name LAN_OUT rule 200 protocol tcp
       - set firewall name LAN_OUT rule 210 action drop
       - set firewall name LAN_OUT rule 210 description "Block classic BitTorrent ports (UDP)"
-      - set firewall name LAN_OUT rule 210 destination port 6881-6889
+      - "set firewall name LAN_OUT rule 210 destination port {{ torrent_port }}-{{ torrent_port + 8 }}"
       - set firewall name LAN_OUT rule 210 protocol udp
     save: true
 

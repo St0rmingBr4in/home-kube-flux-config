@@ -16,3 +16,7 @@ wan_dhcp_client_identifier: "{{ vault_wan_dhcp_client_identifier }}"
 # Set to true to disable hardware NAT offload so DPI inspects all flows.
 # This gives complete torrent blocking but reduces NAT throughput.
 edgerouter_disable_hwnat_for_full_dpi: false
+
+# Torrent port — must match torrent_port in ansible/inventory/group_vars/inlet.yaml
+# and the port: value in argocd/applications/media/qbittorrent/qbittorrent-values.yaml.
+torrent_port: 6881
