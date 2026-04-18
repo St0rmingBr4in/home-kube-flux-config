@@ -1,0 +1,10 @@
+---
+# Single source of truth for the NFS server hostname.
+# Update this value if the NAS is renamed or migrated.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nfs-config
+  namespace: prod-media
+data:
+  server: nasse.hard.st0rmingbr4in.com

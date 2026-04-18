@@ -2,7 +2,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - nfs-config.yaml
   - pv-nfs-share-downloads.yaml
   - pv-nfs-share-media.yaml
   - media-downloads-pvc.yaml
   - media-library-pvc.yaml
+
+# Inject NFS server hostname from nfs-config ConfigMap into both PersistentVolume specs.
+# To change the NAS hostname, update nfs-config.yaml only.
+replacements:
+  - source:
+      kind: ConfigMap
+      name: nfs-config
+      fieldPath: data.server
+    targets:
+      - select:
+          kind: PersistentVolume
+        fieldPaths:
+          - spec.nfs.server
