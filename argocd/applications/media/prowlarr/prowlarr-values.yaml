@@ -73,6 +73,13 @@ workload:
                 periodSeconds: 15
                 failureThreshold: 5
                 timeoutSeconds: 5
+            readiness:
+              enabled: true
+              type: http
+              path: /
+              spec:
+                initialDelaySeconds: 15
+                periodSeconds: 10
 
 persistence:
   config:
