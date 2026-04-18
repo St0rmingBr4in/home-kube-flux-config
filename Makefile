@@ -28,6 +28,10 @@ TF_DIGITALOCEAN_DIR := terraform/digitalocean
 TF_TAILSCALE_DIR    := terraform/tailscale
 TF_VAULT_DIR        := terraform/vault
 DD_SITE        ?= datadoghq.eu
+# Single source of truth for the HCP Terraform Cloud organisation name.
+# The CLI honours TF_CLOUD_ORGANIZATION and overrides the value in terraform{cloud{}} blocks,
+# so all modules pick up the correct org without each file needing an independent copy.
+export TF_CLOUD_ORGANIZATION ?= St0rmingBr4in
 
 # ── Help ─────────────────────────────────────────────────────────────────────
 

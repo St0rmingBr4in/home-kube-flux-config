@@ -102,6 +102,13 @@ spec:
               configMapKeyRef:
                 name: ci-config
                 key: REPO_URL
+          # Single source of truth for the HCP Terraform organisation.
+          # TF_CLOUD_ORGANIZATION overrides terraform{cloud{organization}} in every module.
+          - name: TF_CLOUD_ORGANIZATION
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: TF_CLOUD_ORGANIZATION
         source: |
           set -e
 

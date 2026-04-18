@@ -13,3 +13,6 @@ data:
   VAULT_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
   # Datadog site for API calls. Must match the site in datadog-values.yaml and Terraform.
   DD_SITE: "datadoghq.eu"
+  # HCP Terraform Cloud organisation. Overrides terraform{cloud{organization}} in all modules
+  # via the TF_CLOUD_ORGANIZATION env var, avoiding duplication across module main.tf files.
+  TF_CLOUD_ORGANIZATION: "St0rmingBr4in"
