@@ -39,13 +39,6 @@ datadog:
       instances:
         - prometheus_url: "http://%%env_DD_KUBERNETES_KUBELET_HOST%%:2381/metrics"
 
-    fluxcd.yaml: |-
-      init_config:
-      instances:
-        - metric_patterns:
-            include:
-              - "*"
-
   # Container runtime configuration
   criSocketPath: /run/k3s/containerd/containerd.sock
 
