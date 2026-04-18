@@ -81,7 +81,7 @@ lint-go: ## Lint Go code with go vet and golangci-lint
 
 lint-ansible: ## Lint Ansible playbooks with ansible-lint
 	@echo "==> ansible-lint"
-	pip install ansible-lint --quiet
+	pip install -r ci/images/ci-ansible/requirements.txt --quiet
 	ansible-galaxy role install -r ansible/requirements.yml --roles-path ansible/roles
 	ansible-galaxy collection install -r ansible/requirements.yml
 	cd ansible && ansible-lint
@@ -173,7 +173,7 @@ terraform-vault-apply: ## Apply Vault Terraform
 # ── Ansible ───────────────────────────────────────────────────────────────────
 
 ansible-install-edgerouter: ## Install Ansible + collections for the edgerouter playbook
-	pip install ansible
+	pip install -r ci/images/ci-ansible/requirements.txt
 	ansible-galaxy collection install -r ansible/requirements.yml
 
 ansible-setup-ssh-edgerouter: ## Write EdgeRouter SSH key from EDGEROUTER_SSH_PRIVATE_KEY env var
@@ -193,11 +193,11 @@ ansible-edgerouter-check: ## Run edgerouter playbook in check/diff mode (local d
 	CHECK_MODE=true $(MAKE) ansible-edgerouter
 
 ansible-install-inlet: ## Install Ansible + collections for the inlet playbook
-	pip install ansible
+	pip install -r ci/images/ci-ansible/requirements.txt
 	ansible-galaxy collection install ansible.posix
 
 ansible-install-k3s: ## Install Ansible + roles + collections for the k3s playbook
-	pip install ansible
+	pip install -r ci/images/ci-ansible/requirements.txt
 	ansible-galaxy role install -r ansible/requirements.yml --roles-path ansible/roles
 	ansible-galaxy collection install -r ansible/requirements.yml
 
