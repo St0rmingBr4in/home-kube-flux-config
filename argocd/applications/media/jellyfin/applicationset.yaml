@@ -12,7 +12,6 @@ spec:
             chart: jellyfin
             chartVersion: 19.1.11
             namespace: prod-media
-            valuesPath: argocd/applications/media/jellyfin/jellyfin-values.yaml
             manifestPath: argocd/applications/media/jellyfin
 
   template:
@@ -29,11 +28,67 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              operator:
+                verify:
+                  enabled: false
+                traefik:
+                  namespace: prod-infra
+              ingress:
+                main:
+                  integrations:
+                    traefik:
+                      enableFixedMiddlewares: false
+                      middlewares:
+                  enabled: true
+                  hosts:
+                    - host: jellyfin.st0rmingbr4in.com
+                      paths:
+                        - path: /
+              resources:
+                limits:
+                  cpu: 7
+                  memory: 4Gi
+                requests:
+                  cpu: 3500m
+                  memory: 4Gi
+              podSecurityContext:
+                supplementalGroups:
+                  - 107
+                  - 44
+              workload:
+                main:
+                  podSpec:
+                    containers:
+                      main:
+                        probes:
+                          liveness:
+                            enabled: true
+                            type: exec
+                            command:
+                              - sh
+                              - -c
+                              - touch /config/.liveness
+                            spec:
+                              initialDelaySeconds: 12
+                              periodSeconds: 15
+                              failureThreshold: 5
+                              timeoutSeconds: 5
+                          readiness:
+                            enabled: true
+                            type: http
+                            path: /health
+                            spec:
+                              initialDelaySeconds: 15
+                              periodSeconds: 10
+              persistence:
+                config:
+                  enabled: true
+                  existingClaim: jellyfin-config
+                media:
+                  enabled: true
+                  existingClaim: media-library
+                  mountPath: /media
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

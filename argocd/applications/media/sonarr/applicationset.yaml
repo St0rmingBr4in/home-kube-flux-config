@@ -12,7 +12,6 @@ spec:
             chart: sonarr
             chartVersion: 26.0.1
             namespace: prod-media
-            valuesPath: argocd/applications/media/sonarr/sonarr-values.yaml
             manifestPath: argocd/applications/media/sonarr
 
   template:
@@ -29,11 +28,68 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              operator:
+                verify:
+                  enabled: false
+                traefik:
+                  namespace: prod-infra
+              ingress:
+                main:
+                  enabled: false
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+              exportarrResources:
+                limits:
+                  memory: 100Mi
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+              securityContext:
+                runAsUser: 1031
+                runAsGroup: 100
+              workload:
+                main:
+                  podSpec:
+                    containers:
+                      main:
+                        probes:
+                          liveness:
+                            enabled: true
+                            type: exec
+                            command:
+                              - sh
+                              - -c
+                              - touch /config/.liveness
+                            spec:
+                              initialDelaySeconds: 12
+                              periodSeconds: 15
+                              failureThreshold: 5
+                              timeoutSeconds: 5
+                          readiness:
+                            enabled: true
+                            type: http
+                            path: /
+                            spec:
+                              initialDelaySeconds: 15
+                              periodSeconds: 10
+              persistence:
+                config:
+                  enabled: true
+                  existingClaim: sonarr-config
+                media:
+                  enabled: true
+                  existingClaim: media-library
+                  subPath: Series
+                  mountPath: /tv
+                downloads:
+                  enabled: true
+                  existingClaim: media-downloads
+                  mountPath: /downloads
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

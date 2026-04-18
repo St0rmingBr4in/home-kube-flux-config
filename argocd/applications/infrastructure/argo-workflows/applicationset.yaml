@@ -13,7 +13,6 @@ spec:
             chartVersion: 0.47.5
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
-            valuesPath: argocd/applications/infrastructure/argo-workflows/values.yaml
             manifestPath: argocd/applications/infrastructure/argo-workflows
 
   template:
@@ -28,11 +27,44 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              workflow:
+                serviceAccount:
+                  create: true
+                  name: argo-workflow-default
+                rbac:
+                  create: true
+              controller:
+                serviceAccount:
+                  create: true
+                  name: argo-workflows-controller
+                workflowNamespaces:
+                  - argo
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+              server:
+                enabled: true
+                authModes:
+                  - server
+                ingress:
+                  enabled: false
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+              executor:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 64Mi
+                  limits:
+                    memory: 512Mi
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

@@ -13,7 +13,6 @@ spec:
             chartVersion: 1.94.2
             namespace: tailscale
             repoURL: https://pkgs.tailscale.com/helmcharts
-            valuesPath: argocd/applications/infrastructure/tailscale-operator/tailscale-operator-values.yaml
             manifestPath: argocd/applications/infrastructure/tailscale-operator
 
   template:
@@ -28,11 +27,28 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              oauth:
+                audience: ""
+              apiServerProxyConfig:
+                mode: "true"
+                hostname: "home-kube-api"
+              ingressProxyConfig:
+                mode: "true"
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 128Mi
+                requests:
+                  cpu: 100m
+                  memory: 64Mi
+              image:
+                pullPolicy: IfNotPresent
+              serviceAccount:
+                create: true
+                name: "tailscale-operator"
+              rbac:
+                create: true
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

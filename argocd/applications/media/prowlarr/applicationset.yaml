@@ -12,7 +12,6 @@ spec:
             chart: prowlarr
             chartVersion: 22.0.3
             namespace: prod-media
-            valuesPath: argocd/applications/media/prowlarr/prowlarr-values.yaml
             manifestPath: argocd/applications/media/prowlarr
 
   template:
@@ -29,11 +28,84 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              operator:
+                verify:
+                  enabled: false
+                traefik:
+                  namespace: prod-infra
+              affinity:
+                podAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    - labelSelector:
+                        matchExpressions:
+                          - key: app.kubernetes.io/name
+                            operator: In
+                            values: ["prowlarr"]
+                      topologyKey: kubernetes.io/hostname
+              ingress:
+                main:
+                  integrations:
+                    traefik:
+                      enableFixedMiddlewares: false
+                      middlewares:
+                        - name: authentik-forward-auth
+                          namespace: prod-infra
+                  enabled: true
+                  hosts:
+                    - host: prowlarr.st0rmingbr4in.com
+                      paths:
+                        - path: /
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+              exportarrResources:
+                limits:
+                  memory: 100Mi
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+              exportarrAffinity:
+                podAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    - labelSelector:
+                        matchExpressions:
+                          - key: app.kubernetes.io/name
+                            operator: In
+                            values: ["prowlarr"]
+                      topologyKey: kubernetes.io/hostname
+              workload:
+                main:
+                  podSpec:
+                    containers:
+                      main:
+                        probes:
+                          liveness:
+                            enabled: true
+                            type: exec
+                            command:
+                              - sh
+                              - -c
+                              - touch /config/.liveness
+                            spec:
+                              initialDelaySeconds: 12
+                              periodSeconds: 15
+                              failureThreshold: 5
+                              timeoutSeconds: 5
+                          readiness:
+                            enabled: true
+                            type: http
+                            path: /
+                            spec:
+                              initialDelaySeconds: 15
+                              periodSeconds: 10
+              persistence:
+                config:
+                  enabled: true
+                  existingClaim: prowlarr-config
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

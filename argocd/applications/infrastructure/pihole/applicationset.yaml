@@ -13,7 +13,6 @@ spec:
             chartVersion: 2.35.0
             namespace: prod-infra
             repoURL: https://mojo2600.github.io/pihole-kubernetes/
-            valuesPath: argocd/applications/infrastructure/pihole/pihole-values.yaml
 
   template:
     metadata:
@@ -27,11 +26,49 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+              serviceDns:
+                type: LoadBalancer
+                loadBalancerClass: tailscale
+                annotations:
+                  tailscale.com/hostname: "pihole"
+                  tailscale.com/proxy-class: "proxy-resources"
+              serviceWeb:
+                type: ClusterIP
+              doh:
+                enabled: false
+              persistentVolumeClaim:
+                enabled: false
+              DNS1: "1.1.1.1"
+              DNS2: "1.0.0.1"
+              dnsmasq:
+                upstreamServers: []
+                customDnsEntries: []
+              admin:
+                enabled: true
+              livenessProbe:
+                httpGet:
+                  path: /admin/
+                  port: http
+                initialDelaySeconds: 30
+                periodSeconds: 15
+                failureThreshold: 5
+              readinessProbe:
+                httpGet:
+                  path: /admin/
+                  port: http
+                initialDelaySeconds: 15
+                periodSeconds: 10
+                failureThreshold: 3
+              monitoring:
+                podMonitor:
+                  enabled: false
 
       destination:
         server: https://kubernetes.default.svc

@@ -13,7 +13,6 @@ spec:
             chartVersion: 2.4.20
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
-            valuesPath: argocd/applications/infrastructure/argo-events/values.yaml
 
   template:
     metadata:
@@ -27,11 +26,14 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              controller:
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
 
       destination:
         server: https://kubernetes.default.svc

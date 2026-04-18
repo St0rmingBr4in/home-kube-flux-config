@@ -13,7 +13,6 @@ spec:
             chartVersion: 1.3.0
             namespace: prod-infra
             repoURL: https://helm.releases.hashicorp.com
-            valuesPath: argocd/applications/infrastructure/vault-secrets-operator/vault-secrets-operator-values.yaml
 
   template:
     metadata:
@@ -27,11 +26,40 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              defaultVaultConnection:
+                enabled: true
+                address: "https://vault.prod-infra.svc.cluster.local:8200"
+                caCertSecret: "vault-internal-ca-secret"
+                skipTLSVerify: false
+              defaultAuthMethod:
+                enabled: true
+                namespace: "prod-infra"
+                allowedNamespaces: ["*"]
+                method: kubernetes
+                mount: kubernetes
+                kubernetes:
+                  role: vso
+                  serviceAccount: default
+                  tokenExpirationSeconds: 600
+              controller:
+                manager:
+                  resources:
+                    requests:
+                      memory: 128Mi
+                      cpu: 100m
+                    limits:
+                      memory: 128Mi
+                  clientCache:
+                    persistenceModel: "none"
+                    cacheSize: 1000
+                  globalTransformationOptions:
+                    excludeRaw: false
+              metricsService:
+                enabled: true
+              telemetry:
+                serviceMonitor:
+                  enabled: false
 
       destination:
         server: https://kubernetes.default.svc

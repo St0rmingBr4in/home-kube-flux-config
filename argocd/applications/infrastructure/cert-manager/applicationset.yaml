@@ -13,7 +13,6 @@ spec:
             chartVersion: v1.20.1
             namespace: prod-infra
             repoURL: https://charts.jetstack.io
-            valuesPath: argocd/applications/infrastructure/cert-manager/cert-manager-values.yaml
 
   template:
     metadata:
@@ -27,11 +26,31 @@ spec:
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
-            valueFiles:
-              - $values/{{valuesPath}}
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          ref: values
+            values: |
+              installCRDs: true
+              extraArgs:
+                - "--dns01-recursive-nameservers-only=true"
+                - "--dns01-recursive-nameservers=ns1.digitalocean.com:53,ns2.digitalocean.com:53,ns3.digitalocean.com:53"
+              resources:
+                limits:
+                  memory: 100Mi
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+              webhook:
+                resources:
+                  limits:
+                    memory: 100Mi
+                  requests:
+                    cpu: 100m
+                    memory: 100Mi
+              cainjector:
+                resources:
+                  limits:
+                    memory: 130Mi
+                  requests:
+                    cpu: 100m
+                    memory: 130Mi
 
       destination:
         server: https://kubernetes.default.svc
