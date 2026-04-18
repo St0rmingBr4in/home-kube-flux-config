@@ -108,8 +108,18 @@ spec:
         env:
           - name: DOCKER_CONFIG
             value: /docker-config
+          # Required for rootless BuildKit: disables the OCI worker's process sandbox
+          # so it can run without privileged mode (same approach as ci-docker-build).
+          - name: BUILDKITD_FLAGS
+            value: "--oci-worker-no-process-sandbox"
+        # Rootless BuildKit — no privileged mode required.
+        # Requires kernel unprivileged user namespaces (unprivileged_userns_clone=1),
+        # confirmed on k3s-clusterv2-node1 (kernel 6.1.0-43-amd64, Debian 12).
         securityContext:
-          privileged: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          seccompProfile:
+            type: Unconfined
         resources:
           requests:
             memory: 512Mi
