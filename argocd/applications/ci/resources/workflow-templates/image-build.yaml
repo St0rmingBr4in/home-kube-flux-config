@@ -4,6 +4,11 @@
 # within a single pod to share /workspace (cloned repo) and /docker-config
 # (Docker Hub credentials fetched from Vault at runtime).
 #
+# Supports an optional Go pre-build step (go_build: "true") for images that
+# require a compiled Go binary before the Docker build (e.g. memory-webhook).
+# When enabled, the Go binary is compiled into the context directory so BuildKit
+# can COPY it into a thin runtime image without a Go toolchain inside.
+#
 # Vault secret layout (kv-v2):
 #   secret/ci/docker → username, password (Docker Hub credentials)
 apiVersion: argoproj.io/v1alpha1
@@ -26,6 +31,8 @@ spec:
       - name: path-filter
       - name: image          # e.g. docker.io/st0rmingbr4in/ci-ansible
       - name: context        # repo-relative path containing Dockerfile, e.g. ci/images/ci-ansible
+      - name: go_build       # set to "true" to compile a Go binary before the Docker build
+        default: "false"
   templates:
     - name: main
       steps:
@@ -68,6 +75,30 @@ spec:
               cpu: 50m
             limits:
               memory: 256Mi
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+        # Optional Go build step: only active when go_build == "true".
+        # Compiles the Go binary natively on amd64 so BuildKit can COPY it into
+        # a thin runtime image. Image version must match go.mod — kept in sync by Renovate.
+        - name: go-build
+          image: "{{= workflow.parameters.go_build == 'true' ? 'golang:1.25-alpine@sha256:7a00384194cf2cb68924bbb918d675f1517357433c8541bac0ab2f929b9d5447' : 'alpine:3.21' }}"
+          command: [sh, -c]
+          args:
+            - |
+              if [ "{{workflow.parameters.go_build}}" != "true" ]; then
+                echo "go_build=false, skipping Go compilation"
+                exit 0
+              fi
+              cd /workspace/{{workflow.parameters.context}}
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+                go build -a -installsuffix cgo -o webhook main.go
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 500m
+            limits:
+              memory: 512Mi
           volumeMounts:
             - name: workspace
               mountPath: /workspace
@@ -114,14 +145,14 @@ spec:
         args:
           - build
           - --frontend=dockerfile.v0
-          - --local=context=/workspace
+          - --local=context=/workspace/{{workflow.parameters.context}}
           - --local=dockerfile=/workspace/{{workflow.parameters.context}}
           - --output=type=image,"name={{workflow.parameters.image}}:latest,{{workflow.parameters.image}}:{{workflow.parameters.git-sha}}",push=true
         env:
           - name: DOCKER_CONFIG
             value: /docker-config
           # Required for rootless BuildKit: disables the OCI worker's process sandbox
-          # so it can run without privileged mode (same approach as ci-docker-build).
+          # so it can run without privileged mode.
           - name: BUILDKITD_FLAGS
             value: "--oci-worker-no-process-sandbox"
         # Rootless BuildKit — no privileged mode required.

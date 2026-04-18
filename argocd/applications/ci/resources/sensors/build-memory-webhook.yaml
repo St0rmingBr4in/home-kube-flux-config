@@ -31,7 +31,7 @@ spec:
                 namespace: argo
               spec:
                 workflowTemplateRef:
-                  name: ci-docker-build
+                  name: ci-image-build
                 arguments:
                   parameters:
                     - name: git-ref
@@ -44,6 +44,8 @@ spec:
                       value: "docker.io/st0rmingbr4in/memory-webhook"
                     - name: context
                       value: "memory-webhook"
+                    - name: go_build
+                      value: "true"
           parameters:
             - src:
                 dependencyName: push

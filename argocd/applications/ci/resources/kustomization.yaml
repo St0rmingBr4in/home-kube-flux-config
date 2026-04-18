@@ -10,7 +10,6 @@ resources:
   - ingressroute.yaml
   - workflow-templates/common.yaml
   - workflow-templates/terraform.yaml
-  - workflow-templates/docker-build.yaml
   - workflow-templates/ansible.yaml
   - workflow-templates/image-build.yaml
   - sensors/terraform-authentik.yaml
