@@ -13,7 +13,8 @@ resource "digitalocean_reserved_ip" "inlet" {
   # droplet_id is managed by digitalocean_reserved_ip_assignment below;
   # ignore it here to avoid the two resources fighting each other.
   lifecycle {
-    ignore_changes = [droplet_id]
+    ignore_changes  = [droplet_id]
+    prevent_destroy = true
   }
 }
 

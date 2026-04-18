@@ -2,6 +2,9 @@
 #   terraform import digitalocean_domain.st0rmingbr4in_com st0rmingbr4in.com
 resource "digitalocean_domain" "st0rmingbr4in_com" {
   name = "st0rmingbr4in.com"
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # inlet A record → reserved IP (stable across droplet reprovisioning)
