@@ -19,6 +19,13 @@ spec:
             - sh
             - -c
             - apk add --no-cache curl jq -q && sh /scripts/postsync.sh
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
           env:
             - name: APP_NAME
               value: "" # Override via patch: set to the ArgoCD application name
