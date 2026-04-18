@@ -55,7 +55,13 @@ spec:
           image: alpine/git@sha256:d453f54c83320412aa89c391b076930bd8569bc1012285e8c68ce2d4435826a3
           command: [sh, -c]
           args:
-            - git clone https://github.com/St0rmingBr4in/home-kube-flux-config /workspace
+            - git clone "$REPO_URL" /workspace
+          env:
+            - name: REPO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ci-config
+                  key: REPO_URL
           resources:
             requests:
               memory: 64Mi
@@ -74,19 +80,25 @@ spec:
               apk add --no-cache curl jq -q
               VAULT_TOKEN=$(curl -sk \
                 --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
-                https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+                "${VAULT_ADDR}/v1/auth/kubernetes/login" \
                 | jq -r '.auth.client_token')
               [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] \
                 || { echo "Vault login failed"; exit 1; }
               USERNAME=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-                https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/docker \
+                "${VAULT_ADDR}/v1/secret/data/ci/docker" \
                 | jq -r '.data.data.username')
               PASSWORD=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-                https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/docker \
+                "${VAULT_ADDR}/v1/secret/data/ci/docker" \
                 | jq -r '.data.data.password')
               printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
                 "$(printf '%s:%s' "$USERNAME" "$PASSWORD" | base64 | tr -d '\n')" \
                 > /docker-config/config.json
+          env:
+            - name: VAULT_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: ci-config
+                  key: VAULT_ADDR
           resources:
             requests:
               memory: 64Mi

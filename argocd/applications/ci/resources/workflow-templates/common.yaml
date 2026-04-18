@@ -18,10 +18,14 @@ spec:
             cpu: 50m
           limits:
             memory: 256Mi
+        env:
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
         source: |
-          git clone --depth=2 \
-            https://github.com/St0rmingBr4in/home-kube-flux-config \
-            /workspace
+          git clone --depth=2 "$REPO_URL" /workspace
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -38,7 +42,10 @@ spec:
             memory: 256Mi
         env:
           - name: VAULT_ADDR
-            value: "https://vault.prod-infra.svc.cluster.local:8200"
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
           - name: VAULT_SKIP_VERIFY
             value: "true"
         source: |
@@ -64,10 +71,14 @@ spec:
             cpu: 50m
           limits:
             memory: 256Mi
+        env:
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
         source: |
-          git clone --depth=2 \
-            https://github.com/St0rmingBr4in/home-kube-flux-config \
-            /tmp/workspace
+          git clone --depth=2 "$REPO_URL" /tmp/workspace
           cd /tmp/workspace
           CHANGED=$(git diff HEAD~1 --name-only 2>/dev/null \
             || git show --stat --format="" HEAD | awk '{print $1}')
@@ -94,21 +105,29 @@ spec:
             cpu: 50m
           limits:
             memory: 256Mi
+        env:
+          - name: VAULT_ADDR
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
         source: |
           set -e
           apk add --no-cache curl jq -q
           VAULT_TOKEN=$(curl -sk \
             --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
-            https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+            "${VAULT_ADDR}/v1/auth/kubernetes/login" \
             | jq -r '.auth.client_token')
           GITHUB_TOKEN=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-            https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/github \
+            "${VAULT_ADDR}/v1/secret/data/ci/github" \
             | jq -r '.data.data.token')
+          # Extract org/repo from REPO_URL for the GitHub statuses API path
+          REPO_PATH=$(echo "$REPO_URL" | sed 's|https://github.com/||')
           RESP=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"state\":\"{{inputs.parameters.state}}\",\"target_url\":\"https://argo.st0rmingbr4in.com/workflows/argo/{{workflow.name}}\",\"description\":\"{{inputs.parameters.description}}\",\"context\":\"{{inputs.parameters.context}}\"}" \
-            "https://api.github.com/repos/St0rmingBr4in/home-kube-flux-config/statuses/{{inputs.parameters.sha}}")
+            "https://api.github.com/repos/${REPO_PATH}/statuses/{{inputs.parameters.sha}}")
           HTTP_CODE=$(echo "$RESP" | tail -1)
           echo "GitHub status API: $HTTP_CODE"
           [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]
@@ -134,16 +153,27 @@ spec:
             cpu: 50m
           limits:
             memory: 256Mi
+        env:
+          - name: VAULT_ADDR
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
         source: |
           set -e
           apk add --no-cache curl jq -q
           VAULT_TOKEN=$(curl -sk \
             --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"argo-ci\"}" \
-            https://vault.prod-infra.svc.cluster.local:8200/v1/auth/kubernetes/login \
+            "${VAULT_ADDR}/v1/auth/kubernetes/login" \
             | jq -r '.auth.client_token')
           [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
           DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-            https://vault.prod-infra.svc.cluster.local:8200/v1/secret/data/ci/datadog \
+            "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
             | jq -r '.data.data.TF_VAR_datadog_api_key')
           STATUS="{{inputs.parameters.status}}"
           [ "$STATUS" = "failure" ] && STATUS="error"
@@ -159,6 +189,7 @@ spec:
             --arg sha "{{inputs.parameters.sha}}" \
             --arg branch "$BRANCH" \
             --arg author_email "$AUTHOR_EMAIL" \
+            --arg repo_url "$REPO_URL" \
             '{
               "data": {
                 "type": "cipipeline_resource_request",
@@ -173,7 +204,7 @@ spec:
                     "status": $status,
                     "partial_retry": false,
                     "git": {
-                      "repository_url": "https://github.com/St0rmingBr4in/home-kube-flux-config",
+                      "repository_url": $repo_url,
                       "sha": $sha,
                       "branch": $branch,
                       "author_email": $author_email

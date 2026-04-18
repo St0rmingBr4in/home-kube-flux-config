@@ -93,14 +93,20 @@ spec:
             memory: 1Gi
         env:
           - name: VAULT_ADDR
-            value: "https://vault.prod-infra.svc.cluster.local:8200"
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
         source: |
           set -e
 
           # Clone repo
-          git clone --depth=2 \
-            https://github.com/St0rmingBr4in/home-kube-flux-config \
-            /tmp/workspace
+          git clone --depth=2 "$REPO_URL" /tmp/workspace
 
           # Check if relevant paths changed
           cd /tmp/workspace

@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - rbac.yaml
   - ci-semaphore-configmap.yaml
+  - ci-config-configmap.yaml
   - eventbus.yaml
   - eventsource.yaml
   - ingressroute.yaml

@@ -88,7 +88,15 @@ spec:
           - name: HOME
             value: /root
           - name: VAULT_ADDR
-            value: "https://vault.prod-infra.svc.cluster.local:8200"
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
           - name: PLAYBOOK
             value: "{{workflow.parameters.playbook}}"
         source: |
@@ -96,9 +104,7 @@ spec:
 
           # Clone repo to /root/workspace (not /tmp) so ansible.cfg is not ignored
           # Ansible silently ignores ansible.cfg in world-writable directories (/tmp is 1777)
-          git clone --depth=2 \
-            https://github.com/St0rmingBr4in/home-kube-flux-config \
-            /root/workspace
+          git clone --depth=2 "$REPO_URL" /root/workspace
 
           # Check if relevant paths changed
           cd /root/workspace

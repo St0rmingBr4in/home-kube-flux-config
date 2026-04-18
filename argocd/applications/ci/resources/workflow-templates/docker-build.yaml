@@ -100,7 +100,10 @@ spec:
             memory: 256Mi
         env:
           - name: VAULT_ADDR
-            value: "https://vault.prod-infra.svc.cluster.local:8200"
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: VAULT_ADDR
           - name: VAULT_SKIP_VERIFY
             value: "true"
         source: |

@@ -1,0 +1,13 @@
+---
+# Shared CI configuration values referenced by all WorkflowTemplates.
+# Update this file if the repository is renamed or Vault's internal address changes.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ci-config
+  namespace: argo
+data:
+  # Git repository URL cloned by CI workflow steps.
+  REPO_URL: "https://github.com/St0rmingBr4in/home-kube-flux-config"
+  # Vault internal service address used by all CI pods to fetch secrets.
+  VAULT_ADDR: "https://vault.prod-infra.svc.cluster.local:8200"
