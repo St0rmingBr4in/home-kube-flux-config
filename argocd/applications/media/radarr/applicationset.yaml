@@ -10,7 +10,7 @@ spec:
         elements:
           - name: radarr
             chart: radarr
-            chartVersion: 27.0.2
+            chartVersion: 27.0.3
             namespace: prod-media
             manifestPath: argocd/applications/media/radarr
 
