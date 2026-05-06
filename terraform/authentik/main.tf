@@ -11,10 +11,19 @@ terraform {
       source  = "goauthentik/authentik"
       version = "~> 2025.12"
     }
+    vault = {
+      source  = "hashicorp/vault"
+      version = "~> 4.0"
+    }
   }
 }
 
 provider "authentik" {
   url   = "https://authentik.${local.base_domain}"
   token = var.authentik_token
+}
+
+provider "vault" {
+  address = "https://vault.${local.base_domain}"
+  token   = var.vault_token
 }

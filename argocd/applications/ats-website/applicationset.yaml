@@ -1,0 +1,48 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ats-website
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: ats-website
+            namespace: prod-infra
+            manifestPath: argocd/applications/ats-website
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: "{{name}}"
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+      revisionHistoryLimit: 10

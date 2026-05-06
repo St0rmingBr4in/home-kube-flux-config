@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ats-postgres
+  namespace: prod-infra
+spec:
+  serviceName: ats-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ats-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ats-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: ats
+            - name: POSTGRES_USER
+              value: ats
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ats-website
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "ats", "-d", "ats"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ats-postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ats-postgres
+  namespace: prod-infra
+spec:
+  selector:
+    app.kubernetes.io/name: ats-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres

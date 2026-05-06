@@ -16,4 +16,48 @@
         - { name: fs.inotify.max_user_watches, value: "524288" }
   roles:
     - role: xanmanning.k3s
-    - role: iscsi
+  # ── iSCSI keepalive configuration ──────────────────────────────────────────
+  # Configure iSCSI session keepalives so dropped sessions are detected
+  # and recovered in ~10s instead of the default 120s.
+  # Inlined here (was the iscsi role) — k3s-cluster-specific, never reused.
+  tasks:
+    - name: Install open-iscsi
+      ansible.builtin.package:
+        name: open-iscsi
+        state: present
+
+    - name: Configure iSCSI keepalive and timeout settings
+      ansible.builtin.lineinfile:
+        path: /etc/iscsi/iscsid.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        backup: true
+      loop:
+        # Time to wait for a transport-layer reconnect before declaring the
+        # session dead and returning I/O errors to the filesystem. Default: 120.
+        - regexp: '^node\.session\.timeo\.replacement_timeout'
+          line: 'node.session.timeo.replacement_timeout = 30'
+        # Send a NOP-Out keepalive every 5s to detect silent TCP drops.
+        - regexp: '^node\.conn\.timeo\.noop_out_interval'
+          line: 'node.conn.timeo.noop_out_interval = 5'
+        # Declare the connection dead if no NOP-In reply arrives within 5s.
+        - regexp: '^node\.conn\.timeo\.noop_out_timeout'
+          line: 'node.conn.timeo.noop_out_timeout = 5'
+      notify: Restart iscsid
+
+    - name: Apply replacement_timeout to existing iSCSI node records
+      ansible.builtin.command:
+        cmd: >
+          iscsiadm -m node --op update
+          -n node.session.timeo.replacement_timeout -v 30
+      register: iscsiadm_result
+      # rc=21 means no node records exist yet (iSCSI not yet logged in) — skip gracefully.
+      # Any other non-zero exit code indicates a real failure and should be surfaced.
+      failed_when: iscsiadm_result.rc not in [0, 21]
+      changed_when: iscsiadm_result.rc == 0
+
+  handlers:
+    - name: Restart iscsid
+      ansible.builtin.service:
+        name: iscsid
+        state: restarted

@@ -1,0 +1,29 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - secret-vault.yaml
+  - postgres-pv.yaml
+  - postgres-pvc.yaml
+  - postgres-statefulset.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
+  - frontend-ingressroute.yaml
+
+images:
+  - name: ats-frontend
+    newName: ghcr.io/st0rmingbr4in/ats-frontend
+    newTag: latest
+  - name: ats-backend
+    newName: ghcr.io/st0rmingbr4in/ats-backend
+    newTag: latest
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: ats-website
+
+commonAnnotations:
+  app.kubernetes.io/managed-by: argocd
