@@ -109,10 +109,14 @@ terraform-authentik-init: ## Initialise Authentik Terraform
 	terraform -chdir=$(TF_AUTHENTIK_DIR) init
 
 terraform-authentik-plan: ## Plan Authentik Terraform
-	terraform -chdir=$(TF_AUTHENTIK_DIR) plan -parallelism=1
+	TF_VAR_authentik_token=$$(vault kv get -mount=secret -format=json ci/authentik | jq -r '.data.data.TF_VAR_authentik_token') \
+	TF_VAR_vault_token=$$(vault kv get -mount=secret -format=json ci/authentik | jq -r '.data.data.TF_VAR_vault_token') \
+	terraform -chdir=$(TF_AUTHENTIK_DIR) plan
 
 terraform-authentik-apply: ## Apply Authentik Terraform
-	terraform -chdir=$(TF_AUTHENTIK_DIR) apply -auto-approve -parallelism=1
+	TF_VAR_authentik_token=$$(vault kv get -mount=secret -format=json ci/authentik | jq -r '.data.data.TF_VAR_authentik_token') \
+	TF_VAR_vault_token=$$(vault kv get -mount=secret -format=json ci/authentik | jq -r '.data.data.TF_VAR_vault_token') \
+	terraform -chdir=$(TF_AUTHENTIK_DIR) apply -auto-approve
 
 # Legacy aliases kept for backward compatibility
 terraform-init: terraform-authentik-init
