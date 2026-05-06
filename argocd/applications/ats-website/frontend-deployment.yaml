@@ -34,6 +34,8 @@ spec:
           env:
             - name: BACKEND_URL
               value: http://ats-backend:8080
+            - name: AUTH_URL
+              value: https://ats.st0rmingbr4in.com
           livenessProbe:
             httpGet:
               path: /api/health
