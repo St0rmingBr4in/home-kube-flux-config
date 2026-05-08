@@ -10,7 +10,7 @@ spec:
         elements:
           - name: argo-events
             chart: argo-events
-            chartVersion: 2.4.20
+            chartVersion: 2.4.21
             namespace: argo
             repoURL: https://argoproj.github.io/argo-helm
 
