@@ -10,7 +10,7 @@ spec:
         elements:
           - name: cert-manager
             chart: cert-manager
-            chartVersion: v1.20.1
+            chartVersion: v1.20.2
             namespace: prod-infra
             repoURL: https://charts.jetstack.io
 
