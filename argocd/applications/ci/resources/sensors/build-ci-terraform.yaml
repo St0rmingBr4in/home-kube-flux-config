@@ -44,6 +44,8 @@ spec:
                       value: "docker.io/st0rmingbr4in/ci-terraform"
                     - name: context
                       value: "ci/images/ci-terraform"
+                    - name: go_build
+                      value: "false"
           parameters:
             - src:
                 dependencyName: push

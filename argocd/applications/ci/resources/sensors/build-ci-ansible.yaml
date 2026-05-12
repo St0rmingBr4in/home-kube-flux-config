@@ -44,6 +44,8 @@ spec:
                       value: "docker.io/st0rmingbr4in/ci-ansible"
                     - name: context
                       value: "ci/images/ci-ansible"
+                    - name: go_build
+                      value: "false"
           parameters:
             - src:
                 dependencyName: push
