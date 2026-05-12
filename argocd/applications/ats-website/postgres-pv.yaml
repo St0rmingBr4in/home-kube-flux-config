@@ -19,4 +19,5 @@ spec:
     lun: 1
     fsType: ext4
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   volumeMode: Filesystem
