@@ -39,6 +39,9 @@ spec:
                   parameters:
                     dsm: "192.168.42.42"
                     location: /volume1
+                    type: BLUN
+                    thin_provisioning: "true"
+                    enableSpaceReclamation: "true"
                 nfs-delete:
                   disabled: true
                 nfs-retain:

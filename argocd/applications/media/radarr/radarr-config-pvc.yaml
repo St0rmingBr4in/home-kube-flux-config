@@ -4,9 +4,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: radarr-config
 spec:
+  storageClassName: synology-csi-iscsi-retain
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
-  volumeName: radarr-config
