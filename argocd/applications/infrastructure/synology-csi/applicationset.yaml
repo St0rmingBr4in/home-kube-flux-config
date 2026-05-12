@@ -36,6 +36,7 @@ spec:
                 iscsi-delete:
                   disabled: true
                 iscsi-retain:
+                  isDefault: true
                   parameters:
                     dsm: "192.168.42.42"
                     location: /volume1
