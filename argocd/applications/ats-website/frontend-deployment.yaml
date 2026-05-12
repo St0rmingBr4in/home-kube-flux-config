@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ats-frontend
-  namespace: prod-infra
+  namespace: prod-ats
 spec:
   replicas: 1
   selector:

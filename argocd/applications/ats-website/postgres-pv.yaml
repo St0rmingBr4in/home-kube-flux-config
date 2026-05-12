@@ -12,7 +12,7 @@ spec:
     apiVersion: v1
     kind: PersistentVolumeClaim
     name: ats-postgres
-    namespace: prod-infra
+    namespace: prod-ats
   iscsi:
     targetPortal: 192.168.42.42
     iqn: iqn.2000-01.com.synology:ats-postgres

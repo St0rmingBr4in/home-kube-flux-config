@@ -3,7 +3,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: ats-frontend
-  namespace: prod-infra
+  namespace: prod-ats
 spec:
   entryPoints:
     - websecure

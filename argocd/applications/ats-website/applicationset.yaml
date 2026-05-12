@@ -9,7 +9,7 @@ spec:
     - list:
         elements:
           - name: ats-website
-            namespace: prod-infra
+            namespace: prod-ats
             manifestPath: argocd/applications/ats-website
 
   template:
