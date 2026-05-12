@@ -1,0 +1,71 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: synology-csi
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: synology-csi
+            chart: synology-csi
+            chartVersion: 0.11.1
+            namespace: prod-infra
+            repoURL: https://christian-schlichtherle.github.io/synology-csi-chart
+            manifestPath: argocd/applications/infrastructure/synology-csi
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            values: |
+              clientInfoSecret:
+                name: client-info
+              storageClasses:
+                iscsi-delete:
+                  disabled: true
+                iscsi-retain:
+                  parameters:
+                    dsm: "192.168.42.42"
+                    location: /volume1
+                nfs-delete:
+                  disabled: true
+                nfs-retain:
+                  disabled: true
+                smb-delete:
+                  disabled: true
+                smb-retain:
+                  disabled: true
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

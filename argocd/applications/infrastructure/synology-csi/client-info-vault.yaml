@@ -1,0 +1,17 @@
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: synology-csi-client-info
+  namespace: prod-infra
+spec:
+  mount: secret
+  path: synology-csi
+  type: kv-v2
+  vaultAuthRef: prod-infra/default
+  destination:
+    create: true
+    name: client-info
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h

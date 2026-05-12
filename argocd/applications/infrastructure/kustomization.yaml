@@ -11,6 +11,7 @@ resources:
   # Load Balancing & Networking
   - tailscale-operator/applicationset.yaml
   - traefik/applicationset.yaml
+  - synology-csi/applicationset.yaml
 
   # Secret Management
   - vault/applicationset.yaml
