@@ -111,6 +111,11 @@ spec:
               configMapKeyRef:
                 name: ci-config
                 key: VAULT_ADDR
+          - name: REPO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: ci-config
+                key: REPO_URL
         source: |
           set -e
           apk add --no-cache curl jq -q
