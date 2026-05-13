@@ -4,6 +4,8 @@ kind: Sensor
 metadata:
   name: ci-ansible-inlet
   namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   template:
     serviceAccountName: argo-ci

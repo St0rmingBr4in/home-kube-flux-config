@@ -4,6 +4,8 @@ kind: Sensor
 metadata:
   name: ci-ansible-k3s
   namespace: argo
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
 spec:
   template:
     serviceAccountName: argo-ci
