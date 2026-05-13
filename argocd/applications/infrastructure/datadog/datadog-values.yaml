@@ -67,6 +67,14 @@ datadog:
   apm:
     enabled: true
 
+  # System probe (eBPF) — required for USM
+  systemProbe:
+    enabled: true
+
+  # Universal Service Monitoring — auto-detects HTTP services (Jellyfin, *arr, etc.)
+  serviceMonitoring:
+    enabled: true
+
   # Kubernetes State Metrics
   kubeStateMetricsCore:
     collectVpaMetrics: true
@@ -107,6 +115,13 @@ agents:
         requests:
           cpu: 50m
           memory: 150Mi
+    systemProbe:
+      resources:
+        limits:
+          memory: 400Mi
+        requests:
+          cpu: 100m
+          memory: 300Mi
     initContainers:
       resources:
         limits:
