@@ -19,6 +19,14 @@ metadata:
 spec:
   serviceAccountName: argo-ci
   entrypoint: main
+  podMetadata:
+    annotations:
+      # Tag all CI pod logs with git SHA and pipeline name so Datadog CI Visibility
+      # can correlate them via "Explore connections to logs" (git.commit.sha matching).
+      ad.datadoghq.com/wait.logs: >-
+        [{"source":"argo","service":"ci-build","tags":["git.commit.sha:{{workflow.parameters.git-sha}}","ci.pipeline.name:ci/build-{{workflow.parameters.context}}"]}]
+      ad.datadoghq.com/main.logs: >-
+        [{"source":"argo","service":"ci-build","tags":["git.commit.sha:{{workflow.parameters.git-sha}}","ci.pipeline.name:ci/build-{{workflow.parameters.context}}"]}]
   ttlStrategy:
     secondsAfterSuccess: 3600    # 1h
     secondsAfterFailure: 86400   # 24h
