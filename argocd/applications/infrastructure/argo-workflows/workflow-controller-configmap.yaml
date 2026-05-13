@@ -1,11 +1,11 @@
 ---
-# Global Argo Workflows controller configuration.
-# archiveLogs: streams all pod logs to the S3 artifact repository so they
-# persist after pods are GC'd (OnWorkflowCompletion).
+# Patches the Helm-managed configmap via SSA to add archive log settings.
+# Helm owns the "config:" key; this manifest owns "archiveLogs:" and
+# "artifactRepository:" as separate top-level data keys.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: workflow-controller-configmap
+  name: argo-workflows-workflow-controller-configmap
   namespace: argo
 data:
   archiveLogs: "true"
