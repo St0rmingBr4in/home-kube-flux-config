@@ -13,6 +13,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ats-frontend
+        tags.datadoghq.com/service: ats-frontend
+        tags.datadoghq.com/env: prod
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+        ad.datadoghq.com/ats-frontend.logs: '[{"source":"nodejs","service":"ats-frontend"}]'
     spec:
       imagePullSecrets:
         - name: ghcr-pull-secret

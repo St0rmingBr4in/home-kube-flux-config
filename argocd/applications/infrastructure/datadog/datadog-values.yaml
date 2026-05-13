@@ -47,37 +47,16 @@ datadog:
     enabled: true
     containerCollectAll: true
 
-  # Process monitoring
+  # Process monitoring — discovery only, no heavy per-process collection
   processAgent:
     enabled: true
-    processCollection: true
+    processCollection: false
     processDiscovery: true
-
-  # System probe for network and security monitoring
-  systemProbe:
-    bpfDebug: true
-    enableTCPQueueLength: true
-    enableOOMKill: true
-    enableRuntimeCompiler: true
-    enableKernelHeaderDownload: true
 
   # Monitoring capabilities
   helmCheck:
     enabled: true
     collectEvents: true
-  networkMonitoring:
-    enabled: true
-  serviceMonitoring:
-    enabled: true
-
-  # Security monitoring
-  securityAgent:
-    enabled: true
-    runtime:
-      enabled: true
-      fimEnabled: true
-    network:
-      enabled: true
 
   # Prometheus integration
   prometheusScrape:
@@ -117,35 +96,17 @@ agents:
     processAgent:
       resources:
         limits:
-          memory: 300Mi # Reduced from 500Mi - actual usage is much lower
+          memory: 150Mi
         requests:
-          cpu: 100m
-          memory: 200Mi # Request less than limit
+          cpu: 50m
+          memory: 100Mi
     traceAgent:
       resources:
         limits:
-          memory: 200Mi # Reduced from 256Mi - actual usage is lower
+          memory: 200Mi
         requests:
           cpu: 50m
-          memory: 150Mi # Request less than limit
-    systemProbe:
-      resources:
-        limits:
-          memory: 1Gi # Reduced from 1Gi - actual usage is much lower
-        requests:
-          cpu: 100m
-          memory: 1Gi # Request less than limit
-      securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        privileged: true
-    securityAgent:
-      resources:
-        limits:
-          memory: 256Mi # Increased from 150Mi for runtime security monitoring
-        requests:
-          cpu: 50m
-          memory: 256Mi # Same as limit for guaranteed QoS
+          memory: 150Mi
     initContainers:
       resources:
         limits:
@@ -190,6 +151,11 @@ clusterAgent:
     - effect: NoSchedule
       key: ram
       operator: Exists
+  # Admission Controller: auto-injects DD_AGENT_HOST + DD_TRACE_AGENT_URL
+  # into pods annotated with admission.datadoghq.com/enabled: "true"
+  admissionController:
+    enabled: true
+    mutateUnlabelled: false
 
 # Kube State Metrics configuration
 kube-state-metrics:

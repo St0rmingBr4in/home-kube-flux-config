@@ -13,6 +13,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ats-backend
+        tags.datadoghq.com/service: ats-backend
+        tags.datadoghq.com/env: prod
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+        ad.datadoghq.com/ats-backend.logs: '[{"source":"go","service":"ats-backend"}]'
     spec:
       imagePullSecrets:
         - name: ghcr-pull-secret
