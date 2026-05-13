@@ -22,6 +22,11 @@ rules:
   - apiGroups: [argoproj.io]
     resources: [workflows, workflowtemplates, workflowtaskresults]
     verbs: [get, list, watch, create, update, patch, delete]
+  # Executor reads artifact repository credentials for log archiving
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [argo-spaces-credentials]
+    verbs: [get]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

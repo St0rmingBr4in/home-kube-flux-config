@@ -1,0 +1,22 @@
+---
+# Global Argo Workflows controller configuration.
+# archiveLogs: streams all pod logs to the S3 artifact repository so they
+# persist after pods are GC'd (OnWorkflowCompletion).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workflow-controller-configmap
+  namespace: argo
+data:
+  archiveLogs: "true"
+  artifactRepository: |
+    s3:
+      bucket: st0rmingbr4in-argo-logs
+      endpoint: ams3.digitaloceanspaces.com
+      insecure: false
+      accessKeySecret:
+        name: argo-spaces-credentials
+        key: access_key
+      secretKeySecret:
+        name: argo-spaces-credentials
+        key: secret_key

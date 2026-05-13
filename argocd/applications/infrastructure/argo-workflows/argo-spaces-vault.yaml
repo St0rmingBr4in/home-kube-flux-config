@@ -1,0 +1,24 @@
+---
+# Pulls DigitalOcean Spaces credentials from Vault and creates the
+# argo-spaces-credentials secret used by the Argo Workflows artifact repository.
+#
+# Prerequisite: populate Vault before first sync:
+#   vault kv put secret/argo-spaces \
+#     access_key="<spaces-access-key-id>" \
+#     secret_key="<spaces-secret-access-key>"
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: argo-spaces-credentials
+  namespace: argo
+spec:
+  mount: secret
+  path: argo-spaces
+  type: kv-v2
+  vaultAuthRef: prod-infra/default
+  destination:
+    create: true
+    name: argo-spaces-credentials
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h
