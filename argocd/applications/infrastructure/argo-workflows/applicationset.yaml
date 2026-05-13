@@ -46,6 +46,21 @@ spec:
                     memory: 128Mi
                   limits:
                     memory: 512Mi
+                config:
+                  archiveLogs: "true"
+                  artifactRepository: |
+                    s3:
+                      bucket: argo-logs
+                      endpoint: nasse.hard.st0rmingbr4in.com:9000
+                      insecure: true
+                      createBucketIfNotPresent:
+                        objectLocking: false
+                      accessKeySecret:
+                        name: argo-artifact-credentials
+                        key: access_key
+                      secretKeySecret:
+                        name: argo-artifact-credentials
+                        key: secret_key
               server:
                 enabled: true
                 authModes:
