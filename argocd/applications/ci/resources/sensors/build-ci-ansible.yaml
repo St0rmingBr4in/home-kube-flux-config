@@ -48,6 +48,8 @@ spec:
                       value: "ci/images/ci-ansible"
                     - name: go_build
                       value: "false"
+                    - name: git-author-email
+                      value: ""
           parameters:
             - src:
                 dependencyName: push
@@ -57,5 +59,9 @@ spec:
                 dependencyName: push
                 dataKey: body.after
               dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: push
+                dataKey: body.head_commit.author.email
+              dest: spec.arguments.parameters.6.value
       retryStrategy:
         steps: 3
