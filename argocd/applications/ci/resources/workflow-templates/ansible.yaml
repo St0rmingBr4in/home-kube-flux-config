@@ -18,7 +18,7 @@ spec:
     secondsAfterSuccess: 3600    # 1h
     secondsAfterFailure: 86400   # 24h
   podGC:
-    strategy: OnWorkflowCompletion
+    strategy: OnWorkflowSuccess
   synchronization:
     semaphore:
       configMapKeyRef:
