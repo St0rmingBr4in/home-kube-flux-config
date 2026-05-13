@@ -1,24 +1,24 @@
 ---
-# Pulls DigitalOcean Spaces credentials from Vault and creates the
-# argo-spaces-credentials secret used by the Argo Workflows artifact repository.
+# Mirrors the minio credentials from Vault into the argo namespace so the
+# Argo Workflows executor can authenticate to the MinIO artifact repository.
 #
-# Prerequisite: populate Vault before first sync:
-#   vault kv put secret/argo-spaces \
-#     access_key="<spaces-access-key-id>" \
-#     secret_key="<spaces-secret-access-key>"
+# Prerequisite: populate Vault before first sync (same path as MinIO itself):
+#   vault kv put secret/minio \
+#     access_key="<admin-username>" \
+#     secret_key="<admin-password-min-8-chars>"
 apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultStaticSecret
 metadata:
-  name: argo-spaces-credentials
+  name: argo-artifact-credentials
   namespace: argo
 spec:
   mount: secret
-  path: argo-spaces
+  path: minio
   type: kv-v2
   vaultAuthRef: prod-infra/default
   destination:
     create: true
-    name: argo-spaces-credentials
+    name: argo-artifact-credentials
     overwrite: true
   hmacSecretData: true
   refreshAfter: 24h

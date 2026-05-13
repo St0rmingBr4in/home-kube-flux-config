@@ -11,12 +11,14 @@ data:
   archiveLogs: "true"
   artifactRepository: |
     s3:
-      bucket: st0rmingbr4in-argo-logs
-      endpoint: ams3.digitaloceanspaces.com
-      insecure: false
+      bucket: argo-logs
+      endpoint: nasse.hard.st0rmingbr4in.com:9000
+      insecure: true
+      createBucketIfNotPresent:
+        objectLocking: false
       accessKeySecret:
-        name: argo-spaces-credentials
+        name: argo-artifact-credentials
         key: access_key
       secretKeySecret:
-        name: argo-spaces-credentials
+        name: argo-artifact-credentials
         key: secret_key
