@@ -208,6 +208,12 @@ spec:
           # so it can run without privileged mode.
           - name: BUILDKITD_FLAGS
             value: "--oci-worker-no-process-sandbox"
+          # On standard Kubernetes (no CRI-level user namespace remapping), rootlesskit
+          # defaults to --propagation=rslave which tries to call mount(MS_SLAVE) on mounts
+          # owned by the host user namespace — that fails with EPERM. rprivate skips that
+          # step and creates a private mount namespace instead, which is sufficient for builds.
+          - name: ROOTLESSKIT
+            value: "rootlesskit --propagation=rprivate"
         # Rootless BuildKit — no privileged mode required.
         # Requires kernel unprivileged user namespaces (unprivileged_userns_clone=1),
         # confirmed on k3s-clusterv2-node1 (kernel 6.1.0-43-amd64, Debian 12).

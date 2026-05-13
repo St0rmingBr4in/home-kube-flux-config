@@ -4,6 +4,15 @@
   gather_facts: true
   become: true
   pre_tasks:
+    - name: Add subuid/subgid range for UID 1000 (rootless BuildKit in CI pods)
+      ansible.builtin.lineinfile:
+        path: "{{ item }}"
+        line: "1000:200000:65536"
+        regexp: "^1000:"
+      loop:
+        - /etc/subuid
+        - /etc/subgid
+
     - name: Raise inotify limits for Kubernetes workloads
       ansible.posix.sysctl:
         name: "{{ item.name }}"
