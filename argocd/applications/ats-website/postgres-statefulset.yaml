@@ -38,18 +38,14 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              # pg_isready alone does not detect iSCSI I/O errors — the postmaster
-              # accepts connections but immediately fails on catalog reads.
-              # Adding a SELECT 1 exercises an actual I/O path so that when the
-              # underlying volume is disconnected, the probe fails and Kubernetes
-              # restarts the pod (which re-mounts the volume cleanly).
-              command:
-                - /bin/sh
-                - -c
-                - "pg_isready -U ats -d ats && psql -U ats -d ats -c 'SELECT 1' -t > /dev/null"
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            failureThreshold: 3
+              # Write to the data volume: if iSCSI disconnects and ext4 remounts
+              # read-only, touch fails → probe fails → pod restarts → kubelet
+              # remounts the volume cleanly. Matches authentik-postgresql pattern.
+              command: ["touch", "/var/lib/postgresql/data/pgdata/.liveness"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 5
           resources:
             requests:
               cpu: 50m
