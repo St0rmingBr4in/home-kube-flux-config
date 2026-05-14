@@ -185,12 +185,10 @@ terraform-vault-apply: ## Apply Vault Terraform
 terraform-woodpecker-init: ## Initialise Woodpecker Terraform
 	terraform -chdir=$(TF_WOODPECKER_DIR) init
 
-terraform-woodpecker-plan: ## Plan Woodpecker Terraform
-	TF_VAR_woodpecker_token=$$(vault kv get -mount=secret -format=json ci/woodpecker-tf | jq -r '.data.data.token') \
+terraform-woodpecker-plan: ## Plan Woodpecker Terraform (set TF_VAR_woodpecker_token in env first)
 	terraform -chdir=$(TF_WOODPECKER_DIR) plan
 
-terraform-woodpecker-apply: ## Apply Woodpecker Terraform
-	TF_VAR_woodpecker_token=$$(vault kv get -mount=secret -format=json ci/woodpecker-tf | jq -r '.data.data.token') \
+terraform-woodpecker-apply: ## Apply Woodpecker Terraform (set TF_VAR_woodpecker_token in env first)
 	terraform -chdir=$(TF_WOODPECKER_DIR) apply -auto-approve
 
 # ── Ansible ───────────────────────────────────────────────────────────────────
