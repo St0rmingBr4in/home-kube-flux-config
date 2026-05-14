@@ -36,7 +36,9 @@ spec:
                   WOODPECKER_HOST: "https://woodpecker.st0rmingbr4in.com"
                   WOODPECKER_GITHUB: "true"
                   WOODPECKER_ADMIN: "St0rmingBr4in"
-                  WOODPECKER_ORGS: "St0rmingBr4in"
+                  # WOODPECKER_ORGS removed: it triggers a concurrent paginated GitHub API
+                  # org-membership check that hits the rate limit at login time.
+                  # WOODPECKER_OPEN=false + WOODPECKER_ADMIN is sufficient to restrict access.
                   WOODPECKER_OPEN: "false"
                   # Make VAULT_ADDR, DD_SITE, REPO_URL available in all pipeline steps.
                   # Woodpecker 3.x uses key:value (colon) separator for WOODPECKER_ENVIRONMENT,
