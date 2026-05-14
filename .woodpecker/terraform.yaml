@@ -3,6 +3,8 @@
 # Each step is skipped unless its specific module path changed (step-level when.path).
 #
 # Vault auth: Kubernetes service account JWT (role: woodpecker-ci, SA: woodpecker-pipeline).
+# In Woodpecker 3.x the SA is set per-step via backend_options (WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT
+# was removed); the shared anchor below applies it to all terraform and notify steps.
 # Vault secret layout (kv-v2):
 #   secret/ci/terraform-cloud  → token   (HCP Terraform token)
 #   secret/ci/<module>         → TF_VAR_* fields exported as env vars
@@ -18,6 +20,12 @@ when:
       - "Makefile"
       - ".woodpecker/terraform.yaml"
 
+# Shared backend options: all steps that call Vault need the woodpecker-pipeline SA.
+x-backend: &vault_backend
+  backend_options:
+    kubernetes:
+      serviceAccountName: woodpecker-pipeline
+
 steps:
   - name: terraform-tfe
     image: docker.io/st0rmingbr4in/ci-terraform:latest
@@ -27,6 +35,7 @@ steps:
       MODULE: tfe
       # tfe module only needs the TFC token — no module-specific secrets
       VAULT_SECRET_PATH: secret/ci/terraform-cloud
+    <<: *vault_backend
     commands: &terraform_commands
       - |
         set -e
@@ -59,6 +68,7 @@ steps:
     environment:
       MODULE: authentik
       VAULT_SECRET_PATH: secret/ci/authentik
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: terraform-datadog
@@ -68,6 +78,7 @@ steps:
     environment:
       MODULE: datadog
       VAULT_SECRET_PATH: secret/ci/datadog
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: terraform-digitalocean
@@ -77,6 +88,7 @@ steps:
     environment:
       MODULE: digitalocean
       VAULT_SECRET_PATH: secret/ci/digitalocean
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: terraform-tailscale
@@ -86,6 +98,7 @@ steps:
     environment:
       MODULE: tailscale
       VAULT_SECRET_PATH: secret/ci/tailscale
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: terraform-vault
@@ -95,6 +108,7 @@ steps:
     environment:
       MODULE: vault
       VAULT_SECRET_PATH: secret/ci/vault
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: terraform-woodpecker
@@ -104,6 +118,7 @@ steps:
     environment:
       MODULE: woodpecker
       VAULT_SECRET_PATH: secret/ci/woodpecker-tf
+    <<: *vault_backend
     commands: *terraform_commands
 
   - name: datadog-notify
@@ -112,6 +127,7 @@ steps:
       - status:
           - success
           - failure
+    <<: *vault_backend
     commands:
       - |
         set -e
