@@ -80,7 +80,9 @@ spec:
                   # SA is now set per-step via backend_options.kubernetes.serviceAccountName in pipeline YAML.
                   # Use local-path (k3s default) for workspace PVCs: Delete reclaim policy means
                   # PVCs are cleaned up automatically after each pipeline run (no leftover PVs).
-                  WOODPECKER_BACKEND_K8S_STORAGE_CLASS: "local-path"
+                  # Temporarily empty — use cluster default (synology-csi-iscsi-retain) until
+                  # ansible-k3s re-enables the local-path provisioner, then switch to "local-path".
+                  WOODPECKER_BACKEND_K8S_STORAGE_CLASS: ""
                   # local-path does not support RWX; steps run sequentially.
                   WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
                   WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2G"
