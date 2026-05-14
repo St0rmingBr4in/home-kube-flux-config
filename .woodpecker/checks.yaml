@@ -20,6 +20,10 @@ steps:
       - path:
           - "memory-webhook/**"
           - ".woodpecker/checks.yaml"
+    environment:
+      # Limit parallelism to avoid OOM when compiling k8s.io dependencies on
+      # a high-CPU node (default GOMAXPROCS equals the node's CPU count).
+      GOMAXPROCS: "4"
     commands:
       - cd memory-webhook && go test ./...
 
