@@ -65,21 +65,6 @@
       failed_when: iscsiadm_result.rc not in [0, 21]
       changed_when: iscsiadm_result.rc == 0
 
-    # ── Storage class defaults ──────────────────────────────────────────────────
-    # k3s creates the local-path StorageClass with is-default-class=true.
-    # Patch it to false so that synology-csi-iscsi-retain remains the only default.
-    - name: Ensure local-path is not the default storage class
-      ansible.builtin.command:
-        cmd: >
-          kubectl patch storageclass local-path
-          --type merge
-          -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
-      register: patch_sc_result
-      changed_when: "'patched' in patch_sc_result.stdout"
-      failed_when: patch_sc_result.rc != 0 and 'not found' not in patch_sc_result.stderr
-      run_once: true
-      delegate_to: "{{ groups['server'][0] }}"
-
   handlers:
     - name: Restart iscsid
       ansible.builtin.service:
