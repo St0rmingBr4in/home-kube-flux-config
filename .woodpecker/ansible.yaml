@@ -65,6 +65,8 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
+        annotations:
+          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
   - name: ansible-k3s
     image: docker.io/st0rmingbr4in/ci-ansible:latest
@@ -105,6 +107,8 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
+        annotations:
+          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
   - name: datadog-notify
     image: alpine:3.21
@@ -148,3 +152,5 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
+        annotations:
+          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
