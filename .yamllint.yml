@@ -1,6 +1,9 @@
 ---
 extends: default
 
+ignore: |
+  ansible/roles/xanmanning.k3s/
+
 rules:
   indentation: {spaces: 2, indent-sequences: consistent}
   line-length: disable
@@ -10,4 +13,6 @@ rules:
   braces:
     max-spaces-inside: 1
   octal-values:
-    forbid-implicit-octal: true
+    # Kubernetes uses 0755-style octal for defaultMode — allow both forms.
+    forbid-implicit-octal: false
+    forbid-explicit-octal: false

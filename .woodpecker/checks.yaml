@@ -1,0 +1,49 @@
+---
+# Static checks pipeline: Go tests, yamllint, tflint.
+# Each step runs only when its relevant paths change.
+
+when:
+  - event: push
+    branch: master
+    path:
+      - "memory-webhook/**"
+      - "terraform/**"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - ".yamllint.yml"
+      - ".woodpecker/checks.yaml"
+
+steps:
+  - name: go-test
+    image: golang:1.25-alpine
+    when:
+      - path:
+          - "memory-webhook/**"
+          - ".woodpecker/checks.yaml"
+    commands:
+      - cd memory-webhook && go test ./...
+
+  - name: yamllint
+    image: python:3-alpine
+    when:
+      - path:
+          - "**/*.yaml"
+          - "**/*.yml"
+          - ".yamllint.yml"
+          - ".woodpecker/checks.yaml"
+    commands:
+      - pip install yamllint -q
+      - yamllint -c .yamllint.yml .
+
+  - name: tflint
+    image: ghcr.io/terraform-linters/tflint
+    when:
+      - path:
+          - "terraform/**"
+          - ".woodpecker/checks.yaml"
+    commands:
+      - |
+        for dir in terraform/*/; do
+          echo "==> $dir"
+          tflint --chdir="$dir" || exit 1
+        done

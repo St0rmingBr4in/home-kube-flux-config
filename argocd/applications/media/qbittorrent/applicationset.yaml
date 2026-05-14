@@ -66,4 +66,3 @@ spec:
           kind: Deployment
           jsonPointers:
             - /spec/template/spec/hostUsers
-

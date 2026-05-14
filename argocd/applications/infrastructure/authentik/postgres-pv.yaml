@@ -22,4 +22,3 @@ spec:
     fsType: ext4
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
-
