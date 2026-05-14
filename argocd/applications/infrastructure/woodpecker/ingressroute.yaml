@@ -1,10 +1,9 @@
 ---
-# Woodpecker CI — UI (with Authentik SSO) and GitHub webhook endpoint (no auth).
+# Woodpecker CI — public endpoint (no Authentik forward-auth).
+# Woodpecker has its own GitHub OAuth authentication (WOODPECKER_OPEN=false,
+# WOODPECKER_ADMIN=St0rmingBr4in), so an additional Authentik layer is redundant.
 # GitHub OAuth callback:  https://woodpecker.st0rmingbr4in.com/authorize
 # GitHub webhook URL:     https://woodpecker.st0rmingbr4in.com/api/hook
-#
-# The /api/hook route must be public so GitHub can deliver push events.
-# All other routes go through Authentik forward-auth for the web UI.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -15,14 +14,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: "Host(`woodpecker.st0rmingbr4in.com`) && (PathPrefix(`/api/hook`) || PathPrefix(`/authorize`))"
-      services:
-        - name: woodpecker-server
-          port: 80
-    - kind: Rule
       match: "Host(`woodpecker.st0rmingbr4in.com`)"
-      # TEMPORARY: Authentik middleware removed to allow initial GitHub OAuth login.
-      # Will be restored after repo activation.
       services:
         - name: woodpecker-server
           port: 80
