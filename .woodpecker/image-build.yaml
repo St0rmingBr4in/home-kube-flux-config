@@ -19,7 +19,7 @@ when:
 
 steps:
   - name: build-ci-ansible
-    image: moby/buildkit:v0.20.2
+    image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
       - path:
           - "ci/images/ci-ansible/**"
@@ -58,7 +58,7 @@ steps:
               - SYS_ADMIN
 
   - name: build-ci-terraform
-    image: moby/buildkit:v0.20.2
+    image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
       - path: "ci/images/ci-terraform/**"
     environment:
@@ -105,7 +105,7 @@ steps:
           go build -a -installsuffix cgo -o webhook main.go
 
   - name: build-memory-webhook
-    image: moby/buildkit:v0.20.2
+    image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
       - path: "memory-webhook/**"
     depends_on:
