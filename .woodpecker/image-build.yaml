@@ -53,8 +53,6 @@ steps:
         serviceAccountName: woodpecker-pipeline
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
-        annotations:
-          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
           seccompProfile:
             type: Unconfined
@@ -93,8 +91,6 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
-        annotations:
-          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
@@ -152,8 +148,6 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
-        annotations:
-          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
