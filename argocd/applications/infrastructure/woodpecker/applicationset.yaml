@@ -39,7 +39,9 @@ spec:
                   WOODPECKER_ORGS: "St0rmingBr4in"
                   WOODPECKER_OPEN: "false"
                   # Make VAULT_ADDR, DD_SITE, REPO_URL available in all pipeline steps.
-                  WOODPECKER_ENVIRONMENT: "VAULT_ADDR=https://vault.prod-infra.svc.cluster.local:8200,VAULT_SKIP_VERIFY=true,DD_SITE=datadoghq.eu,REPO_URL=https://github.com/St0rmingBr4in/home-kube-flux-config,TF_CLOUD_ORGANIZATION=St0rmingBr4in"
+                  # Woodpecker 3.x uses key:value (colon) separator for WOODPECKER_ENVIRONMENT,
+                  # not key=value. Splitting on the first colon correctly handles URL values.
+                  WOODPECKER_ENVIRONMENT: "VAULT_ADDR:https://vault.prod-infra.svc.cluster.local:8200,VAULT_SKIP_VERIFY:true,DD_SITE:datadoghq.eu,REPO_URL:https://github.com/St0rmingBr4in/home-kube-flux-config,TF_CLOUD_ORGANIZATION:St0rmingBr4in"
                   WOODPECKER_LOG_LEVEL: "info"
                 # GitHub OAuth app client ID/secret + WOODPECKER_AGENT_SECRET synced from Vault.
                 extraSecretNamesForEnvFrom:
