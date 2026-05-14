@@ -58,7 +58,7 @@ steps:
 
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
-        ansible-lint
+        ansible-lint --offline
         EXTRA_VARS=""
         [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
         ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
@@ -102,7 +102,7 @@ steps:
 
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
-        ansible-lint
+        ansible-lint --offline
         ansible-playbook playbooks/k3s.yaml
     backend_options:
       kubernetes:
@@ -130,7 +130,7 @@ steps:
           | jq -r '.data.data.TF_VAR_datadog_api_key')
         STATUS="$CI_PIPELINE_STATUS"
         [ "$STATUS" = "failure" ] && STATUS="error"
-        START_ISO=$(date -u -d "@${CI_PIPELINE_STARTED}" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        START_ISO=$(date -u -d "@$CI_PIPELINE_STARTED" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
         jq -n \
           --arg name "ci/ansible" \
           --arg uid "${CI_PIPELINE_NUMBER}" \

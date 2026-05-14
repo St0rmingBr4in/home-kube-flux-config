@@ -163,7 +163,7 @@ steps:
           | jq -r '.data.data.TF_VAR_datadog_api_key')
         STATUS="$CI_PIPELINE_STATUS"
         [ "$STATUS" = "failure" ] && STATUS="error"
-        START_ISO=$(date -u -d "@${CI_PIPELINE_STARTED}" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        START_ISO=$(date -u -d "@$CI_PIPELINE_STARTED" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
         jq -n \
           --arg name "ci/terraform" \
           --arg uid "${CI_PIPELINE_NUMBER}" \
