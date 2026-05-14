@@ -5,11 +5,10 @@ terraform {
       name = "homelab-woodpecker"
     }
   }
-
   required_providers {
     woodpecker = {
-      source  = "adduc/woodpecker"
-      version = "~> 0.4"
+      source  = "Kichiyaki/woodpecker"
+      version = "~> 0.5"
     }
   }
 }
