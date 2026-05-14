@@ -7,16 +7,10 @@ locals {
   vault_ci_path_prefix = "ci"
 }
 
-# Policy for the argo-ci service account used by CI workflow pods.
+# Policy for Woodpecker CI pipeline step pods.
 # Grants read access to all secrets under secret/ci/*.
-resource "vault_policy" "argo_ci" {
-  name = "argo-ci"
-
-  # Sole authentication mechanism for all CI workflow pods; destroying this
-  # policy breaks every CI pipeline immediately.
-  lifecycle {
-    prevent_destroy = true
-  }
+resource "vault_policy" "ci" {
+  name = "ci-read"
 
   policy = <<-EOT
     path "${local.vault_kv_mount}/data/${local.vault_ci_path_prefix}/*" {

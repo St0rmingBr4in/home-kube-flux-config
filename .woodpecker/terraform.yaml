@@ -1,0 +1,137 @@
+---
+# Terraform CI pipeline. Triggered on master pushes that touch any terraform module.
+# Each step is skipped unless its specific module path changed (step-level when.path).
+#
+# Vault auth: Kubernetes service account JWT (role: woodpecker-ci, SA: woodpecker-pipeline).
+# Vault secret layout (kv-v2):
+#   secret/ci/terraform-cloud  → token   (HCP Terraform token)
+#   secret/ci/<module>         → TF_VAR_* fields exported as env vars
+#
+# GitHub status check: posted automatically by Woodpecker forge integration.
+# Datadog CI visibility: reported by the notify step at the end.
+
+when:
+  - event: push
+    branch: master
+    path:
+      - "terraform/**"
+      - "Makefile"
+
+steps:
+  - name: terraform-tfe
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/tfe/**"
+    environment:
+      MODULE: tfe
+      # tfe module only needs the TFC token — no module-specific secrets
+      VAULT_SECRET_PATH: secret/ci/terraform-cloud
+    commands: &terraform_commands
+      - |
+        set -e
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+
+        export TF_TOKEN_APP_TERRAFORM_IO=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/terraform-cloud" \
+          | jq -r '.data.data.token')
+        export TFE_TOKEN="$TF_TOKEN_APP_TERRAFORM_IO"
+
+        SECRETS_API_PATH=$(echo "$VAULT_SECRET_PATH" | sed 's|^secret/|secret/data/|')
+        eval "$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/${SECRETS_API_PATH}" \
+          | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
+
+        make terraform-${MODULE}-init
+        make terraform-${MODULE}-plan
+        [ "$CI_COMMIT_BRANCH" = "master" ] && make terraform-${MODULE}-apply
+
+  - name: terraform-authentik
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/authentik/**"
+    environment:
+      MODULE: authentik
+      VAULT_SECRET_PATH: secret/ci/authentik
+    commands: *terraform_commands
+
+  - name: terraform-datadog
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/datadog/**"
+    environment:
+      MODULE: datadog
+      VAULT_SECRET_PATH: secret/ci/datadog
+    commands: *terraform_commands
+
+  - name: terraform-digitalocean
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/digitalocean/**"
+    environment:
+      MODULE: digitalocean
+      VAULT_SECRET_PATH: secret/ci/digitalocean
+    commands: *terraform_commands
+
+  - name: terraform-tailscale
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/tailscale/**"
+    environment:
+      MODULE: tailscale
+      VAULT_SECRET_PATH: secret/ci/tailscale
+    commands: *terraform_commands
+
+  - name: terraform-vault
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/vault/**"
+    environment:
+      MODULE: vault
+      VAULT_SECRET_PATH: secret/ci/vault
+    commands: *terraform_commands
+
+  - name: datadog-notify
+    image: alpine:3.21
+    when:
+      - status:
+          - success
+          - failure
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
+        DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
+          | jq -r '.data.data.TF_VAR_datadog_api_key')
+        STATUS="$CI_PIPELINE_STATUS"
+        [ "$STATUS" = "failure" ] && STATUS="error"
+        START_ISO=$(date -u -d "@${CI_PIPELINE_STARTED}" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        jq -n \
+          --arg name "ci/terraform" \
+          --arg uid "${CI_PIPELINE_NUMBER}" \
+          --arg url "${CI_PIPELINE_URL}" \
+          --arg start "$START_ISO" \
+          --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          --arg status "$STATUS" \
+          --arg sha "$CI_COMMIT_SHA" \
+          --arg branch "$CI_COMMIT_BRANCH" \
+          --arg author "${CI_COMMIT_AUTHOR_EMAIL:-ci@st0rmingbr4in.com}" \
+          --arg repo "$REPO_URL" \
+          '{data:{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}}' \
+        | curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: $DD_API_KEY" \
+            -d @- \
+            "https://api.${DD_SITE}/api/v2/ci/pipeline" \
+        | xargs -I{} echo "Datadog CI API: {}"

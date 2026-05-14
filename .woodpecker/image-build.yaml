@@ -1,0 +1,184 @@
+---
+# Docker image build and push pipeline using BuildKit.
+# Triggered on master pushes touching CI image source directories.
+# Each step is skipped unless its specific image path changed.
+#
+# BuildKit runs with SYS_ADMIN + Unconfined seccomp (required for overlay mounts).
+# Docker Hub credentials fetched from Vault at runtime (secret/ci/docker).
+#
+# For memory-webhook, a Go pre-build step compiles the binary before BuildKit runs
+# (the Dockerfile does a COPY of the pre-built binary rather than a full Go toolchain).
+
+when:
+  - event: push
+    branch: master
+    path:
+      - "ci/images/**"
+      - "memory-webhook/**"
+      - "ansible/requirements.yml"
+
+steps:
+  - name: build-ci-ansible
+    image: moby/buildkit:v0.20.2
+    when:
+      - path:
+          - "ci/images/ci-ansible/**"
+          - "ansible/requirements.yml"
+    environment:
+      DOCKER_CONFIG: /tmp/docker-config
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
+        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
+        mkdir -p /tmp/docker-config
+        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
+          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
+          > /tmp/docker-config/config.json
+        buildctl-daemonless.sh build \
+          --frontend=dockerfile.v0 \
+          --local context=ci/images/ci-ansible \
+          --local dockerfile=ci/images/ci-ansible \
+          --output type=image,"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}",push=true
+    backend_options:
+      kubernetes:
+        securityContext:
+          seccompProfile:
+            type: Unconfined
+          capabilities:
+            add:
+              - SYS_ADMIN
+
+  - name: build-ci-terraform
+    image: moby/buildkit:v0.20.2
+    when:
+      - path: "ci/images/ci-terraform/**"
+    environment:
+      DOCKER_CONFIG: /tmp/docker-config
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
+        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
+        mkdir -p /tmp/docker-config
+        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
+          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
+          > /tmp/docker-config/config.json
+        buildctl-daemonless.sh build \
+          --frontend=dockerfile.v0 \
+          --local context=ci/images/ci-terraform \
+          --local dockerfile=ci/images/ci-terraform \
+          --output type=image,"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}",push=true
+    backend_options:
+      kubernetes:
+        securityContext:
+          seccompProfile:
+            type: Unconfined
+          capabilities:
+            add:
+              - SYS_ADMIN
+
+  - name: go-build-memory-webhook
+    image: golang:1.25-alpine
+    when:
+      - path: "memory-webhook/**"
+    commands:
+      - |
+        cd memory-webhook
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+          go build -a -installsuffix cgo -o webhook main.go
+
+  - name: build-memory-webhook
+    image: moby/buildkit:v0.20.2
+    when:
+      - path: "memory-webhook/**"
+    depends_on:
+      - go-build-memory-webhook
+    environment:
+      DOCKER_CONFIG: /tmp/docker-config
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
+        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
+        mkdir -p /tmp/docker-config
+        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
+          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
+          > /tmp/docker-config/config.json
+        buildctl-daemonless.sh build \
+          --frontend=dockerfile.v0 \
+          --local context=memory-webhook \
+          --local dockerfile=memory-webhook \
+          --output type=image,"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}",push=true
+    backend_options:
+      kubernetes:
+        securityContext:
+          seccompProfile:
+            type: Unconfined
+          capabilities:
+            add:
+              - SYS_ADMIN
+
+  - name: datadog-notify
+    image: alpine:3.21
+    when:
+      - status:
+          - success
+          - failure
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
+        DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
+          | jq -r '.data.data.TF_VAR_datadog_api_key')
+        STATUS="$CI_PIPELINE_STATUS"
+        [ "$STATUS" = "failure" ] && STATUS="error"
+        START_ISO=$(date -u -d "@${CI_PIPELINE_STARTED}" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        jq -n \
+          --arg name "ci/image-build" \
+          --arg uid "${CI_PIPELINE_NUMBER}" \
+          --arg url "${CI_PIPELINE_URL}" \
+          --arg start "$START_ISO" \
+          --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          --arg status "$STATUS" \
+          --arg sha "$CI_COMMIT_SHA" \
+          --arg branch "$CI_COMMIT_BRANCH" \
+          --arg author "${CI_COMMIT_AUTHOR_EMAIL:-ci@st0rmingbr4in.com}" \
+          --arg repo "$REPO_URL" \
+          '{data:{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}}' \
+        | curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: $DD_API_KEY" \
+            -d @- \
+            "https://api.${DD_SITE}/api/v2/ci/pipeline" \
+        | xargs -I{} echo "Datadog CI API: {}"

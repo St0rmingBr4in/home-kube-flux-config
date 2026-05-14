@@ -8,5 +8,4 @@ resources:
   - media/
   - compliance/memory-webhook/applicationset.yaml
   - external-services/external-service-prod-infra/applicationset.yaml
-  - ci/
   - ats-website/applicationset.yaml

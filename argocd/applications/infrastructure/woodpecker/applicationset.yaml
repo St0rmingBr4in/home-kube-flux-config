@@ -1,0 +1,105 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: woodpecker
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: woodpecker
+            chart: woodpecker
+            chartVersion: 3.6.2
+            namespace: woodpecker
+            repoURL: https://woodpecker-ci.org/
+            manifestPath: argocd/applications/infrastructure/woodpecker
+
+  template:
+    metadata:
+      name: "{{name}}"
+      namespace: argocd
+    spec:
+      project: default
+
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{chartVersion}}"
+          helm:
+            values: |
+              server:
+                enabled: true
+                # Auto-generated agent secret disabled — provided via woodpecker-secrets VaultStaticSecret.
+                createAgentSecret: false
+                env:
+                  WOODPECKER_HOST: "https://woodpecker.st0rmingbr4in.com"
+                  WOODPECKER_GITHUB: "true"
+                  WOODPECKER_ADMIN: "St0rmingBr4in"
+                  WOODPECKER_ORGS: "St0rmingBr4in"
+                  WOODPECKER_OPEN: "false"
+                  # Make VAULT_ADDR, DD_SITE, REPO_URL available in all pipeline steps.
+                  WOODPECKER_ENVIRONMENT: "VAULT_ADDR=https://vault.prod-infra.svc.cluster.local:8200,VAULT_SKIP_VERIFY=true,DD_SITE=datadoghq.eu,REPO_URL=https://github.com/St0rmingBr4in/home-kube-flux-config,TF_CLOUD_ORGANIZATION=St0rmingBr4in"
+                  WOODPECKER_LOG_LEVEL: "info"
+                # GitHub OAuth app client ID/secret + WOODPECKER_AGENT_SECRET synced from Vault.
+                extraSecretNamesForEnvFrom:
+                  - woodpecker-secrets
+                persistentVolume:
+                  enabled: true
+                  size: 2Gi
+                  storageClass: ""
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 128Mi
+                  limits:
+                    memory: 256Mi
+
+              agent:
+                enabled: true
+                replicaCount: 1
+                env:
+                  WOODPECKER_SERVER: "woodpecker-server:9000"
+                  WOODPECKER_BACKEND: "kubernetes"
+                  WOODPECKER_BACKEND_K8S_NAMESPACE: "woodpecker"
+                  # Pipeline step pods use woodpecker-pipeline SA for Vault Kubernetes auth.
+                  WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT: "woodpecker-pipeline"
+                  # local-path (k3s default) does not support RWX; steps run sequentially.
+                  WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
+                  WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2G"
+                  WOODPECKER_LOG_LEVEL: "info"
+                  WOODPECKER_CONNECT_RETRY_COUNT: "1"
+                extraSecretNamesForEnvFrom:
+                  - woodpecker-secrets
+                persistence:
+                  enabled: true
+                  size: 512Mi
+                  storageClass: ""
+                resources:
+                  requests:
+                    cpu: 50m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+
+        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+          targetRevision: HEAD
+          path: "{{manifestPath}}"
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

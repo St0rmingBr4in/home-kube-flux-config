@@ -1,0 +1,141 @@
+---
+# Ansible CI pipeline. Triggered on master pushes that touch ansible files.
+# Each step is skipped unless its specific playbook paths changed.
+#
+# Vault auth: Kubernetes service account JWT (role: woodpecker-ci, SA: woodpecker-pipeline).
+# Vault secret layout (kv-v2):
+#   secret/ci/ansible   → vault_password, inlet_ssh_private_key, k3s_ssh_private_key
+#   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only)
+#   secret/ci/datadog   → TF_VAR_datadog_api_key (inlet only)
+
+when:
+  - event: push
+    branch: master
+    path:
+      - "ansible/**"
+
+steps:
+  - name: ansible-inlet
+    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    when:
+      - path:
+          - "ansible/ansible.cfg"
+          - "ansible/scripts/**"
+          - "ansible/requirements.yml"
+          - "ansible/inventory/hosts.yaml"
+          - "ansible/inventory/group_vars/inlet/**"
+          - "ansible/playbooks/inlet.yaml"
+    environment:
+      HOME: /root
+    commands:
+      - |
+        set -e
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+
+        export ANSIBLE_VAULT_PASSWORD=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+          | jq -r '.data.data.vault_password')
+
+        mkdir -p /root/.ssh && chmod 700 /root/.ssh
+        curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+          | jq -r '.data.data.inlet_ssh_private_key' > /root/.ssh/inlet_id_ed25519
+        chmod 600 /root/.ssh/inlet_id_ed25519
+
+        export TAILSCALE_AUTHKEY=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/tailscale" \
+          | jq -r '.data.data.TF_VAR_tailscale_oauth_client_secret')
+        export DATADOG_API_KEY=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
+          | jq -r '.data.data.TF_VAR_datadog_api_key')
+
+        cd ansible
+        export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
+        ansible-lint
+        EXTRA_VARS=""
+        [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
+        ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
+
+  - name: ansible-k3s
+    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    when:
+      - path:
+          - "ansible/ansible.cfg"
+          - "ansible/scripts/**"
+          - "ansible/requirements.yml"
+          - "ansible/inventory/hosts.yaml"
+          - "ansible/inventory/group_vars/k3s_cluster/**"
+          - "ansible/playbooks/k3s.yaml"
+    environment:
+      HOME: /root
+    commands:
+      - |
+        set -e
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+
+        export ANSIBLE_VAULT_PASSWORD=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+          | jq -r '.data.data.vault_password')
+
+        mkdir -p /root/.ssh && chmod 700 /root/.ssh
+        curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
+          | jq -r '.data.data.k3s_ssh_private_key' > /root/.ssh/k3s_id_ed25519
+        chmod 600 /root/.ssh/k3s_id_ed25519
+
+        cd ansible
+        export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
+        ansible-lint
+        ansible-playbook playbooks/k3s.yaml
+
+  - name: datadog-notify
+    image: alpine:3.21
+    when:
+      - status:
+          - success
+          - failure
+    commands:
+      - |
+        set -e
+        apk add --no-cache curl jq -q
+        VAULT_TOKEN=$(curl -sk \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
+          | jq -r '.auth.client_token')
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
+        DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
+          | jq -r '.data.data.TF_VAR_datadog_api_key')
+        STATUS="$CI_PIPELINE_STATUS"
+        [ "$STATUS" = "failure" ] && STATUS="error"
+        START_ISO=$(date -u -d "@${CI_PIPELINE_STARTED}" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        jq -n \
+          --arg name "ci/ansible" \
+          --arg uid "${CI_PIPELINE_NUMBER}" \
+          --arg url "${CI_PIPELINE_URL}" \
+          --arg start "$START_ISO" \
+          --arg end "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+          --arg status "$STATUS" \
+          --arg sha "$CI_COMMIT_SHA" \
+          --arg branch "$CI_COMMIT_BRANCH" \
+          --arg author "${CI_COMMIT_AUTHOR_EMAIL:-ci@st0rmingbr4in.com}" \
+          --arg repo "$REPO_URL" \
+          '{data:{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}}' \
+        | curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: $DD_API_KEY" \
+            -d @- \
+            "https://api.${DD_SITE}/api/v2/ci/pipeline" \
+        | xargs -I{} echo "Datadog CI API: {}"

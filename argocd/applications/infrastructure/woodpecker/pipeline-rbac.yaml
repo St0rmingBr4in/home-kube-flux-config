@@ -1,0 +1,10 @@
+---
+# ServiceAccount used by Woodpecker pipeline step pods (WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT).
+# Steps use this SA's projected token to authenticate to Vault via Kubernetes auth.
+#
+# The Vault Kubernetes auth role (woodpecker-ci) is managed by terraform/vault.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-pipeline
+  namespace: woodpecker
