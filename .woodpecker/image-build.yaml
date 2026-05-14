@@ -50,6 +50,7 @@ steps:
           --output type=image,"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}",push=true
     backend_options:
       kubernetes:
+        serviceAccountName: woodpecker-pipeline
         securityContext:
           seccompProfile:
             type: Unconfined
@@ -87,6 +88,7 @@ steps:
           --output type=image,"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}",push=true
     backend_options:
       kubernetes:
+        serviceAccountName: woodpecker-pipeline
         securityContext:
           seccompProfile:
             type: Unconfined
@@ -103,6 +105,9 @@ steps:
         cd memory-webhook
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
           go build -a -installsuffix cgo -o webhook main.go
+    backend_options:
+      kubernetes:
+        serviceAccountName: woodpecker-pipeline
 
   - name: build-memory-webhook
     image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
@@ -136,6 +141,7 @@ steps:
           --output type=image,"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}",push=true
     backend_options:
       kubernetes:
+        serviceAccountName: woodpecker-pipeline
         securityContext:
           seccompProfile:
             type: Unconfined
@@ -175,10 +181,13 @@ steps:
           --arg branch "$CI_COMMIT_BRANCH" \
           --arg author "${CI_COMMIT_AUTHOR_EMAIL:-ci@st0rmingbr4in.com}" \
           --arg repo "$REPO_URL" \
-          '{data:{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}}' \
+          '{data:[{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}]}' \
         | curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             -H "DD-API-KEY: $DD_API_KEY" \
             -d @- \
             "https://api.${DD_SITE}/api/v2/ci/pipeline" \
         | xargs -I{} echo "Datadog CI API: {}"
+    backend_options:
+      kubernetes:
+        serviceAccountName: woodpecker-pipeline

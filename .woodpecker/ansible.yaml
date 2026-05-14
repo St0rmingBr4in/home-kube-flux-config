@@ -62,6 +62,9 @@ steps:
         EXTRA_VARS=""
         [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
         ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
+    backend_options:
+      kubernetes:
+        serviceAccountName: woodpecker-pipeline
 
   - name: ansible-k3s
     image: docker.io/st0rmingbr4in/ci-ansible:latest
@@ -99,6 +102,9 @@ steps:
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint
         ansible-playbook playbooks/k3s.yaml
+    backend_options:
+      kubernetes:
+        serviceAccountName: woodpecker-pipeline
 
   - name: datadog-notify
     image: alpine:3.21
@@ -132,10 +138,13 @@ steps:
           --arg branch "$CI_COMMIT_BRANCH" \
           --arg author "${CI_COMMIT_AUTHOR_EMAIL:-ci@st0rmingbr4in.com}" \
           --arg repo "$REPO_URL" \
-          '{data:{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}}' \
+          '{data:[{type:"cipipeline_resource_request",attributes:{provider_name:"woodpecker",resource:{level:"pipeline",unique_id:$uid,name:$name,url:$url,start:$start,end:$end,status:$status,partial_retry:false,git:{repository_url:$repo,sha:$sha,branch:$branch,author_email:$author}}}}]}' \
         | curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             -H "DD-API-KEY: $DD_API_KEY" \
             -d @- \
             "https://api.${DD_SITE}/api/v2/ci/pipeline" \
         | xargs -I{} echo "Datadog CI API: {}"
+    backend_options:
+      kubernetes:
+        serviceAccountName: woodpecker-pipeline

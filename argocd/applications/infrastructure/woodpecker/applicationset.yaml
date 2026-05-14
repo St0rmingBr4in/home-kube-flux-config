@@ -78,7 +78,10 @@ spec:
                   WOODPECKER_BACKEND_K8S_NAMESPACE: "woodpecker"
                   # NOTE: WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT was removed in Woodpecker 3.x.
                   # SA is now set per-step via backend_options.kubernetes.serviceAccountName in pipeline YAML.
-                  # local-path (k3s default) does not support RWX; steps run sequentially.
+                  # Use local-path (k3s default) for workspace PVCs: Delete reclaim policy means
+                  # PVCs are cleaned up automatically after each pipeline run (no leftover PVs).
+                  WOODPECKER_BACKEND_K8S_STORAGE_CLASS: "local-path"
+                  # local-path does not support RWX; steps run sequentially.
                   WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
                   WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2G"
                   WOODPECKER_LOG_LEVEL: "info"
