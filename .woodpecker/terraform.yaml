@@ -16,6 +16,7 @@ when:
     path:
       - "terraform/**"
       - "Makefile"
+      - ".woodpecker/terraform.yaml"
 
 steps:
   - name: terraform-tfe
@@ -94,6 +95,15 @@ steps:
     environment:
       MODULE: vault
       VAULT_SECRET_PATH: secret/ci/vault
+    commands: *terraform_commands
+
+  - name: terraform-woodpecker
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    when:
+      - path: "terraform/woodpecker/**"
+    environment:
+      MODULE: woodpecker
+      VAULT_SECRET_PATH: secret/ci/woodpecker-tf
     commands: *terraform_commands
 
   - name: datadog-notify

@@ -10,6 +10,7 @@
         terraform-digitalocean-init terraform-digitalocean-plan terraform-digitalocean-apply \
         terraform-tailscale-init terraform-tailscale-plan terraform-tailscale-apply \
         terraform-vault-init terraform-vault-plan terraform-vault-apply \
+        terraform-woodpecker-init terraform-woodpecker-plan terraform-woodpecker-apply \
         ansible-install-inlet ansible-install-k3s \
         ansible-setup-ssh-inlet ansible-setup-ssh-k3s \
         ansible-install-edgerouter \
@@ -27,6 +28,7 @@ TF_DATADOG_DIR      := terraform/datadog
 TF_DIGITALOCEAN_DIR := terraform/digitalocean
 TF_TAILSCALE_DIR    := terraform/tailscale
 TF_VAULT_DIR        := terraform/vault
+TF_WOODPECKER_DIR   := terraform/woodpecker
 DD_SITE        ?= datadoghq.eu
 # Single source of truth for the HCP Terraform Cloud organisation name.
 # The CLI honours TF_CLOUD_ORGANIZATION and overrides the value in terraform{cloud{}} blocks,
@@ -60,7 +62,7 @@ kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 
 terraform-fmt: ## Check Terraform formatting across all modules (non-destructive)
 	@echo "==> Checking Terraform format"
-	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR) $(TF_DIGITALOCEAN_DIR) $(TF_TAILSCALE_DIR) $(TF_VAULT_DIR); do \
+	@for dir in $(TF_DIR) $(TF_TFE_DIR) $(TF_DATADOG_DIR) $(TF_DIGITALOCEAN_DIR) $(TF_TAILSCALE_DIR) $(TF_VAULT_DIR) $(TF_WOODPECKER_DIR); do \
 		terraform -chdir=$$dir fmt -check -recursive || exit 1; \
 	done
 
@@ -177,6 +179,19 @@ terraform-vault-plan: ## Plan Vault Terraform
 
 terraform-vault-apply: ## Apply Vault Terraform
 	terraform -chdir=$(TF_VAULT_DIR) apply -auto-approve
+
+# ── Terraform: Woodpecker ─────────────────────────────────────────────────────
+
+terraform-woodpecker-init: ## Initialise Woodpecker Terraform
+	terraform -chdir=$(TF_WOODPECKER_DIR) init
+
+terraform-woodpecker-plan: ## Plan Woodpecker Terraform
+	TF_VAR_woodpecker_token=$$(vault kv get -mount=secret -format=json ci/woodpecker-tf | jq -r '.data.data.token') \
+	terraform -chdir=$(TF_WOODPECKER_DIR) plan
+
+terraform-woodpecker-apply: ## Apply Woodpecker Terraform
+	TF_VAR_woodpecker_token=$$(vault kv get -mount=secret -format=json ci/woodpecker-tf | jq -r '.data.data.token') \
+	terraform -chdir=$(TF_WOODPECKER_DIR) apply -auto-approve
 
 # ── Ansible ───────────────────────────────────────────────────────────────────
 

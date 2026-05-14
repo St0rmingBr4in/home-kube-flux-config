@@ -24,6 +24,7 @@ locals {
     homelab_digitalocean = "homelab-digitalocean" # DigitalOcean droplet + DNS
     homelab_tailscale    = "homelab-tailscale"    # Tailscale ACL and OAuth keys
     homelab_vault        = "homelab-vault"        # Vault policies and auth roles
+    homelab_woodpecker   = "homelab-woodpecker"   # Woodpecker CI repository activation
   }
 }
 
