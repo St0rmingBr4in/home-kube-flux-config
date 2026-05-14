@@ -44,6 +44,16 @@ spec:
                 # GitHub OAuth app client ID/secret + WOODPECKER_AGENT_SECRET synced from Vault.
                 extraSecretNamesForEnvFrom:
                   - woodpecker-secrets
+                # Synology iSCSI volumes do not honour fsGroup; chown at startup.
+                initContainers:
+                  - name: fix-permissions
+                    image: alpine:3.21
+                    command: ["chown", "-R", "1000:1000", "/var/lib/woodpecker"]
+                    securityContext:
+                      runAsUser: 0
+                    volumeMounts:
+                      - name: data
+                        mountPath: /var/lib/woodpecker
                 persistentVolume:
                   enabled: true
                   size: 2Gi
@@ -73,7 +83,7 @@ spec:
                   - woodpecker-secrets
                 persistence:
                   enabled: true
-                  size: 512Mi
+                  size: 1Gi
                   storageClass: ""
                 resources:
                   requests:
