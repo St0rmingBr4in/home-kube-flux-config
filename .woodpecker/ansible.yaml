@@ -13,6 +13,7 @@ when:
     branch: master
     path:
       - "ansible/**"
+      - ".woodpecker/ansible.yaml"
 
 steps:
   - name: ansible-inlet
