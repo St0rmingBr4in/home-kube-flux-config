@@ -21,9 +21,8 @@ spec:
           port: 80
     - kind: Rule
       match: "Host(`woodpecker.st0rmingbr4in.com`)"
-      middlewares:
-        - name: authentik-forward-auth
-          namespace: prod-infra
+      # TEMPORARY: Authentik middleware removed to allow initial GitHub OAuth login.
+      # Will be restored after repo activation.
       services:
         - name: woodpecker-server
           port: 80
