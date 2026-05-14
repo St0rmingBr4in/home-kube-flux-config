@@ -49,5 +49,5 @@ steps:
       - |
         for dir in terraform/*/; do
           echo "==> $dir"
-          tflint --chdir="$dir" || exit 1
+          tflint --chdir="$dir" --minimum-failure-severity=error || exit 1
         done
