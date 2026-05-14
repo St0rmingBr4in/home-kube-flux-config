@@ -15,12 +15,12 @@ locals {
       icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png"
       description = "GitOps Continuous Delivery"
     }
-    argo_workflows = {
-      name        = "Argo Workflows"
-      slug        = "argo-workflows"
-      url         = "https://argo.${local.base_domain}"
-      icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argo-workflows.png"
-      description = "CI Workflow Engine"
+    woodpecker = {
+      name        = "Woodpecker CI"
+      slug        = "woodpecker-ci"
+      url         = "https://woodpecker.${local.base_domain}"
+      icon        = "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/woodpecker-ci.png"
+      description = "CI/CD Pipeline Engine"
     }
     bazarr = {
       name        = "Bazarr"
