@@ -32,7 +32,6 @@ steps:
     commands: &terraform_commands
       - |
         set -e
-        echo "MODULE=$MODULE VAULT_SECRET_PATH=$VAULT_SECRET_PATH"
         VAULT_TOKEN=$(curl -sk \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
@@ -48,12 +47,12 @@ steps:
         SECRETS_API_PATH=$(echo "$VAULT_SECRET_PATH" | sed 's|^secret/|secret/data/|')
         eval "$(curl -sk \
           -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/${SECRETS_API_PATH}" \
+          "${VAULT_ADDR}/v1/$SECRETS_API_PATH" \
           | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
 
-        make terraform-${MODULE}-init
-        make terraform-${MODULE}-plan
-        [ "$CI_COMMIT_BRANCH" = "master" ] && make terraform-${MODULE}-apply
+        make terraform-$MODULE-init
+        make terraform-$MODULE-plan
+        [ "$CI_COMMIT_BRANCH" = "master" ] && make terraform-$MODULE-apply
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
