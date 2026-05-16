@@ -79,6 +79,7 @@ podOptions:
 
 workload:
   main:
+    replicas: 1
     podSpec:
       containers:
         main:
@@ -89,11 +90,18 @@ workload:
               command:
                 - sh
                 - -c
-                - touch /config/.liveness
+                # Also verify the exit-node route is active: if inlet goes down and
+                # Tailscale loses the exit-node route, this probe fails → pod restarts
+                # → init container re-applies the iptables kill-switch → Tailscale must
+                # reconnect with a valid exit-node before liveness passes again.
+                - touch /config/.liveness && ip route get 8.8.8.8 | grep -q tailscale0
               spec:
-                initialDelaySeconds: 30
-                periodSeconds: 15
-                failureThreshold: 5
+                # Longer initial delay so Tailscale has time to connect and establish
+                # the exit-node route before the first check.
+                initialDelaySeconds: 60
+                periodSeconds: 30
+                # 3 failures × 30s = 90s grace window for Tailscale to recover.
+                failureThreshold: 3
                 timeoutSeconds: 5
             readiness:
               enabled: true

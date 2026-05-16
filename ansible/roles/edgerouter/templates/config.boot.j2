@@ -1,0 +1,727 @@
+firewall {
+    all-ping enable
+    broadcast-ping disable
+    ipv6-receive-redirects disable
+    ipv6-src-route disable
+    ip-src-route disable
+    log-martians enable
+    modify TAILSCALE_MARK {
+        rule 10 {
+            action modify
+            description "Mark traffic to Tailscale CGNAT range for masquerading"
+            destination {
+                address 100.64.0.0/10
+            }
+            modify {
+                mark 0x40000
+            }
+        }
+    }
+    name Allow {
+        default-action accept
+        enable-default-log
+        rule 1 {
+            action accept
+            log disable
+            protocol all
+            state {
+                established enable
+                invalid enable
+                new enable
+                related enable
+            }
+        }
+    }
+    name LAN_OUT {
+        default-action accept
+        description "LAN to WAN - torrent blocking"
+        rule 10 {
+            action accept
+            description "Allow established/related"
+            state {
+                established enable
+                related enable
+            }
+        }
+        rule 100 {
+            action drop
+            application {
+                category bittorrent
+            }
+            description "Block BitTorrent (DPI)"
+        }
+        rule 200 {
+            action drop
+            description "Block classic BitTorrent ports (TCP)"
+            destination {
+                port {{ torrent_port }}-{{ torrent_port + 8 }}
+            }
+            protocol tcp
+        }
+        rule 210 {
+            action drop
+            description "Block classic BitTorrent ports (UDP)"
+            destination {
+                port {{ torrent_port }}-{{ torrent_port + 8 }}
+            }
+            protocol udp
+        }
+    }
+    name WAN_IN {
+        default-action drop
+        description "WAN to internal"
+        enable-default-log
+        rule 10 {
+            action accept
+            description "Allow established/related"
+            state {
+                established enable
+                related enable
+            }
+        }
+        rule 20 {
+            action drop
+            description "Drop invalid state"
+            state {
+                invalid enable
+            }
+        }
+    }
+    name WAN_LOCAL {
+        default-action drop
+        description "WAN to router"
+        enable-default-log
+        rule 10 {
+            action accept
+            description "Allow established/related"
+            state {
+                established enable
+                related enable
+            }
+        }
+        rule 20 {
+            action drop
+            description "Drop invalid state"
+            state {
+                invalid enable
+            }
+        }
+    }
+    receive-redirects disable
+    send-redirects enable
+    source-validation disable
+    syn-cookies enable
+}
+interfaces {
+    ethernet eth0 {
+        description Local
+        duplex auto
+        poe {
+            output off
+        }
+        speed auto
+    }
+    ethernet eth1 {
+        description Local
+        duplex auto
+        speed auto
+    }
+    ethernet eth2 {
+        description Local
+        duplex auto
+        speed auto
+    }
+    ethernet eth3 {
+        description Local
+        duplex auto
+        poe {
+            output off
+        }
+        speed auto
+    }
+    ethernet eth4 {
+        description Local
+        duplex auto
+        poe {
+            output off
+        }
+        speed auto
+    }
+    ethernet eth5 {
+        duplex auto
+        ip {
+        }
+        speed auto
+        vif 832 {
+            address dhcp
+            dhcp-options {
+                client-option "send user-class &quot;\053FSVDSL_livebox.Internet.softathome.Livebox4&quot;;"
+                client-option "send vendor-class-identifier &quot;sagem&quot;;"
+                client-option "send rfc3118-auth {{ wan_dhcp_rfc3118_auth }};"
+                client-option "request subnet-mask, routers, domain-name-servers, domain-name, broadcast-address, dhcp-lease-time, dhcp-renewal-time, dhcp-rebinding-time, rfc3118-auth;"
+                client-option "send dhcp-client-identifier {{ wan_dhcp_client_identifier }};"
+                default-route update
+                default-route-distance 210
+                global-option "option rfc3118-auth code 90 = string;"
+                name-server update
+            }
+            firewall {
+                in {
+                    modify TAILSCALE_MARK
+                    name WAN_IN
+                }
+                local {
+                    name WAN_LOCAL
+                }
+                out {
+                    name LAN_OUT
+                }
+            }
+        }
+    }
+    loopback lo {
+    }
+    switch switch0 {
+        address 192.168.1.1/24
+        description Local
+        ip {
+            enable-proxy-arp
+        }
+        mtu 1500
+        switch-port {
+            interface eth0 {
+                vlan {
+                    vid 42
+                    vid 52
+                    vid 62
+                    vid 69
+                }
+            }
+            interface eth1 {
+                vlan {
+                    pvid 52
+                }
+            }
+            interface eth2 {
+                vlan {
+                    vid 62
+                    vid 69
+                    vid 42
+                    vid 72
+                }
+            }
+            interface eth3 {
+                vlan {
+                    pvid 69
+                }
+            }
+            interface eth4 {
+                vlan {
+                    pvid 69
+                }
+            }
+            vlan-aware enable
+        }
+        vif 42 {
+            address 192.168.42.1/24
+            description servers
+        }
+        vif 52 {
+            address 192.168.52.1/24
+            description bmc
+            mtu 1500
+        }
+        vif 62 {
+            address 192.168.62.1/24
+            description vms
+            mtu 1500
+        }
+        vif 69 {
+            address 192.168.69.1/24
+            description guest
+            mtu 1500
+        }
+        vif 72 {
+            address 192.168.72.1/24
+            description "SVC IPS"
+        }
+    }
+}
+port-forward {
+    auto-firewall enable
+    hairpin-nat enable
+    lan-interface switch0
+    lan-interface switch0.42
+    lan-interface switch0.69
+    lan-interface tailscale0
+    rule 1 {
+        description http
+        forward-to {
+            address 100.87.211.20
+            port 80
+        }
+        original-port 80
+        protocol tcp_udp
+    }
+    rule 2 {
+        description https
+        forward-to {
+            address 100.87.211.20
+            port 443
+        }
+        original-port 443
+        protocol tcp_udp
+    }
+    rule 3 {
+        description minecraft
+        forward-to {
+            address 192.168.62.18
+            port 25565
+        }
+        original-port 25565
+        protocol tcp_udp
+    }
+    rule 4 {
+        description "rcon minecraft"
+        forward-to {
+            address 192.168.62.18
+            port 25575
+        }
+        original-port 25575
+        protocol tcp_udp
+    }
+    rule 5 {
+        description "nas http"
+        forward-to {
+            address 192.168.42.42
+            port 5000
+        }
+        original-port 5000
+        protocol tcp_udp
+    }
+    rule 6 {
+        description vpn
+        forward-to {
+            address 192.168.42.42
+            port 1701
+        }
+        original-port 1701
+        protocol tcp_udp
+    }
+    rule 7 {
+        description vpn
+        forward-to {
+            address 192.168.42.42
+            port 500
+        }
+        original-port 500
+        protocol tcp_udp
+    }
+    rule 8 {
+        description vpn
+        forward-to {
+            address 192.168.42.42
+            port 4500
+        }
+        original-port 4500
+        protocol tcp_udp
+    }
+    rule 9 {
+        description vpn
+        forward-to {
+            address 192.168.42.42
+            port 1194
+        }
+        original-port 1194
+        protocol tcp_udp
+    }
+    rule 10 {
+        description "nas https"
+        forward-to {
+            address 192.168.42.42
+            port 5001
+        }
+        original-port 5001
+        protocol tcp_udp
+    }
+    rule 11 {
+        description "minecraft aphorya"
+        forward-to {
+            address 192.168.62.18
+            port 25555
+        }
+        original-port 25555
+        protocol tcp_udp
+    }
+    rule 12 {
+        description palworld
+        forward-to {
+            address 192.168.62.18
+            port 8211
+        }
+        original-port 8211
+        protocol tcp_udp
+    }
+    wan-interface eth5.832
+}
+protocols {
+    static {
+    }
+}
+service {
+    dhcp-server {
+        disabled false
+        global-parameters "log-facility local2;"
+        hostfile-update disable
+        shared-network-name LAN {
+            authoritative enable
+            subnet 192.168.1.0/24 {
+                default-router 192.168.1.1
+                dns-server 192.168.42.42
+                domain-name st0rmingbr4in.lan
+                lease 86400
+                static-mapping BMC-k3s-1 {
+                    ip-address 192.168.1.119
+                    mac-address 00:25:90:1F:D9:41
+                }
+                static-mapping BMC-kvm-B {
+                    ip-address 192.168.1.116
+                    mac-address 00:25:90:1F:D8:BA
+                }
+                static-mapping k3s-1 {
+                    ip-address 192.168.1.121
+                    mac-address dc:9c:52:07:9e:c9
+                }
+                static-mapping k3s-2 {
+                    ip-address 192.168.1.102
+                    mac-address DC:9C:52:07:AB:78
+                }
+                static-mapping k3s-3 {
+                    ip-address 192.168.1.103
+                    mac-address DC:9C:52:07:BE:44
+                }
+                static-mapping k3s-6 {
+                    ip-address 192.168.1.110
+                    mac-address 82:58:D9:CA:82:90
+                }
+                static-mapping k3s-1-virt {
+                    ip-address 192.168.1.101
+                    mac-address 52:BB:D0:84:F8:71
+                }
+                static-mapping kvm-1 {
+                    ip-address 192.168.1.109
+                    mac-address 00:25:90:1f:f3:b6
+                }
+                static-mapping truenas-1 {
+                    ip-address 192.168.1.106
+                    mac-address 00:25:90:1f:f2:a8
+                }
+                static-mapping truenas-2 {
+                    ip-address 192.168.1.107
+                    mac-address 00:25:90:1f:93:5c
+                }
+            }
+        }
+        shared-network-name bmc {
+            authoritative enable
+            subnet 192.168.52.0/24 {
+                default-router 192.168.52.1
+                dns-server 192.168.42.42
+                domain-name bmc.st0rmingbr4in.com
+                lease 86400
+                start 192.168.52.10 {
+                    stop 192.168.52.100
+                }
+                static-mapping bmc-asarim {
+                    ip-address 192.168.52.9
+                    mac-address 5c:f9:dd:fd:43:80
+                }
+                static-mapping bmc-powerhouse {
+                    ip-address 192.168.52.38
+                    mac-address e4:5f:01:13:a2:00
+                }
+            }
+        }
+        shared-network-name guest {
+            authoritative disable
+            subnet 192.168.69.0/24 {
+                default-router 192.168.69.1
+                dns-server 8.8.8.8
+                lease 86400
+                start 192.168.69.10 {
+                    stop 192.168.69.100
+                }
+                static-mapping BTT-CB1 {
+                    ip-address 192.168.69.95
+                    mac-address f6:96:fb:2e:d9:f3
+                }
+                static-mapping U1 {
+                    ip-address 192.168.69.24
+                    mac-address 40:fd:f3:00:0b:48
+                }
+                static-mapping apollo-air-1-341894 {
+                    ip-address 192.168.69.25
+                    mac-address f4:12:fa:34:18:94
+                }
+                static-mapping nasse {
+                    ip-address 192.168.69.42
+                    mac-address 00:11:32:bf:51:40
+                }
+                static-mapping steam-pc {
+                    ip-address 192.168.69.50
+                    mac-address dc:9c:52:07:9f:84
+                }
+                static-mapping voron24 {
+                    ip-address 192.168.69.99
+                    mac-address dc:a6:32:2f:99:7e
+                }
+            }
+        }
+        shared-network-name servers {
+            authoritative enable
+            subnet 192.168.42.0/24 {
+                default-router 192.168.42.1
+                dns-server 192.168.42.42
+                domain-name hard.st0rmingbr4in.com
+                lease 86400
+                start 192.168.42.10 {
+                    stop 192.168.42.100
+                }
+                static-mapping asarim {
+                    ip-address 192.168.42.41
+                    mac-address b8:2a:72:d4:52:27
+                }
+                static-mapping powerhouse {
+                    ip-address 192.168.42.53
+                    mac-address 00:15:5d:45:49:06
+                }
+                static-mapping pve-5 {
+                    ip-address 192.168.42.35
+                    mac-address DC:9C:52:07:9F:31
+                }
+                static-mapping sw-mikrotik {
+                    ip-address 192.168.42.62
+                    mac-address 78:9A:18:43:05:AD
+                }
+                static-mapping sw-cisco-52 {
+                    ip-address 192.168.42.52
+                    mac-address 00:1C:57:7A:5F:80
+                }
+            }
+        }
+        shared-network-name vms {
+            authoritative disable
+            subnet 192.168.62.0/24 {
+                default-router 192.168.62.1
+                dns-server 192.168.42.42
+                lease 86400
+                start 192.168.62.10 {
+                    stop 192.168.62.100
+                }
+                static-mapping azuriom {
+                    ip-address 192.168.62.21
+                    mac-address 1A:AB:B5:E6:93:88
+                }
+                static-mapping datadog-relay {
+                    ip-address 192.168.62.28
+                    mac-address 02:4B:8F:1C:3A:D7
+                }
+                static-mapping games {
+                    ip-address 192.168.62.33
+                    mac-address BC:24:11:64:92:D4
+                }
+                static-mapping gitlab {
+                    ip-address 192.168.62.29
+                    mac-address E2:C1:20:49:8A:C3
+                }
+                static-mapping gitlab-runner {
+                    ip-address 192.168.62.30
+                    mac-address 0E:21:13:93:A6:0D
+                }
+                static-mapping homeassistant {
+                    ip-address 192.168.62.31
+                    mac-address 02:90:F6:A2:AA:67
+                }
+                static-mapping k3s-clusterv2-node1 {
+                    ip-address 192.168.62.18
+                    mac-address 0A:62:38:E6:38:00
+                }
+                static-mapping k3s-clusterv2-node2 {
+                    ip-address 192.168.62.22
+                    mac-address 00:15:5d:45:49:00
+                }
+                static-mapping k3s-clusterv2-node3 {
+                    ip-address 192.168.62.23
+                    mac-address 00:15:5d:45:49:07
+                }
+                static-mapping k3s-clusterv2-server1 {
+                    ip-address 192.168.62.17
+                    mac-address 4e:94:ad:43:a2:69
+                }
+                static-mapping pfsense {
+                    ip-address 192.168.62.20
+                    mac-address 0A:D6:4B:5B:72:5E
+                }
+                static-mapping rakk0o-dev {
+                    ip-address 192.168.62.27
+                    mac-address FA:17:02:7A:FC:4F
+                }
+                static-mapping registry {
+                    ip-address 192.168.62.19
+                    mac-address A2:2B:6A:FB:59:A9
+                }
+                static-mapping truenas {
+                    ip-address 192.168.62.24
+                    mac-address b6:24:0a:e6:ea:c8
+                }
+                static-mapping truenas-scale-5 {
+                    ip-address 192.168.62.15
+                    mac-address 5e:f4:a3:3d:59:ce
+                }
+                static-mapping unifi {
+                    ip-address 192.168.62.32
+                    mac-address BC:24:11:7F:00:FE
+                }
+            }
+        }
+        static-arp disable
+        use-dnsmasq disable
+    }
+    dns {
+        dynamic {
+            interface eth5.832 {
+                service dyndns {
+                    host-name julien.likescandy.com
+                    login {{ dyndns_login }}
+                    password {{ dyndns_password }}
+                }
+            }
+        }
+        forwarding {
+            cache-size 150
+            listen-on switch0
+            options dnssec
+            options dnssec-check-unsigned
+            options dnssec-no-timecheck
+            options trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D
+            options trust-anchor=.,19036,8,2,49AAC11D7B6F6446702E54A1607371607A1A41855200FD2CE1CDDE32F24E8FB5
+        }
+    }
+    gui {
+        http-port 80
+        https-port 443
+        listen-address 192.168.69.1
+        listen-address 192.168.42.1
+        listen-address 192.168.52.1
+        listen-address 192.168.62.1
+        older-ciphers enable
+    }
+    nat {
+        rule 5010 {
+            description "masquerade for WAN"
+            log disable
+            outbound-interface eth5.832
+            protocol all
+            type masquerade
+        }
+    }
+    snmp {
+        community {{ snmp_community }} {
+            authorization ro
+        }
+    }
+    ssh {
+        disable-password-authentication
+        port 22
+        protocol-version v2
+    }
+    ubnt-discover {
+    }
+    unms {
+        connection {{ unms_connection }}
+    }
+}
+system {
+    analytics-handler {
+        send-analytics-report false
+    }
+    conntrack {
+        expect-table-size 2048
+        hash-size 32768
+        modules {
+            sip {
+                disable
+            }
+        }
+        table-size 262144
+    }
+    crash-handler {
+        send-crash-report false
+    }
+    host-name ubnt
+    login {
+        user st0rmingbr4in {
+            authentication {
+                encrypted-password {{ router_encrypted_password }}
+                plaintext-password ""
+                public-keys github-actions-k3s {
+                    key AAAAC3NzaC1lZDI1NTE5AAAAIBqlmo+1m/sjauV2GTjDzdJjzOEvgAuFs/b0hEbEEUi1
+                    type ssh-ed25519
+                }
+                public-keys homelab {
+                    key AAAAC3NzaC1lZDI1NTE5AAAAIMXLPvmMDlh3tgvRqz1Vu1e6U6idSvFEw+crHVPi+Mds
+                    type ssh-ed25519
+                }
+            }
+            full-name ""
+            level admin
+        }
+    }
+    ntp {
+        server 0.ubnt.pool.ntp.org {
+        }
+        server 1.ubnt.pool.ntp.org {
+        }
+        server 2.ubnt.pool.ntp.org {
+        }
+        server 3.ubnt.pool.ntp.org {
+        }
+    }
+    offload {
+        hwnat enable
+        ipsec enable
+    }
+    package {
+    }
+    syslog {
+        global {
+            archive {
+                files 5
+                size 5000
+            }
+            facility all {
+                level info
+            }
+            facility local2 {
+                level debug
+            }
+            facility protocols {
+                level debug
+            }
+        }
+        host 192.168.62.28 {
+            facility all {
+                level debug
+            }
+        }
+    }
+    time-zone UTC
+    traffic-analysis {
+        dpi enable
+    }
+}
+
+
+/* Warning: Do not remove the following line. */
+/* === vyatta-config-version: "config-management@1:conntrack@1:cron@1:dhcp-relay@1:dhcp-server@4:firewall@5:ipsec@5:nat@3:qos@1:quagga@2:suspend@1:system@5:ubnt-l2tp@1:ubnt-pptp@1:ubnt-udapi-server@1:ubnt-unms@2:ubnt-util@1:vrrp@1:vyatta-netflow@1:webgui@1:webproxy@1:zone-policy@1" === */
+/* Release version: v3.0.0.5842787.250718.1058 */

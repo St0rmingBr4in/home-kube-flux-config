@@ -1,24 +1,67 @@
 ---
-- name: Configure system settings
-  ansible.builtin.import_tasks: system.yaml
+# Render the full config.boot template locally, upload it to the router via SCP,
+# then use vyatta-cfg-cmd-wrapper over SSH to load + compare + commit/save.
+#
+# All router operations use direct SSH — this avoids ansible.netcommon cli_command
+# timeouts caused by the slow MIPS CPU on EdgeRouter X SFP.
 
-- name: Configure interfaces
-  ansible.builtin.import_tasks: interfaces.yaml
+- name: Render config.boot template
+  ansible.builtin.template:
+    src: config.boot.j2
+    dest: /tmp/edgerouter-config.boot
+  delegate_to: localhost
+  # Always write the rendered file so the SCP step has something to upload,
+  # even when Ansible is invoked with --check.
+  check_mode: false
 
-- name: Configure firewall
-  ansible.builtin.import_tasks: firewall.yaml
+- name: Upload config to router via SCP
+  ansible.builtin.command:
+    argv:
+      - scp
+      - -o
+      - StrictHostKeyChecking=no
+      - -o
+      - BatchMode=yes
+      - /tmp/edgerouter-config.boot
+      - "{{ ansible_user }}@{{ inventory_hostname }}:/tmp/config.boot.candidate"
+  delegate_to: localhost
+  environment:
+    SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+  changed_when: false
+  check_mode: false
 
-- name: Configure NAT
-  ansible.builtin.import_tasks: nat.yaml
+- name: Apply config on router
+  # Runs a self-contained bash script on the router over SSH.
+  # ROUTER_SCRIPT is single-quoted so local bash passes $W/$diff verbatim to
+  # the remote shell; Jinja2 still renders {{ }} before local bash sees the string.
+  # diff is a plain file diff (no configure-session 'compare' needed): the template
+  # is derived from the router's own config.boot format so the comparison is stable.
+  ansible.builtin.shell: |
+    ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
+        {{ ansible_user }}@{{ inventory_hostname }} bash -s << 'ROUTER_SCRIPT'
+    W=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
+    diff_output=$(diff /config/config.boot /tmp/config.boot.candidate 2>&1)
+    if [ -z "$diff_output" ]; then
+        printf 'No changes\n'
+    else
+        printf '%s\n' "$diff_output"
+        COMMIT={{ 'false' if ansible_check_mode else 'true' }}
+        if $COMMIT; then
+            $W begin || exit 1
+            $W load /tmp/config.boot.candidate || { $W discard; $W end; exit 1; }
+            $W commit && $W save || { $W discard; $W end; exit 1; }
+            $W discard
+            $W end
+        fi
+    fi
+    ROUTER_SCRIPT
+  delegate_to: localhost
+  environment:
+    SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+  register: config_result
+  changed_when: "'No changes' not in config_result.stdout"
+  check_mode: false
 
-- name: Configure DHCP server
-  ansible.builtin.import_tasks: dhcp.yaml
-
-- name: Configure DNS
-  ansible.builtin.import_tasks: dns.yaml
-
-- name: Configure port forwarding
-  ansible.builtin.import_tasks: port_forward.yaml
-
-- name: Configure torrent blocking
-  ansible.builtin.import_tasks: torrent_block.yaml
+- name: Show router config diff
+  ansible.builtin.debug:
+    msg: "{{ config_result.stdout }}"

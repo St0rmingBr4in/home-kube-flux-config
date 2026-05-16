@@ -1,17 +1,25 @@
 ---
-ansible_connection: ansible.netcommon.network_cli
-ansible_network_os: community.network.edgeos
+# All tasks delegate_to: localhost and SSH to the router directly; Ansible's own
+# connection plugin is never used for this host.
+ansible_connection: local
 ansible_user: st0rmingbr4in
-ansible_ssh_private_key_file: ~/.ssh/edgerouter_id_ed25519
+# No key file — rely on the SSH agent (1Password) for authentication.
+# Before running the playbook locally, set:
+#   export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
-# Sensitive values — stored in vault.yaml
-snmp_community: "{{ vault_snmp_community }}"
-dyndns_password: "{{ vault_dyndns_password }}"
-unms_connection: "{{ vault_unms_connection }}"
+# Sensitive values — stored in HashiCorp Vault at secret/edgerouter.
+# Fetch the whole secret once and extract fields via Jinja2 to avoid the
+# broken return_field= string-style syntax in community.hashi_vault.
+_edgerouter_secrets: "{{ lookup('community.hashi_vault.hashi_vault', 'secret/data/edgerouter') }}"
+dyndns_login: "{{ _edgerouter_secrets['dyndns_login'] }}"
+router_encrypted_password: "{{ _edgerouter_secrets['router_encrypted_password'] }}"
+snmp_community: "{{ _edgerouter_secrets['snmp_community'] }}"
+dyndns_password: "{{ _edgerouter_secrets['dyndns_password'] }}"
+unms_connection: "{{ _edgerouter_secrets['unms_connection'] }}"
 # Orange France ISP DHCP auth credential (line-specific, do not commit plaintext)
-wan_dhcp_rfc3118_auth: "{{ vault_wan_dhcp_rfc3118_auth }}"
+wan_dhcp_rfc3118_auth: "{{ _edgerouter_secrets['wan_dhcp_rfc3118_auth'] }}"
 # WAN interface MAC address (used as DHCP client identifier)
-wan_dhcp_client_identifier: "{{ vault_wan_dhcp_client_identifier }}"
+wan_dhcp_client_identifier: "{{ _edgerouter_secrets['wan_dhcp_client_identifier'] }}"
 
 # Set to true to disable hardware NAT offload so DPI inspects all flows.
 # This gives complete torrent blocking but reduces NAT throughput.

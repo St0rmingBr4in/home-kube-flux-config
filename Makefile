@@ -197,14 +197,25 @@ ansible-install-edgerouter: ## Install Ansible + collections for the edgerouter 
 	pip install -r ci/images/ci-ansible/requirements.txt
 	ansible-galaxy collection install -r ansible/requirements.yml
 
-ansible-setup-ssh-edgerouter: ## Write EdgeRouter SSH key from EDGEROUTER_SSH_PRIVATE_KEY env var
+ansible-setup-ssh-edgerouter: ## Write EdgeRouter SSH key from EDGEROUTER_SSH_PRIVATE_KEY env var (CI only)
 	@mkdir -p ~/.ssh
 	@printf '%s\n' "$${EDGEROUTER_SSH_PRIVATE_KEY}" > ~/.ssh/edgerouter_id_ed25519
 	@chmod 600 ~/.ssh/edgerouter_id_ed25519
-	@printf 'IdentityFile ~/.ssh/edgerouter_id_ed25519\n' >> ~/.ssh/config
 
-ansible-edgerouter: ## Run edgerouter playbook (check+diff on PRs or CHECK_MODE=true)
-	@if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
+ansible-edgerouter: ## Run edgerouter playbook (check+diff on PRs, uses 1Password agent locally)
+	@# Locally the EdgeRouter SSH key is in 1Password. Point paramiko at the 1Password
+	@# agent socket so it can authenticate. In CI, EDGEROUTER_SSH_PRIVATE_KEY is written
+	@# to disk by ansible-setup-ssh-edgerouter and SSH_AUTH_SOCK is left as-is.
+	@# Vault token: read from macOS Keychain locally; in CI pass VAULT_TOKEN as env var.
+	@if [ -S "$${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock" ] && [ -z "$${EDGEROUTER_SSH_PRIVATE_KEY:-}" ]; then \
+		export SSH_AUTH_SOCK="$${HOME}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"; \
+	fi; \
+	if [ -z "$${VAULT_TOKEN:-}" ]; then \
+		export VAULT_TOKEN="$$(security find-generic-password -a "$$USER" -s vault-token -w 2>/dev/null)"; \
+	fi; \
+	export VAULT_ADDR="$${VAULT_ADDR:-https://vault.st0rmingbr4in.com}"; \
+	export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES; \
+	if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
 		cd ansible && ansible-playbook playbooks/edgerouter.yaml --check --diff $(ANSIBLE_FLAGS); \
 	else \
 		cd ansible && ansible-playbook playbooks/edgerouter.yaml $(ANSIBLE_FLAGS); \
