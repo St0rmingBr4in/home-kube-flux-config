@@ -43,13 +43,6 @@ firewall {
                 related enable
             }
         }
-        rule 100 {
-            action drop
-            application {
-                category bittorrent
-            }
-            description "Block BitTorrent (DPI)"
-        }
         rule 200 {
             action drop
             description "Block classic BitTorrent ports (TCP)"

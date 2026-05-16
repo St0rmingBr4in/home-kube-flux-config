@@ -22,6 +22,10 @@
       - StrictHostKeyChecking=no
       - -o
       - BatchMode=yes
+      - -o
+      - ServerAliveInterval=30
+      - -o
+      - ServerAliveCountMax=60
       - /tmp/edgerouter-config.boot
       - "{{ ansible_user }}@{{ inventory_hostname }}:/tmp/config.boot.candidate"
   delegate_to: localhost
@@ -38,6 +42,7 @@
   # is derived from the router's own config.boot format so the comparison is stable.
   ansible.builtin.shell: |
     ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
+        -o ServerAliveInterval=30 -o ServerAliveCountMax=60 \
         {{ ansible_user }}@{{ inventory_hostname }} bash -s << 'ROUTER_SCRIPT'
     W=/opt/vyatta/sbin/vyatta-cfg-cmd-wrapper
     diff_output=$(diff /config/config.boot /tmp/config.boot.candidate 2>&1)
