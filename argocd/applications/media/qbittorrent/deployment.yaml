@@ -118,16 +118,20 @@ spec:
                   - /bin/sh
                   - -c
                   - |
-                    # Wait for Tailscale to establish the exit-node default route.
-                    # Without throw rules for cluster CIDRs, other pod subnets
-                    # (e.g. 10.42.2.0/24 on server1 where Traefik runs) are routed via
-                    # tailscale0 → exit-node → dropped, causing 504s from Traefik.
-                    until ip route show table all 2>/dev/null | grep -q '^default dev tailscale0'; do sleep 2; done
-                    # Find Tailscale's policy routing table number dynamically (not always 52).
-                    TS_TABLE=$(ip route show table all | awk '/^default dev tailscale0/ && /table/{for(i=1;i<=NF;i++) if($i=="table"){print $(i+1); break}}')
-                    # Allow all cluster pod and service traffic to bypass the exit-node.
-                    ip route add throw 10.42.0.0/16 table "$TS_TABLE" 2>/dev/null || true
-                    ip route add throw 10.43.0.0/16 table "$TS_TABLE" 2>/dev/null || true
+                    # Phase 1: wait for Tailscale to connect and load the peer list.
+                    # `tailscale up --exit-node=<name>` validates the name against the
+                    # peer list before the daemon has connected, so we start without an
+                    # exit-node and set it after the peer list is available.
+                    until tailscale status 2>/dev/null | grep -q 'inlet'; do sleep 2; done
+                    # Phase 2: set exit-node by name now that the peer list is loaded.
+                    tailscale set --exit-node=inlet --exit-node-allow-lan-access=true
+                    # Phase 3: add ip rules so cluster CIDRs use the main table (eth0)
+                    # instead of Tailscale's exit-node policy table.
+                    # We use ip rule (not ip route in table 52) because Tailscale owns
+                    # and rebuilds that table — custom routes would be wiped.
+                    # Priority 100 is consulted before Tailscale's rules (range 5210-5270).
+                    ip rule add to 10.42.0.0/16 lookup main priority 100 2>/dev/null || true
+                    ip rule add to 10.43.0.0/16 lookup main priority 100 2>/dev/null || true
           securityContext:
             runAsUser: 0
             capabilities:
@@ -147,11 +151,10 @@ spec:
                   key: TS_AUTHKEY
             - name: TS_HOSTNAME
               value: qbittorrent
-            # TODO: replace with two-phase startup script so the exit-node name
-            # ("inlet") can be used — tailscale up rejects names when the peer
-            # list isn't loaded yet. For now, use the Tailscale IP directly.
+            # No exit-node here — set dynamically by the postStart hook after the
+            # peer list is loaded (tailscale up rejects names before connecting).
             - name: TS_EXTRA_ARGS
-              value: "--exit-node=100.90.236.95 --exit-node-allow-lan-access"
+              value: ""
             # Accept Tailscale DNS so the exit-node routes DNS via 100.100.100.100
             # (through tailscale0). Without this, the pod uses cluster DNS
             # (10.43.0.10) which Tailscale routes via the exit-node but inlet
