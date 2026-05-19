@@ -121,14 +121,10 @@ pass `-e tailscale_authkey=<oauth-secret>`).
 
 ### 3. Verify qbittorrent exit node reference
 
-qbittorrent uses the MagicDNS FQDN so no update is needed after re-provisioning:
-
-```yaml
-TS_EXTRA_ARGS: "--exit-node=inlet.tail2e3d9.ts.net --exit-node-allow-lan-access"
-```
-
-MagicDNS automatically resolves to the new device's IP. No config change required
-as long as the device name stays `inlet` (ensured by step 1 above).
+qbittorrent uses `--exit-node=inlet` (short unique node name). No config change
+required after re-provisioning as long as step 1 was followed (so `inlet` remains
+the unique name). Note: `--exit-node` does NOT accept MagicDNS FQDNs — only IPs
+or unique short node names.
 
 ### Why `-N` suffixes happen on other nodes (traefik-2, pihole-1, etc.)
 
