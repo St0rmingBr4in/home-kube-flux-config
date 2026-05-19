@@ -10,7 +10,7 @@ spec:
         elements:
           - name: sonarr
             chart: sonarr
-            chartVersion: 26.0.1
+            chartVersion: 26.0.3
             namespace: prod-media
             manifestPath: argocd/applications/media/sonarr
 
