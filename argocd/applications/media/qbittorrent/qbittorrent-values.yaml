@@ -165,7 +165,9 @@ addons:
             name: tailscale-authkey
             key: TS_AUTHKEY
         TS_HOSTNAME: qbittorrent
-        TS_EXTRA_ARGS: "--exit-node=inlet --exit-node-allow-lan-access"
+        # Use MagicDNS FQDN — survives inlet re-provisioning without config changes.
+        # Name must be unique in tailnet; clean up stale devices from admin console if ambiguous.
+        TS_EXTRA_ARGS: "--exit-node=inlet.tail2e3d9.ts.net --exit-node-allow-lan-access"
         TS_ACCEPT_DNS: "false"
         TS_KUBE_SECRET: ""
       resources:
