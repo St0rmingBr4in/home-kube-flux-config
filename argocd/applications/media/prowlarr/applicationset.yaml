@@ -10,7 +10,7 @@ spec:
         elements:
           - name: prowlarr
             chart: prowlarr
-            chartVersion: 22.0.3
+            chartVersion: 22.3.0
             namespace: prod-media
             manifestPath: argocd/applications/media/prowlarr
 
