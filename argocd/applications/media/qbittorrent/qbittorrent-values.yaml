@@ -63,9 +63,10 @@ secret:
       TS_AUTHKEY: "placeholder"
 
 # Image used by the TrueCharts Tailscale addon (routes traffic through inlet exit node)
+# Tailscale moved off ghcr.io after v1.33.x; current releases are on Docker Hub.
 tailscaleImage:
-  repository: ghcr.io/tailscale/tailscale
-  tag: v1.98.2
+  repository: tailscale/tailscale
+  tag: v1.96.5
   pullPolicy: IfNotPresent
 
 # Alpine image for the kill-switch init container (Tailscale image is distroless, no shell/iptables)
@@ -94,7 +95,9 @@ workload:
                 # Tailscale loses the exit-node route, this probe fails → pod restarts
                 # → init container re-applies the iptables kill-switch → Tailscale must
                 # reconnect with a valid exit-node before liveness passes again.
-                - touch /config/.liveness && ip route get 8.8.8.8 | grep -q tailscale0
+                # /proc/net/route used instead of `ip route` — iproute2 not in the image.
+                # Column 1 = iface, column 2 = destination (00000000 = default route).
+                - touch /config/.liveness && awk '$1=="tailscale0" && $2=="00000000"{found=1} END{exit !found}' /proc/net/route
               spec:
                 # Longer initial delay so Tailscale has time to connect and establish
                 # the exit-node route before the first check.
