@@ -60,11 +60,8 @@ spec:
                         probes:
                           liveness:
                             enabled: true
-                            type: exec
-                            command:
-                              - sh
-                              - -c
-                              - touch /config/.liveness
+                            type: http
+                            path: /ping
                             spec:
                               initialDelaySeconds: 12
                               periodSeconds: 15
