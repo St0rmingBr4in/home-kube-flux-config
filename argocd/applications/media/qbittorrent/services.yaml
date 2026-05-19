@@ -1,0 +1,47 @@
+---
+# ClusterIP — exposes the web UI to Traefik (see ingressroute.yaml)
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+# LoadBalancer (Tailscale) — exposes the torrent port via the qbittorrent-torrent Tailscale proxy.
+# inlet DNAT forwards external port 6881 → 100.122.130.88:6881 (this service's Tailscale IP).
+# Must match torrent_port in ansible/inventory/group_vars/inlet.yaml
+# and ansible/inventory/group_vars/edgerouter/vars.yaml.
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent-torrent
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+  annotations:
+    tailscale.com/hostname: "qbittorrent-torrent"
+    tailscale.com/proxy-class: "proxy-resources"
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+  selector:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+  ports:
+    - name: torrent
+      port: 6881
+      targetPort: 6881
+      protocol: TCP

@@ -6,6 +6,8 @@ resources:
   - qbittorrent-config-pvc.yaml
   - tailscale-authkey-vault.yaml
   - ingressroute.yaml
+  - deployment.yaml
+  - services.yaml
 
 components:
   - ../../../components/app-health-hooks

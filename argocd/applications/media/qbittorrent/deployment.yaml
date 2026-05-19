@@ -1,0 +1,182 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: qbittorrent
+    app.kubernetes.io/instance: qbittorrent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbittorrent
+      app.kubernetes.io/instance: qbittorrent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbittorrent
+        app.kubernetes.io/instance: qbittorrent
+        # Keep existing service selectors (ClusterIP + LoadBalancer) working
+        # without modifying them during the live test.
+        pod.name: main
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+        - name: vpn-kill-switch
+          image: alpine:3.21
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add: [NET_ADMIN]
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache iptables
+              # Kill switch: block all direct internet traffic; only allow:
+              #  - loopback
+              #  - traffic routed through tailscale0 (exit-node tunnel)
+              #  - Tailscale CGNAT (100.64.0.0/10) for control-plane
+              #  - WireGuard direct (UDP 41641)
+              #  - DERP relays (TCP/UDP 443, UDP 3478)
+              #  - DNS
+              #  - ESTABLISHED/RELATED replies
+              iptables -A OUTPUT -o lo -j ACCEPT
+              iptables -A OUTPUT -o tailscale0 -j ACCEPT
+              iptables -A OUTPUT -d 100.64.0.0/10 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 41641 -j ACCEPT
+              iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 443 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 3478 -j ACCEPT
+              iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+              iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+              iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+              iptables -A OUTPUT -j DROP
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:5.2.0
+          env:
+            - name: PUID
+              value: "1031"
+            - name: PGID
+              value: "100"
+            - name: TZ
+              value: Europe/Paris
+            - name: WEBUI_PORT
+              value: "8080"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: torrent
+              containerPort: 6881
+              protocol: TCP
+            - name: torrentudp
+              containerPort: 6881
+              protocol: UDP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                # Tailscale exit-node routes via a policy table (currently 52, but
+                # table numbers are internal — use `table all` to avoid hardcoding).
+                # If exit-node drops, fails 3× → pod restarts → kill-switch re-runs.
+                - ip route show table all | grep -q '^default dev tailscale0'
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1Gi
+            limits:
+              memory: 1Gi
+
+        - name: tailscale
+          image: tailscale/tailscale:v1.96.5
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add: [NET_ADMIN, NET_RAW]
+              drop: [ALL]
+            allowPrivilegeEscalation: false
+          env:
+            # TS_USERSPACE=false: use kernel TUN (creates tailscale0 interface).
+            # Without this, containerboot forces --tun=userspace-networking and
+            # no tailscale0 appears, so the kill-switch and liveness probe fail.
+            - name: TS_USERSPACE
+              value: "false"
+            - name: TS_AUTH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-tailscale-authkey
+                  key: TS_AUTHKEY
+            - name: TS_HOSTNAME
+              value: qbittorrent
+            # TODO: replace with two-phase startup script so the exit-node name
+            # ("inlet") can be used — tailscale up rejects names when the peer
+            # list isn't loaded yet. For now, use the Tailscale IP directly.
+            - name: TS_EXTRA_ARGS
+              value: "--exit-node=100.90.236.95 --exit-node-allow-lan-access"
+            # Accept Tailscale DNS so the exit-node routes DNS via 100.100.100.100
+            # (through tailscale0). Without this, the pod uses cluster DNS
+            # (10.43.0.10) which Tailscale routes via the exit-node but inlet
+            # cannot reach — causing DNS timeouts.
+            - name: TS_ACCEPT_DNS
+              value: "true"
+            # Empty: don't persist state in a k8s Secret (no RBAC needed).
+            # The pod re-authenticates via TS_AUTH_KEY on each restart.
+            - name: TS_KUBE_SECRET
+              value: ""
+          volumeMounts:
+            - name: tailscale-state
+              mountPath: /var/lib/tailscale
+            - name: tun
+              mountPath: /dev/net/tun
+            - name: tmp
+              mountPath: /tmp
+            - name: varrun
+              mountPath: /var/run
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: media-downloads
+        - name: tailscale-state
+          emptyDir: {}
+        - name: tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+        - name: tmp
+          emptyDir:
+            medium: Memory
+        - name: varrun
+          emptyDir:
+            medium: Memory

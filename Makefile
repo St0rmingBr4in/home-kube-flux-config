@@ -164,9 +164,13 @@ terraform-tailscale-init: ## Initialise Tailscale Terraform
 	terraform -chdir=$(TF_TAILSCALE_DIR) init
 
 terraform-tailscale-plan: ## Plan Tailscale Terraform
+	TF_VAR_tailscale_oauth_client_id=$$(vault kv get -mount=secret -format=json tailscale-oauth | jq -r '.data.data.client_id') \
+	TF_VAR_tailscale_oauth_client_secret=$$(vault kv get -mount=secret -format=json tailscale-oauth | jq -r '.data.data.client_secret') \
 	terraform -chdir=$(TF_TAILSCALE_DIR) plan
 
 terraform-tailscale-apply: ## Apply Tailscale Terraform
+	TF_VAR_tailscale_oauth_client_id=$$(vault kv get -mount=secret -format=json tailscale-oauth | jq -r '.data.data.client_id') \
+	TF_VAR_tailscale_oauth_client_secret=$$(vault kv get -mount=secret -format=json tailscale-oauth | jq -r '.data.data.client_secret') \
 	terraform -chdir=$(TF_TAILSCALE_DIR) apply -auto-approve
 
 # ── Terraform: Vault ──────────────────────────────────────────────────────────
