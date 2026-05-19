@@ -118,14 +118,16 @@ spec:
                   - /bin/sh
                   - -c
                   - |
-                    # Wait for Tailscale to establish the exit-node default route in table 52.
-                    # Table 52 only gets a throw for the local /24 by default; other pod subnets
-                    # (e.g. 10.42.2.0/24 on server1 where Traefik runs) are routed via tailscale0
-                    # → exit-node → dropped, causing 504s.
-                    until ip route show table 52 2>/dev/null | grep -q '^default dev tailscale0'; do sleep 2; done
+                    # Wait for Tailscale to establish the exit-node default route.
+                    # Without throw rules for cluster CIDRs, other pod subnets
+                    # (e.g. 10.42.2.0/24 on server1 where Traefik runs) are routed via
+                    # tailscale0 → exit-node → dropped, causing 504s from Traefik.
+                    until ip route show table all 2>/dev/null | grep -q '^default dev tailscale0'; do sleep 2; done
+                    # Find Tailscale's policy routing table number dynamically (not always 52).
+                    TS_TABLE=$(ip route show table all | awk '/^default dev tailscale0/ && /table/{for(i=1;i<=NF;i++) if($i=="table"){print $(i+1); break}}')
                     # Allow all cluster pod and service traffic to bypass the exit-node.
-                    ip route add throw 10.42.0.0/16 table 52 2>/dev/null || true
-                    ip route add throw 10.43.0.0/16 table 52 2>/dev/null || true
+                    ip route add throw 10.42.0.0/16 table "$TS_TABLE" 2>/dev/null || true
+                    ip route add throw 10.43.0.0/16 table "$TS_TABLE" 2>/dev/null || true
           securityContext:
             runAsUser: 0
             capabilities:
