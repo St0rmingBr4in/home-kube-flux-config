@@ -49,7 +49,7 @@
       # Accept connections from the Tailscale CGNAT range only.
       client pass {
         from: 100.64.0.0/10 to: 0.0.0.0/0
-        log: error
+        log: connect error
       }
 
       # Allow authenticated CONNECT to anywhere on the internet.
