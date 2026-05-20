@@ -64,6 +64,11 @@ steps:
           "${VAULT_ADDR}/v1/secret/data/inlet/socks" \
           | jq -r '.data.data.password')
 
+        # Woodpecker clones the workspace with mode 0777 — Ansible refuses
+        # to load ansible.cfg from a world-writable dir, so the inventory
+        # path is lost and the play matches no hosts. Tighten permissions
+        # before invoking ansible-playbook.
+        chmod -R go-w .
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
@@ -113,6 +118,8 @@ steps:
           | jq -r '.data.data.k3s_ssh_private_key' > /root/.ssh/k3s_id_ed25519
         chmod 600 /root/.ssh/k3s_id_ed25519
 
+        # See ansible-inlet step for why this chmod is required.
+        chmod -R go-w .
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
