@@ -2,7 +2,7 @@
 
 ## Engineering principles
 
-Apply YAGNI, KISS, and SOLID. Concretely in this repo:
+Apply YAGNI, KISS, DRY, and SOLID. Concretely in this repo:
 
 - **YAGNI** — don't add config knobs, abstractions, or files for hypothetical
   future needs. One concrete consumer before generalising.
@@ -10,6 +10,10 @@ Apply YAGNI, KISS, and SOLID. Concretely in this repo:
   in an existing playbook beats a new role. A static manifest beats a
   templated one. Reach for Helm / kustomize patches / operators only when
   duplication actually shows up.
+- **DRY** — when the *same* config / value / pattern appears in two places
+  and they need to change together, extract it (a kustomize base, a shared
+  group_var, a Terraform module). Don't pre-extract for one-time similarity
+  that may diverge — that fights YAGNI.
 - **SOLID** — at this scale it mostly means: keep modules narrow (one
   responsibility per ansible role / terraform module / argocd app), and don't
   reach across module boundaries when a small interface would do.
