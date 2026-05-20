@@ -67,10 +67,13 @@ steps:
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
+        # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
+        # sees the variables at runtime. Plain ${VAR} would be expanded at
+        # YAML-compile time (to empty) before the shell ever runs.
         EXTRA_VARS=""
-        [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$EXTRA_VARS -e tailscale_authkey=${TAILSCALE_AUTHKEY}"
-        [ -n "${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$EXTRA_VARS -e socks_password=${SOCKS_PASSWORD}"
-        ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
+        [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
+        [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
+        ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
