@@ -35,6 +35,11 @@ spec:
                 hostname: "home-kube-api"
               ingressProxyConfig:
                 mode: "true"
+              # Use tag:k8s-operator for spawned proxy pods (chart default is
+              # tag:k8s, which we don't own). Aligns with OPERATOR_INITIAL_TAGS
+              # default and with our existing OAuth client's tag scope.
+              proxyConfig:
+                defaultTags: "tag:k8s-operator"
               resources:
                 limits:
                   cpu: 500m
