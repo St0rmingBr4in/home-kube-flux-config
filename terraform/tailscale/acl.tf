@@ -2,6 +2,10 @@ resource "tailscale_acl" "acl" {
   acl = jsonencode({
     tagOwners = {
       "tag:servers" = ["autogroup:admin"]
+      # Required by the Tailscale Kubernetes operator: the OAuth client used by
+      # the operator (secret/tailscale-oauth) needs this tag in scope so it can
+      # mint authkeys for the proxy pods it spawns (ts-traefik, egress, etc.).
+      "tag:k8s-operator" = ["autogroup:admin"]
     }
 
     # Auto-approve exit node advertisements from tagged servers so that
