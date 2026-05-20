@@ -1,5 +1,22 @@
 # Homelab Flux Config — Developer Notes
 
+## Engineering principles
+
+Apply YAGNI, KISS, and SOLID. Concretely in this repo:
+
+- **YAGNI** — don't add config knobs, abstractions, or files for hypothetical
+  future needs. One concrete consumer before generalising.
+- **KISS** — prefer the smallest change that works. A two-line shell snippet
+  in an existing playbook beats a new role. A static manifest beats a
+  templated one. Reach for Helm / kustomize patches / operators only when
+  duplication actually shows up.
+- **SOLID** — at this scale it mostly means: keep modules narrow (one
+  responsibility per ansible role / terraform module / argocd app), and don't
+  reach across module boundaries when a small interface would do.
+
+When in doubt, write the simpler version and accept a future refactor over a
+speculative abstraction today.
+
 ## Adding a new Terraform module
 
 All Terraform modules use HCP Terraform Cloud (TFC) as a state backend with
