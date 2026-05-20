@@ -1,0 +1,30 @@
+---
+# Tailscale operator cluster-egress Service: gives in-cluster workloads a
+# regular ClusterIP that proxies to inlet's SOCKS daemon (tailscale0:1080).
+# The operator creates a tailnet-connected proxy StatefulSet behind this
+# Service — cluster pods don't need a Tailscale sidecar.
+#
+# Prowlarr targets inlet-socks-egress.prod-media.svc.cluster.local:1080.
+#
+# Inlet re-provisioning is transparent: the operator re-resolves
+# inlet.tail2e3d9.ts.net (MagicDNS) and the new tailnet IP is picked up by
+# the proxy automatically — no manifest change needed.
+#
+# Resources for the spawned proxy pod come from the existing
+# `proxy-resources` ProxyClass (10m CPU req, 64Mi mem req, 256Mi mem limit).
+apiVersion: v1
+kind: Service
+metadata:
+  name: inlet-socks-egress
+  namespace: prod-media
+  annotations:
+    tailscale.com/tailnet-fqdn: inlet.tail2e3d9.ts.net
+    tailscale.com/proxy-class: proxy-resources
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: socks
+      port: 1080
+      protocol: TCP
+      targetPort: 1080

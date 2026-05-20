@@ -1,0 +1,67 @@
+---
+# SOCKS5 proxy on tailscale0 for application-level exit-node routing.
+#
+# Purpose: let cluster apps (prowlarr first) egress to the public internet via
+# inlet without standing up a Tailscale sidecar + kill-switch stack. Apps that
+# support a proxy config (HTTP/SOCKS) point at inlet.tail2e3d9.ts.net:1080.
+#
+# Trust boundary: danted binds to tailscale0 only — never reachable from the
+# public internet. Username/password auth via PAM (system user `socksproxy`)
+# is defense-in-depth in case a tailnet ACL mistake widens access.
+
+- name: Install dante-server
+  ansible.builtin.apt:
+    name: dante-server
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: Fail when socks_password is not provided
+  ansible.builtin.fail:
+    msg: >
+      socks_password is required. Fetch from Vault and pass via:
+        -e socks_password=$(vault kv get -mount=secret -field=password inlet/socks)
+  when: socks_password | default('') == ''
+
+- name: Create unprivileged socksproxy user for PAM auth
+  ansible.builtin.user:
+    name: socksproxy
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+    password: "{{ socks_password | password_hash('sha512') }}"
+    update_password: always
+
+- name: Render danted.conf (bind tailscale0:1080, username auth)
+  ansible.builtin.copy:
+    dest: /etc/danted.conf
+    mode: "0644"
+    content: |
+      # Managed by Ansible — do not edit by hand.
+      logoutput: syslog
+      internal: tailscale0 port = 1080
+      external: {{ public_interface }}
+      socksmethod: username
+      clientmethod: none
+      user.privileged: root
+      user.unprivileged: nobody
+
+      # Accept connections from the Tailscale CGNAT range only.
+      client pass {
+        from: 100.64.0.0/10 to: 0.0.0.0/0
+        log: error
+      }
+
+      # Allow authenticated CONNECT to anywhere on the internet.
+      socks pass {
+        from: 100.64.0.0/10 to: 0.0.0.0/0
+        command: connect
+        log: error
+      }
+  notify: Restart danted
+
+- name: Ensure danted is enabled and started
+  ansible.builtin.systemd:
+    name: danted
+    enabled: true
+    state: started

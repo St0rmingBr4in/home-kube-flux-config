@@ -257,6 +257,9 @@ ansible-inlet: ## Run inlet playbook (check+diff on PRs or CHECK_MODE=true)
 	if [ -n "$${TAILSCALE_AUTHKEY:-}" ]; then \
 		EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"; \
 	fi; \
+	if [ -n "$${SOCKS_PASSWORD:-}" ]; then \
+		EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"; \
+	fi; \
 	if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
 		cd ansible && ansible-playbook playbooks/inlet.yaml --check --diff $$EXTRA_VARS $(ANSIBLE_FLAGS); \
 	else \

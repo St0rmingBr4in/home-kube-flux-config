@@ -5,3 +5,4 @@ resources:
   - pv-prowlarr.yaml
   - prowlarr-config-pvc.yaml
   - prowlarr-ingressroute.yaml
+  - inlet-socks-egress.yaml

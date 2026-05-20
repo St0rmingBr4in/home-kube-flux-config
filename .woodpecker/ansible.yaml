@@ -7,6 +7,7 @@
 #   secret/ci/ansible   → vault_password, inlet_ssh_private_key, k3s_ssh_private_key
 #   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only)
 #   secret/ci/datadog   → TF_VAR_datadog_api_key (inlet only)
+#   secret/inlet/socks  → password (inlet only — danted PAM auth)
 
 when:
   - event: push
@@ -24,7 +25,8 @@ steps:
           - "ansible/scripts/**"
           - "ansible/requirements.yml"
           - "ansible/inventory/hosts.yaml"
-          - "ansible/inventory/group_vars/inlet/**"
+          - "ansible/inventory/group_vars/inlet.yaml"
+          - "ansible/roles/inlet/**"
           - "ansible/playbooks/inlet.yaml"
           - ".woodpecker/ansible.yaml"
     environment:
@@ -57,12 +59,17 @@ steps:
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
           | jq -r '.data.data.TF_VAR_datadog_api_key')
+        export SOCKS_PASSWORD=$(curl -sk \
+          -H "X-Vault-Token: $VAULT_TOKEN" \
+          "${VAULT_ADDR}/v1/secret/data/inlet/socks" \
+          | jq -r '.data.data.password')
 
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
         EXTRA_VARS=""
-        [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="-e tailscale_authkey=${TAILSCALE_AUTHKEY}"
+        [ -n "${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$EXTRA_VARS -e tailscale_authkey=${TAILSCALE_AUTHKEY}"
+        [ -n "${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$EXTRA_VARS -e socks_password=${SOCKS_PASSWORD}"
         ansible-playbook playbooks/inlet.yaml ${EXTRA_VARS}
     backend_options:
       kubernetes:

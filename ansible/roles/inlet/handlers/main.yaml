@@ -34,3 +34,9 @@
     state: restarted
     daemon_reload: true
   listen: "Reload systemd and restart inlet-qos-watch"
+
+- name: Restart danted
+  ansible.builtin.systemd:
+    name: danted
+    state: restarted
+  listen: "Restart danted"

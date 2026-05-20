@@ -16,3 +16,6 @@
 
 - name: Configure QoS to prioritise web traffic over bulk torrent traffic
   ansible.builtin.import_tasks: qos.yaml
+
+- name: Configure SOCKS5 proxy for tailnet apps
+  ansible.builtin.import_tasks: socks.yaml
