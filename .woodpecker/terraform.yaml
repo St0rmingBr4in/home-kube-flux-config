@@ -13,8 +13,7 @@
 # Datadog CI visibility: reported by the notify step at the end.
 
 when:
-  - event: push
-    branch: master
+  - event: [push, pull_request]
     path:
       - "terraform/**"
       - "Makefile"
@@ -52,7 +51,11 @@ steps:
 
         make terraform-$MODULE-init
         make terraform-$MODULE-plan
-        [ "$CI_COMMIT_BRANCH" = "master" ] && make terraform-$MODULE-apply
+        # Apply only on the master push (post-merge). Pull-request runs are
+        # plan-only — they verify changes before the merge is gated.
+        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+          make terraform-$MODULE-apply
+        fi
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline

@@ -10,8 +10,7 @@
 #   secret/inlet/socks  → password (inlet only — danted PAM auth)
 
 when:
-  - event: push
-    branch: master
+  - event: [push, pull_request]
     path:
       - "ansible/**"
       - ".woodpecker/ansible.yaml"
@@ -72,13 +71,18 @@ steps:
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
-        # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
-        # sees the variables at runtime. Plain ${VAR} would be expanded at
-        # YAML-compile time (to empty) before the shell ever runs.
-        EXTRA_VARS=""
-        [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
-        [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
-        ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
+        # Run the playbook only on master push (post-merge). PR runs stop at
+        # lint — they validate changes before the merge is gated, without
+        # mutating remote hosts.
+        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+          # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
+          # sees the variables at runtime. Plain ${VAR} would be expanded at
+          # YAML-compile time (to empty) before the shell ever runs.
+          EXTRA_VARS=""
+          [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
+          [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
+          ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
+        fi
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
@@ -123,7 +127,11 @@ steps:
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
         ansible-lint --offline
-        ansible-playbook playbooks/k3s.yaml
+        # Run the playbook only on master push (post-merge). PR runs stop at
+        # lint — see ansible-inlet step for rationale.
+        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+          ansible-playbook playbooks/k3s.yaml
+        fi
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline

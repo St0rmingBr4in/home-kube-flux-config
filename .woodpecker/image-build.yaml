@@ -10,8 +10,7 @@
 # (the Dockerfile does a COPY of the pre-built binary rather than a full Go toolchain).
 
 when:
-  - event: push
-    branch: master
+  - event: [push, pull_request]
     path:
       - "ci/images/**"
       - "memory-webhook/**"
@@ -21,7 +20,8 @@ steps:
   - name: build-ci-ansible
     image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
-      - path:
+      - event: push
+        path:
           - "ci/images/ci-ansible/**"
           - "ansible/requirements.yml"
     environment:
@@ -63,7 +63,8 @@ steps:
   - name: build-ci-terraform
     image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
-      - path: "ci/images/ci-terraform/**"
+      - event: push
+        path: "ci/images/ci-terraform/**"
     environment:
       DOCKER_CONFIG: /tmp/docker-config
     commands:
@@ -101,9 +102,13 @@ steps:
               - SYS_ADMIN
 
   - name: go-build-memory-webhook
-    image: golang:1.25-alpine
+    image: golang:1-alpine
     when:
       - path: "memory-webhook/**"
+    environment:
+      # Single source of truth for the Go version is memory-webhook/go.mod.
+      # See checks.yaml for the full rationale.
+      GOTOOLCHAIN: auto
     commands:
       - |
         cd memory-webhook
@@ -118,7 +123,8 @@ steps:
   - name: build-memory-webhook
     image: moby/buildkit:v0.29.0@sha256:0039c1d47e8748b5afea56f4e85f14febaf34452bd99d9552d2daa82262b5cc5
     when:
-      - path: "memory-webhook/**"
+      - event: push
+        path: "memory-webhook/**"
     depends_on:
       - go-build-memory-webhook
     environment:

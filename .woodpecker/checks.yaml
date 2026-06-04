@@ -3,8 +3,7 @@
 # Each step runs only when its relevant paths change.
 
 when:
-  - event: push
-    branch: master
+  - event: [push, pull_request]
     path:
       - "memory-webhook/**"
       - "terraform/**"
@@ -15,12 +14,17 @@ when:
 
 steps:
   - name: go-test
-    image: golang:1.25-alpine
+    image: golang:1-alpine
     when:
       - path:
           - "memory-webhook/**"
           - ".woodpecker/checks.yaml"
     environment:
+      # Single source of truth for the Go version is memory-webhook/go.mod.
+      # GOTOOLCHAIN=auto lets Go download whatever toolchain go.mod requires,
+      # so the image tag only needs to be recent enough to support toolchains
+      # (Go >= 1.21).
+      GOTOOLCHAIN: auto
       # Limit parallelism to avoid OOM when compiling k8s.io dependencies on
       # a high-CPU node (default GOMAXPROCS equals the node's CPU count).
       GOMAXPROCS: "4"
