@@ -10,7 +10,7 @@ spec:
         elements:
           - name: vault-secrets-operator
             chart: vault-secrets-operator
-            chartVersion: 1.3.0
+            chartVersion: 1.4.0
             namespace: prod-infra
             repoURL: https://helm.releases.hashicorp.com
 
