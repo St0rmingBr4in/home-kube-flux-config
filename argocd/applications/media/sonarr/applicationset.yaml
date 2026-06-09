@@ -40,10 +40,10 @@ spec:
               resources:
                 limits:
                   cpu: "4"
-                  memory: 1Gi
+                  memory: 2Gi
                 requests:
                   cpu: 100m
-                  memory: 1Gi
+                  memory: 2Gi
               exportarrResources:
                 limits:
                   memory: 100Mi
@@ -58,6 +58,8 @@ spec:
                   podSpec:
                     containers:
                       main:
+                        env:
+                          DOTNET_DbgEnableMiniDump: "0"
                         probes:
                           liveness:
                             enabled: true
