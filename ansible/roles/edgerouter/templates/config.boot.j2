@@ -83,7 +83,6 @@ firewall {
     name WAN_LOCAL {
         default-action drop
         description "WAN to router"
-        enable-default-log
         rule 10 {
             action accept
             description "Allow established/related"
@@ -98,6 +97,15 @@ firewall {
             state {
                 invalid enable
             }
+        }
+        rule 9000 {
+            action drop
+            description "Rate-limited default-drop log"
+            limit {
+                burst 5
+                rate 1/second
+            }
+            log enable
         }
     }
     receive-redirects disable
