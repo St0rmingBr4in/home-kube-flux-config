@@ -48,10 +48,10 @@ spec:
               resources:
                 limits:
                   cpu: 7
-                  memory: 4Gi
+                  memory: 8Gi
                 requests:
                   cpu: 3500m
-                  memory: 4Gi
+                  memory: 8Gi
               podSecurityContext:
                 supplementalGroups:
                   - 107
