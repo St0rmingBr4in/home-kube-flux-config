@@ -56,31 +56,6 @@ spec:
                 supplementalGroups:
                   - 107
                   - 44
-              workload:
-                main:
-                  podSpec:
-                    containers:
-                      main:
-                        probes:
-                          liveness:
-                            enabled: true
-                            type: exec
-                            command:
-                              - sh
-                              - -c
-                              - touch /config/.liveness
-                            spec:
-                              initialDelaySeconds: 12
-                              periodSeconds: 15
-                              failureThreshold: 5
-                              timeoutSeconds: 5
-                          readiness:
-                            enabled: true
-                            type: http
-                            path: /health
-                            spec:
-                              initialDelaySeconds: 15
-                              periodSeconds: 10
               persistence:
                 config:
                   enabled: true
