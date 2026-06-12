@@ -63,7 +63,7 @@ spec:
                             command:
                               - sh
                               - -c
-                              - touch /config/.liveness
+                              - touch /app/config/.liveness
                             spec:
                               initialDelaySeconds: 12
                               periodSeconds: 15
