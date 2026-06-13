@@ -9,7 +9,7 @@ terraform {
   required_providers {
     authentik = {
       source  = "goauthentik/authentik"
-      version = "~> 2025.12"
+      version = "~> 2026.0"
     }
     vault = {
       source  = "hashicorp/vault"
