@@ -10,7 +10,7 @@ spec:
         elements:
           - name: synology-csi
             chart: synology-csi
-            chartVersion: 0.11.1
+            chartVersion: 0.11.2
             namespace: prod-infra
             repoURL: https://christian-schlichtherle.github.io/synology-csi-chart
             manifestPath: argocd/applications/infrastructure/synology-csi
