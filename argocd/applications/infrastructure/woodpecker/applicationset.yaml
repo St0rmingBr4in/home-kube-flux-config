@@ -10,7 +10,7 @@ spec:
         elements:
           - name: woodpecker
             chart: woodpecker
-            chartVersion: 3.6.2
+            chartVersion: 3.6.4
             namespace: woodpecker
             repoURL: https://woodpecker-ci.org/
             manifestPath: argocd/applications/infrastructure/woodpecker
