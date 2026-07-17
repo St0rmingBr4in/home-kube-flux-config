@@ -18,7 +18,7 @@ when:
 
 steps:
   - name: build-ci-ansible
-    image: moby/buildkit:v0.30.0@sha256:0168606be2315b7c807a03b3d8aa79beefdb31c98740cebdffdfeebf31190c9f
+    image: moby/buildkit:v0.31.0@sha256:a095b3d11ce1a9a05b6064ef515dfca0291ec5bcf2ea8178da8f6461924294e1
     when:
       - event: push
         path:
@@ -61,7 +61,7 @@ steps:
               - SYS_ADMIN
 
   - name: build-ci-terraform
-    image: moby/buildkit:v0.30.0@sha256:0168606be2315b7c807a03b3d8aa79beefdb31c98740cebdffdfeebf31190c9f
+    image: moby/buildkit:v0.31.0@sha256:a095b3d11ce1a9a05b6064ef515dfca0291ec5bcf2ea8178da8f6461924294e1
     when:
       - event: push
         path: "ci/images/ci-terraform/**"
@@ -121,7 +121,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
 
   - name: build-memory-webhook
-    image: moby/buildkit:v0.30.0@sha256:0168606be2315b7c807a03b3d8aa79beefdb31c98740cebdffdfeebf31190c9f
+    image: moby/buildkit:v0.31.0@sha256:a095b3d11ce1a9a05b6064ef515dfca0291ec5bcf2ea8178da8f6461924294e1
     when:
       - event: push
         path: "memory-webhook/**"
