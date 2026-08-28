@@ -11,7 +11,7 @@ resources:
 
 images:
   - name: ghcr.io/yannkr/openrsvp
-    newTag: v1.8.2
+    newTag: "1.8.2"
 
 labels:
   - pairs:
