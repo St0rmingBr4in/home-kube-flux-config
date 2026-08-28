@@ -1,0 +1,95 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openrsvp
+  namespace: prod-openrsvp
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openrsvp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openrsvp
+        tags.datadoghq.com/service: openrsvp
+        tags.datadoghq.com/env: prod
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+        ad.datadoghq.com/openrsvp.logs: '[{"source":"openrsvp","service":"openrsvp"}]'
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: openrsvp
+          image: ghcr.io/yannkr/openrsvp:v1.8.2
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - secretRef:
+                name: openrsvp # SMTP_USERNAME, SMTP_PASSWORD
+          env:
+            - name: ENV
+              value: production
+            - name: BASE_URL
+              value: https://rsvp.st0rmingbr4in.com
+            - name: DB_DRIVER
+              value: sqlite
+            - name: DB_DSN
+              value: /data/openrsvp.db
+            - name: UPLOADS_DIR
+              value: /data/uploads
+            # Traefik connects from in-cluster, always within the pod CIDR — trust
+            # its X-Forwarded-For so per-IP rate limiting sees the real client IP.
+            - name: TRUSTED_PROXIES
+              value: 10.42.0.0/16
+            - name: ADMIN_EMAILS
+              value: julien.doche@gmail.com
+            - name: NOTIFICATION_EMAIL_PROVIDER
+              value: smtp
+            - name: SMTP_HOST
+              value: smtp.gmail.com
+            - name: SMTP_PORT
+              value: "587"
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: openrsvp
+                  key: SMTP_USERNAME
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            # Write to the data volume: if iSCSI disconnects and ext4 remounts
+            # read-only, touch fails → probe fails → pod restarts → kubelet
+            # remounts the volume cleanly. Matches ats-postgres/Jellyfin pattern.
+            exec:
+              command: ["touch", "/data/.liveness"]
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openrsvp-data

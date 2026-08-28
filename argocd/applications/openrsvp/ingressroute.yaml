@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: openrsvp
+  namespace: prod-openrsvp
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`rsvp.st0rmingbr4in.com`)
+      services:
+        - name: openrsvp
+          port: 8080
+  tls:
+    secretName: st0rmingbr4in.com-cert

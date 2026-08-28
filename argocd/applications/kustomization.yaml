@@ -9,3 +9,4 @@ resources:
   - compliance/memory-webhook/applicationset.yaml
   - external-services/external-service-prod-infra/applicationset.yaml
   - ats-website/applicationset.yaml
+  - openrsvp/applicationset.yaml
