@@ -21,8 +21,18 @@ spec:
         admission.datadoghq.com/enabled: "true"
         ad.datadoghq.com/openrsvp.logs: '[{"source":"openrsvp","service":"openrsvp"}]'
     spec:
-      securityContext:
-        fsGroup: 1000
+      # The Synology CSI driver does not reliably apply fsGroup, so a fresh
+      # iSCSI volume mounts as root:root and the image's uid 100 cannot write.
+      # Chown /data to the image's openrsvp user (100:101) before it starts.
+      initContainers:
+        - name: chown-data
+          image: busybox:1.36
+          command: ["sh", "-c", "chown 100:101 /data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - name: openrsvp
           image: ghcr.io/yannkr/openrsvp:1.8.2
