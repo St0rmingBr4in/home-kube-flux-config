@@ -10,8 +10,11 @@ resources:
   - ingressroute.yaml
 
 images:
+  # Fork build (St0rmingBr4in/openrsvp) — upstream 1.8.2 + the magic-link verify
+  # fix (issue #5). Revert to ghcr.io/yannkr/openrsvp once the fix ships upstream.
   - name: ghcr.io/yannkr/openrsvp
-    newTag: "1.8.2"
+    newName: ghcr.io/st0rmingbr4in/openrsvp
+    newTag: 1.8.2-fix1
 
 labels:
   - pairs:
