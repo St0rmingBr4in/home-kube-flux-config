@@ -59,6 +59,8 @@ spec:
               value: 10.42.0.0/16
             - name: ADMIN_EMAILS
               value: julien.doche@gmail.com
+            - name: DEFAULT_LOCALE
+              value: fr
             - name: NOTIFICATION_EMAIL_PROVIDER
               value: smtp
             - name: SMTP_HOST
