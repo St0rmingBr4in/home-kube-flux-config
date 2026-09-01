@@ -35,7 +35,7 @@ spec:
               mountPath: /data
       containers:
         - name: openrsvp
-          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix6
+          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix7
           ports:
             - containerPort: 8080
               name: http
