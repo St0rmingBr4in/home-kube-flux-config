@@ -35,7 +35,7 @@ spec:
               mountPath: /data
       containers:
         - name: openrsvp
-          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix7
+          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix8
           ports:
             - containerPort: 8080
               name: http
@@ -64,9 +64,9 @@ spec:
             - name: NOTIFICATION_EMAIL_PROVIDER
               value: smtp
             - name: SMTP_HOST
-              value: smtp.gmail.com
+              value: ssl0.ovh.net
             - name: SMTP_PORT
-              value: "587"
+              value: "465"
             - name: SMTP_FROM
               valueFrom:
                 secretKeyRef:
