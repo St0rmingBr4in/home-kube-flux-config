@@ -142,15 +142,17 @@ spec:
           # cached default route via tailscale0, which stays present even when
           # sync with the control plane is dead (e.g. an expired auth key) —
           # that let a real outage run silently for over a day. This probe
-          # catches that case directly: `tailscale status` prints a
-          # "# Health check:" banner whenever the daemon reports a degraded
-          # state (control-plane unreachable, DNS forwarding broken, etc).
+          # catches that case directly: when the node can't reach the control
+          # plane, `tailscale status` prints the health warning "Unable to
+          # connect to the Tailscale coordination server". Match that exact
+          # string, not the generic "# Health check:" banner, so benign
+          # warnings (e.g. "--accept-routes is false") don't trigger restarts.
           livenessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
-                - '! tailscale status 2>&1 | grep -q "^# Health check:"'
+                - '! tailscale status 2>&1 | grep -qi "coordination server"'
             initialDelaySeconds: 60
             periodSeconds: 30
             failureThreshold: 3
