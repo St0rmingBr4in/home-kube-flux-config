@@ -138,6 +138,23 @@ spec:
               add: [NET_ADMIN, NET_RAW]
               drop: [ALL]
             allowPrivilegeEscalation: false
+          # The qbittorrent container's own liveness probe only checks for a
+          # cached default route via tailscale0, which stays present even when
+          # sync with the control plane is dead (e.g. an expired auth key) —
+          # that let a real outage run silently for over a day. This probe
+          # catches that case directly: `tailscale status` prints a
+          # "# Health check:" banner whenever the daemon reports a degraded
+          # state (control-plane unreachable, DNS forwarding broken, etc).
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - '! tailscale status 2>&1 | grep -q "^# Health check:"'
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
           env:
             # TS_USERSPACE=false: use kernel TUN (creates tailscale0 interface).
             # Without this, containerboot forces --tun=userspace-networking and
@@ -151,10 +168,13 @@ spec:
                   key: TS_AUTHKEY
             - name: TS_HOSTNAME
               value: qbittorrent
-            # No exit-node here — set dynamically by the postStart hook after the
-            # peer list is loaded (tailscale up rejects names before connecting).
+            # TS_AUTHKEY is an OAuth client secret (see tailscale-authkey-vault.yaml),
+            # not a classic reusable auth key — OAuth-registered devices must be
+            # tagged, so advertise the same tag the k8s operator's proxies use.
+            # (No --exit-node here — set dynamically by the postStart hook after
+            # the peer list is loaded; tailscale up rejects names before connecting.)
             - name: TS_EXTRA_ARGS
-              value: ""
+              value: "--advertise-tags=tag:k8s-operator"
             # Accept Tailscale DNS so the exit-node routes DNS via 100.100.100.100
             # (through tailscale0). Without this, the pod uses cluster DNS
             # (10.43.0.10) which Tailscale routes via the exit-node but inlet
