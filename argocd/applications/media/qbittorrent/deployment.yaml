@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/instance: qbittorrent
 spec:
-  replicas: 1
+  replicas: 0 # TEMP: scaled to 0 for offline e2fsck on qbittorrent-config LUN — revert to 1
   strategy:
     type: Recreate
   selector:
