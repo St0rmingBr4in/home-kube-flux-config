@@ -28,6 +28,19 @@ spec:
       # (TS_KUBE_SECRET). qbittorrent ignores the mounted token.
       serviceAccountName: qbittorrent-tailscale
       automountServiceAccountToken: true
+      # containerboot reaches the k8s API via the name `kubernetes.default.svc`
+      # to read its state Secret. With TS_ACCEPT_DNS=true resolv.conf points at
+      # the tunnel resolver, which is unreachable before the tunnel is up — so
+      # that name won't resolve on a fresh (rescheduled) pod and the sidecar
+      # crash-loops. Pin the name to the API ClusterIP in /etc/hosts so reading
+      # the state Secret never depends on DNS (TLS still validates: the name is
+      # a SAN on the API server cert).
+      hostAliases:
+        - ip: "10.43.0.1"
+          hostnames:
+            - kubernetes.default.svc
+            - kubernetes.default
+            - kubernetes
       initContainers:
         - name: vpn-kill-switch
           image: alpine:3.21
