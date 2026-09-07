@@ -19,3 +19,7 @@
 
 - name: Configure SOCKS5 proxy for tailnet apps
   ansible.builtin.import_tasks: socks.yaml
+
+- name: Encrypt upstream DNS with DNS-over-TLS
+  ansible.builtin.import_tasks: dns_privacy.yaml
+  tags: dns

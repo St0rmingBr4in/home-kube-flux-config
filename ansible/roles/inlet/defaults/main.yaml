@@ -1,0 +1,7 @@
+---
+# WAN-facing interfaces whose netplan-assigned DigitalOcean resolvers must be
+# cleared so systemd-resolved uses the global Quad9 DoT servers (see
+# dns_privacy.yaml). eth0 = public, eth1 = DO private network.
+inlet_wan_interfaces:
+  - eth0
+  - eth1

@@ -1,0 +1,59 @@
+---
+# Encrypt inlet's upstream DNS with DNS-over-TLS (Quad9) so the exit node no
+# longer leaks DNS query names in plaintext to DigitalOcean's resolvers.
+#
+# Verified path (2026-09-08): qbittorrent -> WireGuard tunnel -> inlet
+# tailscaled -> 127.0.0.53 (systemd-resolved) -> upstream. Upstream was
+# DigitalOcean's 67.207.67.x over plaintext :53, so DO could read every name
+# qbittorrent resolved. We point systemd-resolved at Quad9 over strict DoT and
+# clear the per-link DO resolvers so the global DoT servers are the only
+# upstream. Strict mode = no silent downgrade to cleartext.
+
+- name: Ensure systemd-resolved drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure systemd-resolved for DNS-over-TLS (Quad9, strict)
+  ansible.builtin.copy:
+    dest: /etc/systemd/resolved.conf.d/10-dot.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (inlet role). DNS-over-TLS to Quad9 so upstream DNS
+      # (including exit-node clients' queries) is encrypted, never plaintext to
+      # DigitalOcean. Strict mode: fail closed rather than downgrade to :53.
+      [Resolve]
+      DNS=9.9.9.9#dns.quad9.net 149.112.112.112#dns.quad9.net 2620:fe::fe#dns.quad9.net 2620:fe::9#dns.quad9.net
+      FallbackDNS=
+      DNSOverTLS=yes
+  notify: Restart systemd-resolved
+
+- name: Ensure per-link networkd drop-in directories exist
+  ansible.builtin.file:
+    path: "/etc/systemd/network/10-netplan-{{ item }}.network.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ inlet_wan_interfaces }}"
+
+- name: Clear DigitalOcean per-link resolvers so global DoT is authoritative
+  ansible.builtin.copy:
+    dest: "/etc/systemd/network/10-netplan-{{ item }}.network.d/10-clear-dns.conf"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (inlet role). Clear the static DigitalOcean resolvers
+      # (67.207.67.x) netplan sets on this link, so systemd-resolved falls back
+      # to the global Quad9 DoT servers for all queries instead of using these
+      # plaintext-only servers.
+      [Network]
+      DNS=
+  loop: "{{ inlet_wan_interfaces }}"
+  notify: Reload systemd-networkd

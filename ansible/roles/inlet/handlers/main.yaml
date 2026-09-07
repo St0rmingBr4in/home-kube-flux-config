@@ -4,6 +4,25 @@
     cmd: netfilter-persistent save
   listen: "Save iptables rules"
 
+# DNS-over-TLS (dns_privacy.yaml). Reload networkd first so the cleared per-link
+# resolvers take effect, then restart resolved so it picks up the DoT config and
+# regenerates the stub resolv.conf.
+- name: Reload systemd-networkd
+  ansible.builtin.command:
+    cmd: networkctl reload
+  listen: "Reload systemd-networkd"
+
+- name: Reconfigure WAN links for DNS change
+  ansible.builtin.command:
+    cmd: "networkctl reconfigure {{ inlet_wan_interfaces | join(' ') }}"
+  listen: "Reload systemd-networkd"
+
+- name: Restart systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+  listen: "Restart systemd-resolved"
+
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
