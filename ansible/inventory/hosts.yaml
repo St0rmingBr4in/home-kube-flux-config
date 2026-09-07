@@ -9,7 +9,6 @@ all:
         inlet.st0rmingbr4in.com:
           ansible_host: 64.226.113.229
           ansible_user: root
-          tailscale_ip: "100.123.88.118"
     k3s_cluster:
       children:
         server:

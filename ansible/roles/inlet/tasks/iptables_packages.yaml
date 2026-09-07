@@ -1,17 +1,31 @@
 ---
-- name: Install iptables-persistent, netfilter-persistent and ipset
+# inlet's iptables rules are (re)applied at boot by inlet-firewall.service and
+# inlet-qos.service (both ordered After=tailscaled) — NOT snapshotted by
+# netfilter-persistent. Persisting them would also capture tailscaled's
+# dynamically-managed ts-* chains and restore them stale before tailscaled
+# starts, wedging inlet's outbound data path until tailscaled is restarted.
+
+- name: Install ipset (used by the QoS peer-marking ipset)
   ansible.builtin.apt:
     name:
-      - iptables-persistent
-      - netfilter-persistent
       - ipset
-      - ipset-persistent
     state: present
     update_cache: true
     cache_valid_time: 86400
 
-- name: Enable and start netfilter-persistent
-  ansible.builtin.systemd:
-    name: netfilter-persistent
-    enabled: true
-    state: started
+- name: Remove iptables/ipset persistence packages
+  ansible.builtin.apt:
+    name:
+      - iptables-persistent
+      - netfilter-persistent
+      - ipset-persistent
+    state: absent
+    purge: true
+
+- name: Remove stale persisted iptables snapshots (they contained tailscaled ts-* chains)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/iptables/rules.v4
+    - /etc/iptables/rules.v6

@@ -1,9 +1,4 @@
 ---
-- name: Save iptables rules
-  ansible.builtin.command:
-    cmd: netfilter-persistent save
-  listen: "Save iptables rules"
-
 # DNS-over-TLS (dns_privacy.yaml). Reload networkd first so the cleared per-link
 # resolvers take effect, then restart resolved so it picks up the DoT config and
 # regenerates the stub resolv.conf.

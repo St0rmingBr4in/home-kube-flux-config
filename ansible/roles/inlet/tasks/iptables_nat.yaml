@@ -1,4 +1,10 @@
 ---
+# inlet's own iptables rules (web/torrent DNAT, MASQUERADE, FORWARD) are applied
+# by a boot-time systemd oneshot ordered After=tailscaled — deliberately NOT
+# persisted via netfilter-persistent. Persisting would snapshot tailscaled's
+# ts-* chains and restore them stale before tailscaled starts, wedging inlet's
+# outbound data path on reboot. See templates/inlet-firewall.sh.j2 for details.
+
 - name: Warn when qbittorrent torrent IP is not configured
   ansible.builtin.debug:
     msg: >
@@ -8,113 +14,42 @@
           -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
   when: qbittorrent_torrent_tailscale_ip == ""
 
-# --- Torrent port forwarding (conditional) ---
+- name: Deploy inlet-firewall.sh (idempotent rule application)
+  ansible.builtin.template:
+    src: inlet-firewall.sh.j2
+    dest: /usr/local/sbin/inlet-firewall.sh
+    owner: root
+    group: root
+    mode: "0755"
 
-- name: DNAT TCP torrent traffic to qbittorrent
-  ansible.builtin.iptables:
-    table: nat
-    chain: PREROUTING
-    in_interface: "{{ public_interface }}"
-    protocol: tcp
-    destination_port: "{{ torrent_port }}"
-    jump: DNAT
-    to_destination: "{{ qbittorrent_torrent_tailscale_ip }}:{{ torrent_port }}"
-    comment: "inlet: torrent TCP DNAT"
-  when: qbittorrent_torrent_tailscale_ip != ""
-  notify: Save iptables rules
+- name: Deploy inlet-firewall.service (oneshot, ordered after tailscaled)
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/inlet-firewall.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Apply inlet DNAT/MASQUERADE/FORWARD rules
+      After=tailscaled.service network-online.target
+      Wants=tailscaled.service network-online.target
 
-- name: DNAT UDP torrent traffic to qbittorrent
-  ansible.builtin.iptables:
-    table: nat
-    chain: PREROUTING
-    in_interface: "{{ public_interface }}"
-    protocol: udp
-    destination_port: "{{ torrent_port }}"
-    jump: DNAT
-    to_destination: "{{ qbittorrent_torrent_tailscale_ip }}:{{ torrent_port }}"
-    comment: "inlet: torrent UDP DNAT"
-  when: qbittorrent_torrent_tailscale_ip != ""
-  notify: Save iptables rules
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/inlet-firewall.sh
+      RemainAfterExit=yes
 
-- name: FORWARD TCP torrent traffic to qbittorrent
-  ansible.builtin.iptables:
-    chain: FORWARD
-    protocol: tcp
-    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
-    destination_port: "{{ torrent_port }}"
-    jump: ACCEPT
-    comment: "inlet: torrent TCP FORWARD"
-  when: qbittorrent_torrent_tailscale_ip != ""
-  notify: Save iptables rules
+      [Install]
+      WantedBy=multi-user.target
+  notify: Reload systemd
 
-- name: FORWARD UDP torrent traffic to qbittorrent
-  ansible.builtin.iptables:
-    chain: FORWARD
-    protocol: udp
-    destination: "{{ qbittorrent_torrent_tailscale_ip }}"
-    destination_port: "{{ torrent_port }}"
-    jump: ACCEPT
-    comment: "inlet: torrent UDP FORWARD"
-  when: qbittorrent_torrent_tailscale_ip != ""
-  notify: Save iptables rules
+- name: Ensure inlet-firewall.service is enabled
+  ansible.builtin.systemd:
+    name: inlet-firewall
+    enabled: true
+    daemon_reload: true
 
-# --- MASQUERADE for DNAT'd traffic exiting via Tailscale ---
-# Without this, Traefik (and qbittorrent) would see the original client IP as source
-# and try to reply directly to the internet, breaking the connection. MASQUERADE on
-# tailscale0 makes the source appear as inlet's Tailscale IP so replies come back
-# through inlet and get un-DNAT'd correctly.
-
-- name: MASQUERADE forwarded traffic exiting via tailscale0
-  ansible.builtin.iptables:
-    table: nat
-    chain: POSTROUTING
-    out_interface: tailscale0
-    jump: MASQUERADE
-    comment: "inlet: MASQUERADE DNAT'd traffic via Tailscale"
-  notify: Save iptables rules
-
-# --- Web traffic → Traefik ---
-
-- name: DNAT HTTP traffic to Traefik
-  ansible.builtin.iptables:
-    table: nat
-    chain: PREROUTING
-    in_interface: "{{ public_interface }}"
-    protocol: tcp
-    destination_port: "{{ http_port }}"
-    jump: DNAT
-    to_destination: "{{ traefik_tailscale_ip }}:{{ http_port }}"
-    comment: "inlet: HTTP DNAT to Traefik"
-  notify: Save iptables rules
-
-- name: DNAT HTTPS traffic to Traefik
-  ansible.builtin.iptables:
-    table: nat
-    chain: PREROUTING
-    in_interface: "{{ public_interface }}"
-    protocol: tcp
-    destination_port: "{{ https_port }}"
-    jump: DNAT
-    to_destination: "{{ traefik_tailscale_ip }}:{{ https_port }}"
-    comment: "inlet: HTTPS DNAT to Traefik"
-  notify: Save iptables rules
-
-- name: FORWARD HTTP traffic to Traefik
-  ansible.builtin.iptables:
-    chain: FORWARD
-    protocol: tcp
-    destination: "{{ traefik_tailscale_ip }}"
-    destination_port: "{{ http_port }}"
-    jump: ACCEPT
-    comment: "inlet: HTTP FORWARD to Traefik"
-  notify: Save iptables rules
-
-- name: FORWARD HTTPS traffic to Traefik
-  ansible.builtin.iptables:
-    chain: FORWARD
-    protocol: tcp
-    destination: "{{ traefik_tailscale_ip }}"
-    destination_port: "{{ https_port }}"
-    jump: ACCEPT
-    comment: "inlet: HTTPS FORWARD to Traefik"
-  notify: Save iptables rules
+# Idempotent (check-then-add) — safe to run every play; applies rules immediately
+# so an ansible run doesn't have to wait for the next boot.
+- name: Apply inlet firewall rules now
+  ansible.builtin.command:
+    cmd: /usr/local/sbin/inlet-firewall.sh
+  changed_when: false

@@ -1,0 +1,58 @@
+#!/bin/bash
+# Apply inlet's own iptables rules (DNAT / MASQUERADE / FORWARD) idempotently.
+#
+# Runs at boot as a oneshot ordered After=tailscaled (inlet-firewall.service) and
+# also during ansible applies. We deliberately do NOT persist these rules with
+# netfilter-persistent: `netfilter-persistent save` snapshots the ENTIRE ruleset,
+# including tailscaled's dynamically-managed ts-forward/ts-input/ts-postrouting
+# chains, and restoring that snapshot at boot (before tailscaled starts) reinstalls
+# STALE ts-* chains that wedge inlet's outbound WireGuard data path until tailscaled
+# is restarted. Instead: tailscaled manages its ts-* chains, and this script layers
+# inlet's rules on top with check-then-add (never flushes a whole table).
+#
+# Managed by Ansible (inlet role) — do not edit on the host.
+set -euo pipefail
+
+IFACE=tailscale0
+
+# The MASQUERADE/DNAT rules reference tailscale0, so wait for it to exist.
+for _ in $(seq 1 30); do
+  ip link show "$IFACE" &>/dev/null && break
+  sleep 1
+done
+ip link show "$IFACE" &>/dev/null || { echo "[inlet-firewall] tailscale0 not found after 30s" >&2; exit 1; }
+
+# ensure <table> <chain> <rule-spec...> — add the rule only if it is not present.
+ensure() {
+  local table="$1" chain="$2"
+  shift 2
+  iptables -t "$table" -C "$chain" "$@" 2>/dev/null || iptables -t "$table" -A "$chain" "$@"
+}
+
+PUB="{{ public_interface }}"
+TRAEFIK="{{ traefik_tailscale_ip }}"
+HTTP="{{ http_port }}"
+HTTPS="{{ https_port }}"
+
+# ── Web traffic → Traefik ────────────────────────────────────────────────────
+ensure nat PREROUTING -i "$PUB" -p tcp --dport "$HTTP"  -m comment --comment "inlet: HTTP DNAT to Traefik"  -j DNAT --to-destination "$TRAEFIK:$HTTP"
+ensure nat PREROUTING -i "$PUB" -p tcp --dport "$HTTPS" -m comment --comment "inlet: HTTPS DNAT to Traefik" -j DNAT --to-destination "$TRAEFIK:$HTTPS"
+ensure filter FORWARD -d "$TRAEFIK" -p tcp --dport "$HTTP"  -m comment --comment "inlet: HTTP FORWARD to Traefik"  -j ACCEPT
+ensure filter FORWARD -d "$TRAEFIK" -p tcp --dport "$HTTPS" -m comment --comment "inlet: HTTPS FORWARD to Traefik" -j ACCEPT
+
+{% if qbittorrent_torrent_tailscale_ip != "" %}
+# ── Torrent port → qbittorrent ───────────────────────────────────────────────
+QBT="{{ qbittorrent_torrent_tailscale_ip }}"
+TP="{{ torrent_port }}"
+ensure nat PREROUTING -i "$PUB" -p tcp --dport "$TP" -m comment --comment "inlet: torrent TCP DNAT" -j DNAT --to-destination "$QBT:$TP"
+ensure nat PREROUTING -i "$PUB" -p udp --dport "$TP" -m comment --comment "inlet: torrent UDP DNAT" -j DNAT --to-destination "$QBT:$TP"
+ensure filter FORWARD -d "$QBT" -p tcp --dport "$TP" -m comment --comment "inlet: torrent TCP FORWARD" -j ACCEPT
+ensure filter FORWARD -d "$QBT" -p udp --dport "$TP" -m comment --comment "inlet: torrent UDP FORWARD" -j ACCEPT
+{% endif %}
+
+# ── MASQUERADE DNAT'd traffic exiting via Tailscale ──────────────────────────
+# Without this, Traefik/qbittorrent would reply to the original client IP directly
+# and break the connection. MASQUERADE makes replies come back through inlet.
+ensure nat POSTROUTING -o "$IFACE" -m comment --comment "inlet: MASQUERADE DNAT'd traffic via Tailscale" -j MASQUERADE
+
+echo "[inlet-firewall] rules applied"

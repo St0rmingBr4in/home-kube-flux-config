@@ -8,14 +8,17 @@
 - name: Configure Tailscale exit node
   ansible.builtin.import_tasks: tailscale.yaml
 
-- name: Install iptables-persistent packages
+- name: Install iptables/ipset packages
   ansible.builtin.import_tasks: iptables_packages.yaml
+  tags: firewall
 
 - name: Configure iptables NAT rules
   ansible.builtin.import_tasks: iptables_nat.yaml
+  tags: firewall
 
 - name: Configure QoS to prioritise web traffic over bulk torrent traffic
   ansible.builtin.import_tasks: qos.yaml
+  tags: firewall
 
 - name: Configure SOCKS5 proxy for tailnet apps
   ansible.builtin.import_tasks: socks.yaml

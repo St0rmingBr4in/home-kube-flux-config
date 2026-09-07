@@ -55,6 +55,12 @@
       # The watcher will populate/refresh it; we just ensure the iptables rule
       # has a valid set to reference from the moment it is installed.
       ipset create "$IPSET" hash:ip 2>/dev/null || true
+
+      # Mark traffic to qbittorrent peers as DSCP CS1 so CAKE deprioritises it.
+      # Applied here (idempotent check-then-add, after the ipset exists) instead
+      # of being persisted via netfilter-persistent — persisting would snapshot
+      # tailscaled's ts-* chains and wedge the data path on reboot.
+      iptables -t mangle -C POSTROUTING -o "$IFACE" -m set --match-set "$IPSET" dst -m comment --comment "inlet: mark qbittorrent peers as CS1 for CAKE deprioritization" -j DSCP --set-dscp-class CS1 2>/dev/null || iptables -t mangle -A POSTROUTING -o "$IFACE" -m set --match-set "$IPSET" dst -m comment --comment "inlet: mark qbittorrent peers as CS1 for CAKE deprioritization" -j DSCP --set-dscp-class CS1
   notify: Apply QoS rules
 
 # ── Systemd oneshot: run inlet-qos.sh at boot ────────────────────────────────
@@ -105,22 +111,10 @@
   changed_when: ipset_create_result.rc == 0
   failed_when: ipset_create_result.rc not in [0, 1]
 
-# ── iptables: single static rule matching the ipset ──────────────────────────
-# The rule itself never changes; only the ipset membership is updated dynamically
-# by inlet-qos-watch.service whenever Tailscale peer IPs change.
-
-- name: Mark qbittorrent peer traffic as DSCP CS1 via ipset
-  ansible.builtin.iptables:
-    table: mangle
-    chain: POSTROUTING
-    out_interface: tailscale0
-    match: set
-    match_set: qbittorrent-peers
-    match_set_flags: dst
-    jump: DSCP
-    set_dscp_mark_class: CS1
-    comment: "inlet: mark qbittorrent peers as CS1 for CAKE deprioritization"
-  notify: Save iptables rules
+# The mangle DSCP rule that matches this ipset is applied idempotently inside
+# inlet-qos.sh (right after the ipset is created) — see above. It is not
+# persisted via netfilter-persistent (that would snapshot tailscaled's ts-*
+# chains and wedge the data path on reboot).
 
 # ── Watcher script: event-driven ipset refresh via Tailscale LocalAPI ────────
 
@@ -152,7 +146,10 @@
       # Short MagicDNS names — resolved at runtime by tailscale ip --4.
       PEERS=({{ qbittorrent_hostnames | join(' ') }})
 
-      log() { echo "[inlet-qos-watch] $*"; }
+      # Log to stderr: resolve_peers()/apply_ipset() capture stdout via
+      # $(resolve_peers), so a WARN on stdout would be fed to `ipset add` and
+      # crash the service (set -e) at boot before peers are resolvable.
+      log() { echo "[inlet-qos-watch] $*" >&2; }
 
       resolve_peers() {
         local ips=()
