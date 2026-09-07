@@ -24,7 +24,10 @@ spec:
         # without modifying them during the live test.
         pod.name: main
     spec:
-      automountServiceAccountToken: false
+      # The tailscale sidecar needs a token to read/write its state Secret
+      # (TS_KUBE_SECRET). qbittorrent ignores the mounted token.
+      serviceAccountName: qbittorrent-tailscale
+      automountServiceAccountToken: true
       initContainers:
         - name: vpn-kill-switch
           image: alpine:3.21
@@ -177,16 +180,26 @@ spec:
             # the peer list is loaded; tailscale up rejects names before connecting.)
             - name: TS_EXTRA_ARGS
               value: "--advertise-tags=tag:k8s-operator"
-            # Accept Tailscale DNS so the exit-node routes DNS via 100.100.100.100
-            # (through tailscale0). Without this, the pod uses cluster DNS
-            # (10.43.0.10) which Tailscale routes via the exit-node but inlet
-            # cannot reach — causing DNS timeouts.
+            # Accept Tailscale DNS so qbittorrent's DNS queries route through the
+            # tunnel via 100.100.100.100 (over tailscale0 → exit node). This keeps
+            # tracker/peer name resolution private — it must NOT leak to cluster or
+            # home DNS. Required: do not disable.
             - name: TS_ACCEPT_DNS
               value: "true"
-            # Empty: don't persist state in a k8s Secret (no RBAC needed).
-            # The pod re-authenticates via TS_AUTH_KEY on each restart.
+            # Persist node state in a k8s Secret so a container restart resumes the
+            # existing node identity instead of re-authenticating. Re-auth uses the
+            # OAuth client (api.tailscale.com), which fails once TS_ACCEPT_DNS has
+            # pointed resolv.conf at the tunnel resolver (unreachable while the
+            # tunnel is down) — that caused a crash-loop and a new qbittorrent-N
+            # device per restart. See tailscale-state-rbac.yaml for the RBAC.
             - name: TS_KUBE_SECRET
-              value: ""
+              value: "qbittorrent-tailscale-state"
+            # Only run `tailscale up` (the OAuth exchange) when not already
+            # authenticated. On restart the persisted state is reused and the
+            # control plane is reached via bootstrap DNS, so no api.tailscale.com
+            # call is needed and the tunnel-only resolv.conf can't break re-auth.
+            - name: TS_AUTH_ONCE
+              value: "true"
           volumeMounts:
             - name: tailscale-state
               mountPath: /var/lib/tailscale
