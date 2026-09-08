@@ -25,9 +25,19 @@
         - { name: fs.inotify.max_user_watches, value: "524288" }
   roles:
     - role: xanmanning.k3s
-  # ── iSCSI keepalive configuration ──────────────────────────────────────────
-  # Configure iSCSI session keepalives so dropped sessions are detected
-  # and recovered in ~10s instead of the default 120s.
+  # ── iSCSI keepalive & failure handling ─────────────────────────────────────
+  # Detect dead sessions fast (5s NOP keepalives) but NEVER fail I/O back to the
+  # filesystem on a NAS blip. With replacement_timeout = -1 the block layer
+  # QUEUES I/O until the session reconnects, so a transient NAS stall self-heals
+  # with no ext4 journal abort / read-only remount / pod restart.
+  #
+  # Trade-off: during a *permanent* NAS outage, I/O blocks (D-state) until the
+  # NAS returns or the node reboots. That never corrupts data (unlike
+  # errors=continue) — it only defers it. This is the deliberate fix for the
+  # 2026-09-08 cascade where a ~5s NAS stall + replacement_timeout=30 remounted
+  # every iSCSI volume read-only cluster-wide.
+  # NOTE: replacement_timeout is read at session login, so this takes effect on
+  # the next re-login (pod reschedule) or node reboot — not on live sessions.
   # Inlined here (was the iscsi role) — k3s-cluster-specific, never reused.
   tasks:
     - name: Install open-iscsi
@@ -42,23 +52,31 @@
         line: "{{ item.line }}"
         backup: true
       loop:
-        # Time to wait for a transport-layer reconnect before declaring the
-        # session dead and returning I/O errors to the filesystem. Default: 120.
+        # Queue I/O indefinitely until the session reconnects instead of failing
+        # it back to ext4 (which aborts the journal → read-only). Negative value
+        # = wait forever; this is what makes a NAS blip self-heal.
         - regexp: '^node\.session\.timeo\.replacement_timeout'
-          line: 'node.session.timeo.replacement_timeout = 30'
+          line: 'node.session.timeo.replacement_timeout = -1'
+        # Auto-reconnect sessions at boot so a node reboot re-establishes them.
+        - regexp: '^node\.startup'
+          line: 'node.startup = automatic'
         # Send a NOP-Out keepalive every 5s to detect silent TCP drops.
         - regexp: '^node\.conn\.timeo\.noop_out_interval'
           line: 'node.conn.timeo.noop_out_interval = 5'
-        # Declare the connection dead if no NOP-In reply arrives within 5s.
+        # Declare the connection dead if no NOP-In reply arrives within 5s
+        # (starts recovery fast; replacement_timeout=-1 keeps I/O queued).
         - regexp: '^node\.conn\.timeo\.noop_out_timeout'
           line: 'node.conn.timeo.noop_out_timeout = 5'
       notify: Restart iscsid
 
-    - name: Apply replacement_timeout to existing iSCSI node records
+    - name: Apply settings to existing iSCSI node records
       ansible.builtin.command:
         cmd: >
           iscsiadm -m node --op update
-          -n node.session.timeo.replacement_timeout -v 30
+          --name={{ item.name }} --value={{ item.value }}
+      loop:
+        - { name: node.session.timeo.replacement_timeout, value: "-1" }
+        - { name: node.startup, value: automatic }
       register: iscsiadm_result
       # rc=21 means no node records exist yet (iSCSI not yet logged in) — skip gracefully.
       # Any other non-zero exit code indicates a real failure and should be surfaced.
