@@ -60,8 +60,36 @@
       }
   notify: Restart danted
 
+# danted binds `internal: tailscale0`, but on boot that interface does not
+# exist until tailscaled has brought the tunnel up. Started too early, danted
+# tries to DNS-resolve the literal string "tailscale0", fails, and exits — and
+# with no restart policy it stays dead until a manual restart (observed after
+# the 2026-09-07 inlet reboots: SOCKS down for hours, prowlarr egress broke).
+# Make it self-healing: order after tailscaled, block until tailscale0 has an
+# IPv4 address, and let systemd restart it forever if it ever drops.
+- name: Install danted systemd drop-in for boot ordering + autoheal
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/danted.service.d/override.conf
+    mode: "0644"
+    content: |
+      # Managed by Ansible — do not edit by hand.
+      [Unit]
+      After=tailscaled.service network-online.target
+      Wants=network-online.target
+      # Never give up: don't let repeated fast failures at boot trip the
+      # systemd start limit and leave danted permanently dead.
+      StartLimitIntervalSec=0
+
+      [Service]
+      # Wait for the tunnel interface to exist and hold an IP before starting.
+      ExecStartPre=/bin/sh -c 'until ip -4 addr show tailscale0 2>/dev/null | grep -q "inet "; do sleep 1; done'
+      Restart=always
+      RestartSec=5
+  notify: Restart danted
+
 - name: Ensure danted is enabled and started
   ansible.builtin.systemd:
     name: danted
     enabled: true
     state: started
+    daemon_reload: true

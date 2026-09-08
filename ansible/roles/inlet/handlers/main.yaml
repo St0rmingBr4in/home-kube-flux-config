@@ -53,4 +53,5 @@
   ansible.builtin.systemd:
     name: danted
     state: restarted
+    daemon_reload: true
   listen: "Restart danted"
