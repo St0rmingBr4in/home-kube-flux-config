@@ -10,7 +10,7 @@ spec:
         elements:
           - name: jellyfin
             chart: jellyfin
-            chartVersion: 19.1.11
+            chartVersion: 3.2.0
             namespace: prod-media
             manifestPath: argocd/applications/media/jellyfin
 
@@ -24,27 +24,28 @@ spec:
       project: default
 
       sources:
-        - repoURL: oci.trueforge.org/truecharts
+        - repoURL: https://jellyfin.github.io/jellyfin-helm
           chart: "{{chart}}"
           targetRevision: "{{chartVersion}}"
           helm:
             values: |
-              operator:
-                verify:
-                  enabled: false
-                traefik:
-                  namespace: prod-infra
-              ingress:
-                main:
-                  integrations:
-                    traefik:
-                      enableFixedMiddlewares: false
-                      middlewares:
-                  enabled: true
-                  hosts:
-                    - host: jellyfin.st0rmingbr4in.com
-                      paths:
-                        - path: /
+              image:
+                # Pinned explicitly for reproducibility; matches chart 3.2.0 appVersion.
+                tag: "10.11.8"
+              # RWO iSCSI config PVC — the new pod must not start until the old one
+              # releases the volume, otherwise it deadlocks on a multi-attach error.
+              deploymentStrategy:
+                type: Recreate
+              podSecurityContext:
+                # /config data is owned gid 568 (setgid dirs, group-rwx); run in that
+                # group so Jellyfin can read/write the existing library.
+                runAsUser: 568
+                runAsGroup: 568
+                fsGroup: 568
+                # render/video groups for HW transcode (inert until /dev/dri exists).
+                supplementalGroups:
+                  - 107
+                  - 44
               resources:
                 limits:
                   cpu: 7
@@ -52,35 +53,6 @@ spec:
                 requests:
                   cpu: 3500m
                   memory: 8Gi
-              podSecurityContext:
-                supplementalGroups:
-                  - 107
-                  - 44
-              workload:
-                main:
-                  podSpec:
-                    containers:
-                      main:
-                        probes:
-                          liveness:
-                            enabled: true
-                            type: exec
-                            command:
-                              - sh
-                              - -c
-                              - touch /config/.liveness
-                            spec:
-                              initialDelaySeconds: 12
-                              periodSeconds: 15
-                              failureThreshold: 5
-                              timeoutSeconds: 5
-                          readiness:
-                            enabled: true
-                            type: http
-                            path: /health
-                            spec:
-                              initialDelaySeconds: 15
-                              periodSeconds: 10
               persistence:
                 config:
                   enabled: true
@@ -88,7 +60,42 @@ spec:
                 media:
                   enabled: true
                   existingClaim: media-library
-                  mountPath: /media
+                  readOnly: false
+                cache:
+                  # disabled -> chart mounts an emptyDir at /cache (regenerable data).
+                  enabled: false
+              # Preserve the iSCSI stale-mount canary: touch fails and restarts the
+              # pod if the iSCSI-backed /config mount goes read-only/stale.
+              livenessProbe:
+                exec:
+                  command:
+                    - sh
+                    - -c
+                    - touch /config/.liveness
+                initialDelaySeconds: 12
+                periodSeconds: 15
+                failureThreshold: 5
+                timeoutSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: /health
+                  port: http
+                initialDelaySeconds: 15
+                periodSeconds: 10
+              ingress:
+                enabled: true
+                className: traefik
+                annotations:
+                  traefik.ingress.kubernetes.io/router.entrypoints: websecure
+                  traefik.ingress.kubernetes.io/router.tls: "true"
+                hosts:
+                  - host: jellyfin.st0rmingbr4in.com
+                    paths:
+                      - path: /
+                        pathType: Prefix
+                # Traefik serves TLS from its default wildcard cert (same as the other
+                # media apps) — no per-ingress secret needed.
+                tls: []
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"
@@ -111,13 +118,3 @@ spec:
             duration: 5s
             factor: 2
             maxDuration: 3m
-
-      ignoreDifferences:
-        - group: "*"
-          kind: "Secret"
-          jsonPointers:
-            - /data
-        - group: apps
-          kind: Deployment
-          jsonPointers:
-            - /spec/template/spec/hostUsers
