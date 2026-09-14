@@ -67,6 +67,9 @@ spec:
               # Preserve the iSCSI stale-mount canary: touch fails and restarts the
               # pod if the iSCSI-backed /config mount goes read-only/stale.
               livenessProbe:
+                # null out the chart's default httpGet handler; Helm deep-merges
+                # values, so without this the probe would have two handler types.
+                httpGet: null
                 exec:
                   command:
                     - sh
