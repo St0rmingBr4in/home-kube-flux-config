@@ -64,26 +64,35 @@ spec:
                 cache:
                   # disabled -> chart mounts an emptyDir at /cache (regenerable data).
                   enabled: false
-              # Preserve the iSCSI stale-mount canary: touch fails and restarts the
-              # pod if the iSCSI-backed /config mount goes read-only/stale.
+              # startupProbe gates liveness/readiness until the server is serving, so
+              # a slow first-boot DB migration (10.9->10.11 took ~3min) is never killed
+              # by the liveness probe.
+              startupProbe:
+                tcpSocket: null        # drop chart default handler (deep-merge)
+                httpGet:
+                  path: /health
+                  port: http
+                periodSeconds: 10
+                failureThreshold: 60   # up to ~10min for a schema migration
+                timeoutSeconds: 5
+              # Liveness checks BOTH the iSCSI mount and HTTP health in one exec (a probe
+              # may only have one handler type, so httpGet is nulled and folded in):
+              #   touch /config/.liveness -> iSCSI-backed /config writable (stale-mount canary)
+              #   curl /health            -> HTTP server responsive (catches a hung process)
               livenessProbe:
-                # null out the chart's default httpGet handler; Helm deep-merges
-                # values, so without this the probe would have two handler types.
                 httpGet: null
                 exec:
                   command:
                     - sh
                     - -c
-                    - touch /config/.liveness
-                initialDelaySeconds: 12
+                    - touch /config/.liveness && curl -fsS -o /dev/null http://127.0.0.1:8096/health
                 periodSeconds: 15
                 failureThreshold: 5
-                timeoutSeconds: 5
+                timeoutSeconds: 10
               readinessProbe:
                 httpGet:
                   path: /health
                   port: http
-                initialDelaySeconds: 15
                 periodSeconds: 10
               ingress:
                 enabled: true
