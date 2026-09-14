@@ -5,3 +5,5 @@ resources:
   - pv-bazarr.yaml
   - bazarr-config-pvc.yaml
   - bazarr-ingressroute.yaml
+  - deployment.yaml
+  - services.yaml

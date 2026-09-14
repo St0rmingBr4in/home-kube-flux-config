@@ -9,8 +9,6 @@ spec:
     - list:
         elements:
           - name: bazarr
-            chart: bazarr
-            chartVersion: 24.0.2
             namespace: prod-media
             manifestPath: argocd/applications/media/bazarr
 
@@ -23,64 +21,10 @@ spec:
     spec:
       project: default
 
-      sources:
-        - repoURL: oci.trueforge.org/truecharts
-          chart: "{{chart}}"
-          targetRevision: "{{chartVersion}}"
-          helm:
-            values: |
-              operator:
-                verify:
-                  enabled: false
-                traefik:
-                  namespace: prod-infra
-              ingress:
-                main:
-                  enabled: false
-              securityContext:
-                runAsUser: 1025
-              resources:
-                limits:
-                  memory: 512Mi
-                requests:
-                  cpu: 1000m
-                  memory: 512Mi
-              workload:
-                main:
-                  podSpec:
-                    containers:
-                      main:
-                        probes:
-                          liveness:
-                            enabled: true
-                            type: exec
-                            command:
-                              - sh
-                              - -c
-                              - touch /config/.liveness
-                            spec:
-                              initialDelaySeconds: 12
-                              periodSeconds: 15
-                              failureThreshold: 5
-                              timeoutSeconds: 5
-                          readiness:
-                            enabled: true
-                            type: http
-                            path: /
-                            spec:
-                              initialDelaySeconds: 15
-                              periodSeconds: 10
-              persistence:
-                config:
-                  enabled: true
-                  existingClaim: bazarr-config
-                media:
-                  enabled: true
-                  existingClaim: media-library
-                  mountPath: /tv
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc
@@ -94,7 +38,6 @@ spec:
           - CreateNamespace=true
           - ServerSideApply=true
 
-        # Retry configuration for failed syncs
         retry:
           limit: 5
           backoff:
@@ -102,7 +45,6 @@ spec:
             factor: 2
             maxDuration: 3m
 
-      # Health checks
       ignoreDifferences:
         - group: "*"
           kind: "Secret"

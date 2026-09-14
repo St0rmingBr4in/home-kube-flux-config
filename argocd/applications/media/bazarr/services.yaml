@@ -1,0 +1,20 @@
+---
+# ClusterIP — exposes the Bazarr web UI + API to Traefik (see bazarr-ingressroute.yaml)
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/instance: bazarr
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/instance: bazarr
+  ports:
+    - name: http
+      port: 6767
+      targetPort: 6767
+      protocol: TCP

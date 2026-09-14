@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: bazarr
+    app.kubernetes.io/instance: bazarr
+spec:
+  replicas: 1
+  strategy:
+    # RWO iSCSI config PVC — never mount it from two pods at once.
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bazarr
+      app.kubernetes.io/instance: bazarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bazarr
+        app.kubernetes.io/instance: bazarr
+    spec:
+      containers:
+        - name: bazarr
+          image: lscr.io/linuxserver/bazarr:1.6.0-ls363
+          # PUID/PGID make Bazarr write as the media-owner uid (1025 owns the bulk
+          # of /tv/Series, incl. Nichijou) and group `users` (gid 100). This is the
+          # fix for "Error saving Subtitles file to disk ... Permission denied": the
+          # previous TrueCharts pod ran as uid 568 and could not write .srt files
+          # next to the videos. UMASK=002 makes new files group-writable so they
+          # also work on any dir made group-writable on the NAS.
+          # NOTE: no securityContext/runAsUser/readOnlyRootFilesystem — the
+          # linuxserver s6 init must start as root to chown /config, then drops to
+          # PUID (same approach as qbittorrent).
+          env:
+            - name: PUID
+              value: "1025"
+            - name: PGID
+              value: "100"
+            - name: UMASK
+              value: "002"
+            - name: TZ
+              value: Europe/Paris
+          ports:
+            - name: http
+              containerPort: 6767
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /tv
+          # iSCSI stale-mount canary: touch fails and restarts the pod if the
+          # iSCSI-backed /config goes read-only/stale. Do not replace with httpGet
+          # (Bazarr keeps answering HTTP even when /config is read-only).
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - touch /config/.liveness
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 6767
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              # headroom for subsync (ffmpeg audio extraction during sync)
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: bazarr-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-library
