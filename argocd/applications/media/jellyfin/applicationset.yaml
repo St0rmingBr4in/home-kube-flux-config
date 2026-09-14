@@ -47,8 +47,10 @@ spec:
                   - 107
                   - 44
               resources:
+                # no CPU limit: software HEVC transcode needs to burst to all idle
+                # cores to hit real-time. CPU is compressible; other pods stay
+                # protected by their own requests. Memory stays capped.
                 limits:
-                  cpu: 7
                   memory: 8Gi
                 requests:
                   cpu: 3500m
