@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: bazarr
-          image: lscr.io/linuxserver/bazarr:1.6.0-ls363
+          image: lscr.io/linuxserver/bazarr:1.6.0
           # PUID/PGID make Bazarr write as the media-owner uid (1025 owns the bulk
           # of /tv/Series, incl. Nichijou) and group `users` (gid 100). This is the
           # fix for "Error saving Subtitles file to disk ... Permission denied": the
