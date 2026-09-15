@@ -1,0 +1,44 @@
+---
+# Desired SwOS state for the RB260GSP (CSS106-1G-4P-1S) that replaces the
+# Catalyst WS-C3750G-24TS (sw-cisco-52). This is the IaC source of truth —
+# edit here, then `make ansible-rb260gsp-check` / `make ansible-rb260gsp`.
+#
+# Port map (1:1 from the Cisco, Gi1/0/21 dropped, asarim-bmc left disconnected):
+#   P1  <- Gi1/0/23  router        trunk  42,52,62,69,72
+#   P2  <- Gi1/0/9   asarim        trunk  42,52,62,69,72
+#   P3  <- Gi1/0/14  pve-5         trunk  42,52,62,69,72
+#   P4  <- Gi1/0/22  switch 2.5    trunk  42,52,62,69,72   (CRS310 uplink)
+#   P5  <- Gi1/0/24  nas           access 42
+#   P6  (SFP)        unused        disabled
+#
+# VLANs (from the 3750G): 42 servers, 52 bmc, 62 vms, 69 guest, 72 kube-vip.
+# Trunks carry all five tagged with PVID 1 (native VLAN 1 is unused, matching
+# the Cisco where VLAN 1 was absent from every `switchport trunk allowed vlan`).
+
+rb260gsp_swos_config:
+  system:
+    # Documentation-only on the module; the mgmt IP/VLAN is set on the SwOS
+    # System tab (see README — the module does not manage it).
+    device_name: "sw-rb260gsp"
+    model: "RB260GSP (CSS106-1G-4P-1S)"
+
+  # DRY: the set of tagged VLANs every trunk carries.
+  vlan_groups:
+    uplink: [42, 52, 62, 69, 72]
+
+  port_config:
+    1: { mode: trunk, native_vlan: 1, vlan_group: uplink }   # router
+    2: { mode: trunk, native_vlan: 1, vlan_group: uplink }   # asarim
+    3: { mode: trunk, native_vlan: 1, vlan_group: uplink }   # pve-5
+    4: { mode: trunk, native_vlan: 1, vlan_group: uplink }   # switch 2.5 (CRS310)
+    5: { mode: access, vlan: 42 }                            # nas
+    # P6 (SFP) is unused — left at its SwOS default with no VLAN membership.
+    # Nothing is cabled to it, so it is harmless; disable it on the SwOS
+    # System/Link tab if you want it administratively down (see README).
+
+  vlans:
+    - { vlan_id: 42 }   # servers
+    - { vlan_id: 52 }   # bmc
+    - { vlan_id: 62 }   # vms
+    - { vlan_id: 69 }   # guest
+    - { vlan_id: 72 }   # kube-vip

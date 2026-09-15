@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: st0rmingbr4in
+  description: >-
+    Manages the MikroTik CRS310-8G+2S+ ("switch 2.5") running RouterOS — captures
+    the running config to git and enforces the VLAN-42 management addressing.
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: routeros
+dependencies: []

@@ -4,6 +4,12 @@ all:
     edgerouter:
       hosts:
         router.hard.st0rmingbr4in.com:
+    rb260gsp:
+      hosts:
+        sw-rb260gsp:
+    crs310:
+      hosts:
+        sw-crs310:
     inlet:
       hosts:
         inlet.st0rmingbr4in.com:

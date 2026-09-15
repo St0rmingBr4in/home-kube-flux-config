@@ -17,3 +17,6 @@ collections:
     version: ">=5.0.0"
   - name: vyos.vyos
     version: ">=4.0.0"
+  # RouterOS management for the crs310 role (CRS310-8G+2S+ "switch 2.5").
+  - name: community.routeros
+    version: ">=3.0.0"

@@ -1,0 +1,6 @@
+---
+- name: Configure RB260GSP smart switch (SwOS)
+  hosts: rb260gsp
+  gather_facts: false
+  roles:
+    - role: rb260gsp

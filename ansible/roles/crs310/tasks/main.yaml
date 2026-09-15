@@ -1,0 +1,45 @@
+---
+# Manage the CRS310 over SSH (network_cli + community.routeros).
+#
+# RouterOS persists config immediately (no commit/rollback), but everything here
+# is either read-only or a guarded, idempotent add. Still — ALWAYS run
+# `make ansible-crs310-check` first and read the diff before applying.
+
+- name: Capture the running config (/export) for the git baseline
+  community.routeros.command:
+    commands:
+      - /export
+  register: crs310_export
+  check_mode: false
+  changed_when: false
+
+- name: Write the config baseline into the repo
+  ansible.builtin.copy:
+    content: "{{ crs310_export.stdout[0] }}\n"
+    dest: "{{ role_path }}/files/sw-crs310.rsc"
+    mode: "0644"
+  delegate_to: localhost
+
+- name: Strip the volatile export timestamp so git diffs stay meaningful
+  # RouterOS prefixes /export with "# <date> <time> by RouterOS <ver>", which
+  # changes every run. The stable "# model =" / "# serial number =" comment lines
+  # are kept.
+  ansible.builtin.lineinfile:
+    path: "{{ role_path }}/files/sw-crs310.rsc"
+    regexp: '^# [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:]+ by RouterOS'
+    state: absent
+  delegate_to: localhost
+
+- name: Check whether the VLAN-42 management DHCP client already exists
+  community.routeros.command:
+    commands:
+      - ":put [/ip dhcp-client find where interface={{ crs310_mgmt_dhcp_interface }}]"
+  register: crs310_dhcp_find
+  check_mode: false
+  changed_when: false
+
+- name: Ensure the VLAN-42 management DHCP client
+  community.routeros.command:
+    commands:
+      - '/ip dhcp-client add interface={{ crs310_mgmt_dhcp_interface }} disabled=no comment="{{ crs310_mgmt_dhcp_comment }}"'
+  when: crs310_dhcp_find.stdout[0] | trim | length == 0

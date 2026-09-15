@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author: st0rmingbr4in
+  description: Configures the RB260GSP (SwOS) smart switch replacing sw-cisco-52
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: swos
+dependencies: []

@@ -1,0 +1,14 @@
+---
+# The CRS310 runs RouterOS, so — unlike rb260gsp (SwOS/HTTP) — it has a real CLI.
+# We manage it over SSH with the community.routeros collection's network_cli.
+
+ansible_host: 192.168.42.62          # mgmt IP on VLAN 42 (EdgeRouter reservation `sw-crs310`)
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: community.routeros.routeros
+ansible_user: admin
+ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+# Admin password from 1Password, read locally via the `op` CLI — same workflow as
+# the rb260gsp role. Sign in first: `op signin` (or unlock the 1Password desktop
+# app). NOTE: verify the item name below matches your vault entry for this switch.
+ansible_password: "{{ lookup('community.general.onepassword', 'mikrotik switch', field='password', vault='Private') }}"

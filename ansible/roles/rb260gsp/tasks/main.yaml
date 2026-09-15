@@ -1,0 +1,36 @@
+---
+# Push the desired SwOS state to the RB260GSP over HTTP (Digest auth).
+#
+# SwOS has no SSH/RouterOS CLI, so this uses the community `swos` Ansible module
+# (lanrat/python-mikrotik-swos). Install it first with `make ansible-rb260gsp-setup`
+# — it drops `swos.py` into this role's library/ (git-ignored) and pip-installs the
+# underlying `swos` python package. The module is idempotent and honours --check.
+#
+# SwOS applies + persists changes immediately (no commit/rollback like RouterOS),
+# so ALWAYS run `make ansible-rb260gsp-check` first and read the diff.
+
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: "{{ role_path }}/files/backups"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  check_mode: false
+
+- name: Apply SwOS configuration to the RB260GSP
+  swos:
+    host: "{{ ansible_host }}"
+    username: "{{ rb260gsp_admin_user }}"
+    password: "{{ rb260gsp_admin_password }}"
+    config: "{{ rb260gsp_swos_config }}"
+    backup: true
+    backup_options:
+      filename: "{{ inventory_hostname }}.swb"
+      dir_path: "{{ role_path }}/files/backups"
+  delegate_to: localhost
+  register: rb260gsp_result
+
+- name: Show backup location
+  ansible.builtin.debug:
+    msg: "SwOS backup saved to {{ rb260gsp_result.backup_path }}"
+  when: rb260gsp_result.backup_path is defined

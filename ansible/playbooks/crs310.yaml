@@ -1,0 +1,6 @@
+---
+- name: Configure CRS310 core switch (RouterOS)
+  hosts: crs310
+  gather_facts: false
+  roles:
+    - role: crs310

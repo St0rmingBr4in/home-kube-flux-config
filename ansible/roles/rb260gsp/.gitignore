@@ -1,0 +1,4 @@
+# Third-party SwOS Ansible module fetched by `make ansible-rb260gsp-setup`.
+library/swos.py
+# Binary SwOS config backups pulled during apply.
+files/backups/

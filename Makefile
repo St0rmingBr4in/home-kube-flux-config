@@ -16,6 +16,8 @@
         ansible-install-edgerouter \
         ansible-setup-ssh-edgerouter \
         ansible-edgerouter ansible-edgerouter-check \
+        ansible-rb260gsp-setup ansible-rb260gsp ansible-rb260gsp-check \
+        ansible-crs310 ansible-crs310-check \
         ansible-inlet ansible-inlet-check \
         ansible-k3s ansible-k3s-check \
         memory-webhook-test \
@@ -227,6 +229,32 @@ ansible-edgerouter: ## Run edgerouter playbook (check+diff on PRs, uses 1Passwor
 
 ansible-edgerouter-check: ## Run edgerouter playbook in check/diff mode (local dev)
 	CHECK_MODE=true $(MAKE) ansible-edgerouter
+
+ansible-rb260gsp-setup: ## Fetch the SwOS Ansible module + python lib for the rb260gsp playbook
+	pip install python-mikrotik-swos
+	mkdir -p ansible/roles/rb260gsp/library
+	curl -fsSL -o ansible/roles/rb260gsp/library/swos.py \
+		https://raw.githubusercontent.com/lanrat/python-mikrotik-swos/master/ansible/swos.py
+
+ansible-rb260gsp: ## Apply RB260GSP SwOS config (CHECK_MODE=true for --check/diff). ALWAYS check first.
+	@if [ "$${CHECK_MODE:-false}" = "true" ]; then \
+		cd ansible && ansible-playbook playbooks/rb260gsp.yaml --check --diff $(ANSIBLE_FLAGS); \
+	else \
+		cd ansible && ansible-playbook playbooks/rb260gsp.yaml $(ANSIBLE_FLAGS); \
+	fi
+
+ansible-rb260gsp-check: ## Run rb260gsp playbook in check/diff mode (local dev)
+	CHECK_MODE=true $(MAKE) ansible-rb260gsp
+
+ansible-crs310: ## Apply CRS310 RouterOS config (CHECK_MODE=true for --check/diff). ALWAYS check first. Needs `op` signed in.
+	@if [ "$${CHECK_MODE:-false}" = "true" ]; then \
+		cd ansible && ansible-playbook playbooks/crs310.yaml --check --diff $(ANSIBLE_FLAGS); \
+	else \
+		cd ansible && ansible-playbook playbooks/crs310.yaml $(ANSIBLE_FLAGS); \
+	fi
+
+ansible-crs310-check: ## Run crs310 playbook in check/diff mode (local dev)
+	CHECK_MODE=true $(MAKE) ansible-crs310
 
 ansible-install-inlet: ## Install Ansible + collections for the inlet playbook
 	pip install -r ci/images/ci-ansible/requirements.txt

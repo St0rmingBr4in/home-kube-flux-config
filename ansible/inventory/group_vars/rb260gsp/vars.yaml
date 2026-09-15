@@ -1,0 +1,18 @@
+---
+# The RB260GSP is configured over HTTP (SwOS), not SSH — all tasks delegate to
+# localhost and the `swos` module talks to the switch directly.
+ansible_connection: local
+
+# Management IP of the switch.
+#   * Bench setup: SwOS ships on 192.168.88.1 (leave as-is while cabled to a laptop).
+#   * On the network: set SwOS "Address Acquisition = DHCP" and the EdgeRouter hands
+#     it 192.168.42.54 (reservation for MAC f4:1e:57:d6:74:af in config.boot.j2).
+#     Then change ansible_host to 192.168.42.54.
+ansible_host: 192.168.42.54
+
+rb260gsp_admin_user: admin
+
+# Admin password — stored in 1Password (same as the other switches). Read locally
+# via the `op` CLI, matching the edgerouter's 1Password-agent workflow. Sign in
+# with `op signin` (or have the desktop app unlocked) before running the playbook.
+rb260gsp_admin_password: "{{ lookup('community.general.onepassword', 'sw-RB260GSP CSS106-1G-4P-1S', field='password', vault='Private') }}"

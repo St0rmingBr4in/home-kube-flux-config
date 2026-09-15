@@ -1,0 +1,22 @@
+---
+# Desired *management* state for the CRS310-8G+2S+ ("switch 2.5"), RouterOS 7.16.
+#
+# Scope (KISS/YAGNI): this role does NOT re-model the whole switch. The bridge,
+# ports and per-VLAN membership were built by hand and are stable, so re-declaring
+# them here would be fragile duplication with no second consumer. Instead the role:
+#
+#   1. captures the full running config to files/sw-crs310.rsc — git is the
+#      reviewable source of truth and the restore point; and
+#   2. enforces the one thing we actually changed and care about staying correct:
+#      a DHCP client on the tagged VLAN-42 interface, which picks up
+#      192.168.42.62 from the EdgeRouter reservation `sw-crs310`
+#      (MAC 78:9A:18:43:05:AD, see ansible/roles/edgerouter/.../config.boot.j2).
+#
+# Why VLAN 42 and not the default bridge/VLAN 1: the switch's trunk uplink carries
+# only *tagged* VLANs 42,52,62,69,72 (native VLAN 1 is unused), so management has
+# to live on a tagged VLAN. The L3 VLAN interfaces already exist on `bridge`:
+#   VLAN42 servers | VLAN52 bmc | VLAN62 vms | VLAN69 guest | VLAN72 kube-vip
+
+# Interface the management DHCP client binds to (must be an existing VLAN iface).
+crs310_mgmt_dhcp_interface: VLAN42
+crs310_mgmt_dhcp_comment: "mgmt via .42.62 reservation"
