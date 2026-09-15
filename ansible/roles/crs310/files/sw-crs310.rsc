@@ -12,7 +12,7 @@ set [ find default-name=ether7 ] name=guest
 set [ find default-name=ether6 ] name=guest-spare
 set [ find default-name=ether8 ] name=pc-clem
 set [ find default-name=ether5 ] name=pve-5
-set [ find default-name=ether2 ] name=tmp-trunk-to-uplink
+set [ find default-name=ether2 ] name=revali
 set [ find default-name=ether1 ] name=trunk-to-uplink
 /interface vlan
 add comment=servers interface=bridge name=VLAN42 vlan-id=42
@@ -30,8 +30,8 @@ set 0 name=serial0
 /interface bridge port
 add bridge=bridge comment=defconf interface=trunk-to-uplink \
     internal-path-cost=10 path-cost=10
-add bridge=bridge comment=defconf interface=tmp-trunk-to-uplink \
-    internal-path-cost=10 path-cost=10
+add bridge=bridge comment=defconf interface=revali internal-path-cost=10 \
+    path-cost=10
 add bridge=bridge comment=defconf interface=asarim internal-path-cost=10 \
     path-cost=10 pvid=42
 add bridge=bridge comment=defconf interface=bmc-asarim internal-path-cost=10 \
@@ -57,11 +57,12 @@ add bridge=bridge tagged=trunk-to-uplink untagged=asarim,pve-5 vlan-ids=62
 add bridge=bridge tagged=trunk-to-uplink untagged=guest,pc-clem,guest-spare \
     vlan-ids=69
 add bridge=bridge tagged=bridge vlan-ids=42,52,62,69,72
-add bridge=bridge tagged=trunk-to-uplink,tmp-trunk-to-uplink untagged=bridge \
-    vlan-ids=1
+add bridge=bridge tagged=trunk-to-uplink,revali untagged=bridge vlan-ids=1
+add bridge=bridge comment="revali proxmox trunk" tagged=revali vlan-ids=\
+    42,52,62,69,72
 /interface list member
 add interface=trunk-to-uplink list=WAN
-add interface=tmp-trunk-to-uplink list=LAN
+add interface=revali list=LAN
 add interface=asarim list=LAN
 add interface=bmc-asarim list=LAN
 add interface=pve-5 list=LAN
@@ -77,5 +78,7 @@ add comment="mgmt via .42.62 reservation" interface=VLAN42
 set [ find default=yes ] html-directory=hotspot
 /ip ipsec profile
 set [ find default=yes ] dpd-interval=2m dpd-maximum-failures=5
+/system clock
+set time-zone-name=Europe/Paris
 /system note
 set show-at-login=no
