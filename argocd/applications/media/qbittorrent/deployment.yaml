@@ -72,6 +72,14 @@ spec:
               iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
               iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
               iptables -A OUTPUT -j DROP
+        # Qt only treats a lockfile as stale if it was written by the same
+        # hostname, so a new pod's qbittorrent exits forever on the old pod's lock.
+        - name: clear-stale-lock
+          image: alpine:3.21
+          command: [rm, -f, /config/qBittorrent/lockfile, /config/qBittorrent/ipc-socket]
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:5.2.0
