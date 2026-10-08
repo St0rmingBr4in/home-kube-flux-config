@@ -17,7 +17,7 @@ when:
 
 steps:
   - name: ansible-inlet
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9936b271343da31f431ceb3dce1ea2ed0c46badabaab7f9ec83b2920a4900028
     when:
       - path:
           - "ansible/ansible.cfg"
@@ -90,7 +90,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
   - name: ansible-k3s
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9936b271343da31f431ceb3dce1ea2ed0c46badabaab7f9ec83b2920a4900028
     when:
       - path:
           - "ansible/ansible.cfg"
