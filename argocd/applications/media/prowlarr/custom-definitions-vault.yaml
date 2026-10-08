@@ -1,0 +1,18 @@
+---
+# Custom Cardigann definitions live in Vault so tracker details stay out of this public repo.
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: prowlarr-custom-definitions
+  namespace: prod-media
+spec:
+  type: kv-v2
+  mount: secret
+  path: prowlarr-custom-definitions
+  destination:
+    name: prowlarr-custom-definitions
+    create: true
+    overwrite: true
+  hmacSecretData: true
+  refreshAfter: 24h
+  vaultAuthRef: prod-infra/default

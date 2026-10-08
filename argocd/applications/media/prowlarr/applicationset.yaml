@@ -106,6 +106,13 @@ spec:
                 config:
                   enabled: true
                   existingClaim: prowlarr-config
+                custom-definitions:
+                  enabled: true
+                  type: secret
+                  objectName: prowlarr-custom-definitions
+                  expandObjectName: false
+                  mountPath: /config/Definitions/Custom
+                  readOnly: true
         - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
           targetRevision: HEAD
           path: "{{manifestPath}}"

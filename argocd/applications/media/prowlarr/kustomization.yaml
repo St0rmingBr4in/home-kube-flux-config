@@ -6,3 +6,6 @@ resources:
   - prowlarr-config-pvc.yaml
   - prowlarr-ingressroute.yaml
   - inlet-socks-egress.yaml
+  - prowlarr-api-vault.yaml
+  - custom-definitions-vault.yaml
+  - cronjob-sitewide-freeleech-expiry.yaml

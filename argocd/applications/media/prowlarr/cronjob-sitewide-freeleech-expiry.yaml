@@ -1,0 +1,70 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prowlarr-sitewide-freeleech-expiry
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/instance: prowlarr
+spec:
+  schedule: "5 0 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: prowlarr
+            app.kubernetes.io/instance: prowlarr
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: freeleech-expiry
+              image: alpine:3.21
+              env:
+                - name: TZ
+                  value: Europe/Paris
+              command:
+                - /bin/sh
+                - -euc
+                - |
+                  apk add --no-cache curl jq >/dev/null
+                  api="http://prowlarr.prod-media.svc:9696/api/v1"
+                  key="$(cat /secrets/api-key)"
+                  today="$(date +%F)"
+                  # Custom definitions expose a sitewide_freeleech checkbox plus a last-day date field.
+                  curl -sf -H "X-Api-Key: $key" "$api/indexer" \
+                    | jq -c '.[] | select(any(.fields[]; .name == "sitewide_freeleech" and .value == true))' \
+                    | while read -r idx; do
+                        name="$(echo "$idx" | jq -r .name)"
+                        until="$(echo "$idx" | jq -r '.fields[] | select(.name == "sitewide_freeleech_until") | .value // "" | .[0:10]')"
+                        if [ -n "$until" ] && [ "$today" \> "$until" ]; then
+                          echo "$idx" \
+                            | jq '(.fields[] | select(.name == "sitewide_freeleech") | .value) = false
+                                  | (.fields[] | select(.name == "sitewide_freeleech_until") | .value) = ""' \
+                            | curl -sf -X PUT -H "X-Api-Key: $key" -H "Content-Type: application/json" \
+                                -d @- "$api/indexer/$(echo "$idx" | jq .id)" >/dev/null
+                          echo "$name: site-wide freeleech ended on $until, unticked"
+                        else
+                          echo "$name: still active (until=${until:-unset})"
+                        fi
+                      done
+              volumeMounts:
+                - name: api-key
+                  mountPath: /secrets
+                  readOnly: true
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+          volumes:
+            - name: api-key
+              secret:
+                secretName: prowlarr-api-key
