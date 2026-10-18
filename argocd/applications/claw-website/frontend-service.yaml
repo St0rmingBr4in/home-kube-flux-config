@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claw-frontend
+  namespace: prod-claw
+spec:
+  selector:
+    app.kubernetes.io/name: claw-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http

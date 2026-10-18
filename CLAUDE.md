@@ -21,6 +21,32 @@ Apply YAGNI, KISS, DRY, and SOLID. Concretely in this repo:
 When in doubt, write the simpler version and accept a future refactor over a
 speculative abstraction today.
 
+## Requesting persistent storage
+
+Request storage with a PersistentVolumeClaim on the
+`synology-csi-iscsi-retain` storage class (the cluster default). Synology CSI
+creates the iSCSI LUN on the NAS automatically, and `Retain` keeps the LUN and
+its data if the PVC is deleted.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myapp-data
+  namespace: prod-myapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: synology-csi-iscsi-retain
+```
+
+Don't create LUNs by hand in DSM or write static `PersistentVolume` manifests
+with an `iscsi:` block for new apps. Some older apps (ats-website, authentik,
+bazarr) still use that manual pattern; don't copy it.
+
 ## Adding a new Terraform module
 
 All Terraform modules use HCP Terraform Cloud (TFC) as a state backend with

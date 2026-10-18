@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: claw-postgres
+  namespace: prod-claw
+spec:
+  serviceName: claw-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: claw-postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claw-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: claw
+            - name: POSTGRES_USER
+              value: claw
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: claw-website
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              # Fails if iSCSI drops and ext4 remounts read-only, so the pod
+              # restarts and kubelet remounts the volume cleanly.
+              command: ["touch", "/var/lib/postgresql/data/pgdata/.liveness"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: claw-postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claw-postgres
+  namespace: prod-claw
+spec:
+  selector:
+    app.kubernetes.io/name: claw-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres

@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claw-postgres
+  namespace: prod-claw
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # Synology CSI creates the LUN; Retain keeps it if the PVC is deleted.
+  storageClassName: synology-csi-iscsi-retain

@@ -1,0 +1,28 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - secret-vault.yaml
+  - postgres-pvc.yaml
+  - postgres-statefulset.yaml
+  - backend-deployment.yaml
+  - backend-service.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
+  - frontend-ingressroute.yaml
+
+images:
+  - name: claw-frontend
+    newName: ghcr.io/st0rmingbr4in/claw-frontend
+    newTag: latest
+  - name: claw-backend
+    newName: ghcr.io/st0rmingbr4in/claw-backend
+    newTag: latest
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: claw-website
+
+commonAnnotations:
+  app.kubernetes.io/managed-by: argocd

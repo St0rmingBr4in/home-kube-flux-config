@@ -1,0 +1,27 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: claw-frontend
+  namespace: prod-claw
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Authentik callback path: must bypass any middleware so the OIDC flow completes
+    - kind: Rule
+      match: Host(`claw.st0rmingbr4in.com`) && PathPrefix(`/outpost.goauthentik.io`)
+      priority: 100
+      services:
+        - name: ak-outpost-authentik-embedded-outpost
+          namespace: prod-infra
+          port: 9000
+    # No forward-auth middleware: Auth.js handles sessions via OIDC
+    - kind: Rule
+      match: Host(`claw.st0rmingbr4in.com`)
+      priority: 10
+      services:
+        - name: claw-frontend
+          port: 3000
+  tls:
+    secretName: st0rmingbr4in.com-cert

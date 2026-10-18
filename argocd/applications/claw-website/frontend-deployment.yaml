@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claw-frontend
+  namespace: prod-claw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: claw-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claw-frontend
+        tags.datadoghq.com/service: claw-frontend
+        tags.datadoghq.com/env: prod
+      annotations:
+        admission.datadoghq.com/enabled: "true"
+        ad.datadoghq.com/claw-frontend.logs: '[{"source":"nodejs","service":"claw-frontend"}]'
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+      containers:
+        - name: claw-frontend
+          image: claw-frontend:latest
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - secretRef:
+                name: claw-website
+            - secretRef:
+                name: claw-website-authentik
+          env:
+            - name: BACKEND_URL
+              value: http://claw-backend:8080
+            - name: AUTH_URL
+              value: https://claw.st0rmingbr4in.com
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
