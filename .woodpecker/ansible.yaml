@@ -2,7 +2,7 @@
 # Ansible CI pipeline. Triggered on master pushes that touch ansible files.
 # Each step is skipped unless its specific playbook paths changed.
 #
-# Vault auth: Kubernetes service account JWT (role: woodpecker-ci, SA: woodpecker-pipeline).
+# Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # Vault secret layout (kv-v2):
 #   secret/ci/ansible   → vault_password, inlet_ssh_private_key, k3s_ssh_private_key
 #   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only)
@@ -34,7 +34,7 @@ steps:
       - |
         set -e
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ansible\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -85,7 +85,7 @@ steps:
         fi
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-ansible
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
@@ -106,7 +106,7 @@ steps:
       - |
         set -e
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ansible\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -134,7 +134,7 @@ steps:
         fi
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-ansible
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
@@ -149,7 +149,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-notify\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
@@ -178,6 +178,6 @@ steps:
             "https://api.${DD_SITE}/api/v2/ci/pipeline"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'

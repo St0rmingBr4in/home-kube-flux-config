@@ -2,7 +2,7 @@
 # Terraform CI pipeline. Triggered on master pushes that touch any terraform module.
 # Each step is skipped unless its specific module path changed (step-level when.path).
 #
-# Vault auth: Kubernetes service account JWT (role: woodpecker-ci, SA: woodpecker-pipeline).
+# Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # In Woodpecker 3.x WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT was removed; the SA is set
 # per-step via backend_options.kubernetes.serviceAccountName.
 # Vault secret layout (kv-v2):
@@ -32,7 +32,7 @@ steps:
       - |
         set -e
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-tf-$MODULE\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -60,7 +60,7 @@ steps:
         fi
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-tfe
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -74,7 +74,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-authentik
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -88,7 +88,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-datadog
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -102,7 +102,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-digitalocean
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -116,7 +116,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-tailscale
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -130,7 +130,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-vault
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -144,7 +144,7 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-tf-woodpecker
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
@@ -159,7 +159,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-notify\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
@@ -188,6 +188,6 @@ steps:
             "https://api.${DD_SITE}/api/v2/ci/pipeline"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'

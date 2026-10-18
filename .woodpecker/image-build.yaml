@@ -32,7 +32,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -51,7 +51,7 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
@@ -74,7 +74,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -93,7 +93,7 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
@@ -118,7 +118,7 @@ steps:
           go build -a -installsuffix cgo -o webhook main.go
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-image-build
         # The memory-webhook's 512Mi default OOM-kills a full `go build -a`.
         resources:
           requests:
@@ -143,7 +143,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
@@ -162,7 +162,7 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
@@ -183,7 +183,7 @@ steps:
         set -e
         apk add --no-cache curl jq -q
         VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ci\"}" \
+          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-notify\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
@@ -213,6 +213,6 @@ steps:
         | xargs -I{} echo "Datadog CI API: {}"
     backend_options:
       kubernetes:
-        serviceAccountName: woodpecker-pipeline
+        serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
