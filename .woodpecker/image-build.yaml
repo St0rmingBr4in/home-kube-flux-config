@@ -47,7 +47,7 @@ steps:
           --frontend=dockerfile.v0 \
           --local context=ci/images/ci-ansible \
           --local dockerfile=ci/images/ci-ansible \
-          --output type=image,"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}",push=true
+          --output "type=image,\"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
@@ -88,7 +88,7 @@ steps:
           --frontend=dockerfile.v0 \
           --local context=ci/images/ci-terraform \
           --local dockerfile=ci/images/ci-terraform \
-          --output type=image,"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}",push=true
+          --output "type=image,\"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline
@@ -150,7 +150,7 @@ steps:
           --frontend=dockerfile.v0 \
           --local context=memory-webhook \
           --local dockerfile=memory-webhook \
-          --output type=image,"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}",push=true
+          --output "type=image,\"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-pipeline

@@ -36,6 +36,8 @@ steps:
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
+        # make and the Vault provider read VAULT_TOKEN from the environment.
+        export VAULT_TOKEN
 
         export TF_TOKEN_APP_TERRAFORM_IO=$(curl -sk \
           -H "X-Vault-Token: $VAULT_TOKEN" \
