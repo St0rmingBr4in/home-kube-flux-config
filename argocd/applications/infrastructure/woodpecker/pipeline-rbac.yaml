@@ -8,3 +8,65 @@ kind: ServiceAccount
 metadata:
   name: woodpecker-pipeline
   namespace: woodpecker
+# One ServiceAccount per group of steps, each bound to a same-named Vault role
+# with only that group's secrets (terraform/vault/ci-roles.tf).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-tfe
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-authentik
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-datadog
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-digitalocean
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-tailscale
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-vault
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-tf-woodpecker
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-ansible
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-image-build
+  namespace: woodpecker
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: woodpecker-notify
+  namespace: woodpecker

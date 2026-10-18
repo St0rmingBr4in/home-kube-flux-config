@@ -1,4 +1,8 @@
 ---
+# Internet-facing host: refuse unknown host keys (ansible.cfg disables checking globally).
+ansible_host_key_checking: true
+ansible_ssh_common_args: "-o UserKnownHostsFile={{ inventory_dir }}/../known_hosts"
+
 tailscale_extra_args: "--hostname=inlet --advertise-exit-node --accept-routes --advertise-tags=tag:servers"
 # tailscale_authkey: never stored here — pass via -e at runtime (only for re-registration)
 

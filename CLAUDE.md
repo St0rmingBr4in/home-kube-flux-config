@@ -132,6 +132,10 @@ breaks the `--exit-node=inlet` reference in qbittorrent's Tailscale addon.
 
 ### 2. Run Ansible
 
+A new droplet has a new SSH host key, and Ansible refuses unknown keys for
+inlet. Check the new key's fingerprint in the DigitalOcean console, then
+replace the line in `ansible/known_hosts`.
+
 ```bash
 make ansible-inlet
 ```
