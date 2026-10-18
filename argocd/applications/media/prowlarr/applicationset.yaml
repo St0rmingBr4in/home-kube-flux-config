@@ -62,12 +62,6 @@ spec:
                 requests:
                   cpu: 100m
                   memory: 512Mi
-              exportarrResources:
-                limits:
-                  memory: 100Mi
-                requests:
-                  cpu: 100m
-                  memory: 100Mi
               exportarrAffinity:
                 podAffinity:
                   requiredDuringSchedulingIgnoredDuringExecution:
@@ -81,6 +75,14 @@ spec:
                 main:
                   podSpec:
                     containers:
+                      # exportarr otherwise inherits the app's top-level resources.
+                      exportarr:
+                        resources:
+                          requests:
+                            cpu: 10m
+                            memory: 32Mi
+                          limits:
+                            memory: 64Mi
                       main:
                         probes:
                           liveness:
