@@ -67,10 +67,6 @@ datadog:
   apm:
     enabled: true
 
-  # System probe (eBPF) — required for USM
-  systemProbe:
-    enabled: true
-
   # Universal Service Monitoring — auto-detects HTTP services (Jellyfin, *arr, etc.)
   serviceMonitoring:
     enabled: true

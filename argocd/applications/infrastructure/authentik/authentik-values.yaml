@@ -40,9 +40,12 @@ server:
       - authentik.st0rmingbr4in.com
 worker:
   replicas: 1
-  # One replica: a rolling update would need room for two workers at once.
+  # One replica: stop the old worker first so the node never needs room for two.
   deploymentStrategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   # 2026.2 workers use ~1Gi at steady state (goauthentik/authentik#20537).
   resources:
     requests:
