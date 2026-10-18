@@ -2,19 +2,6 @@
 # ATS Website — OIDC provider (Auth.js manages the session, not Authentik)
 # ---------------------------------------------------------------------------
 
-# Scope mappings — only needed for OIDC providers (not used by proxy apps above)
-data "authentik_property_mapping_provider_scope" "openid" {
-  scope_name = "openid"
-}
-
-data "authentik_property_mapping_provider_scope" "email" {
-  scope_name = "email"
-}
-
-data "authentik_property_mapping_provider_scope" "profile" {
-  scope_name = "profile"
-}
-
 resource "authentik_provider_oauth2" "ats_website" {
   name               = "ATS Website"
   authorization_flow = data.authentik_flow.default_authorization.id

@@ -23,7 +23,7 @@ provider "authentik" {
   token = var.authentik_token
 }
 
+# No token argument: the Makefile passes the operator's own Vault login as VAULT_TOKEN.
 provider "vault" {
   address = "https://vault.${local.base_domain}"
-  token   = var.vault_token
 }

@@ -3,9 +3,3 @@ variable "authentik_token" {
   type        = string
   sensitive   = true
 }
-
-variable "vault_token" {
-  description = "Vault token used to write generated secrets (e.g. OIDC client secrets)"
-  type        = string
-  sensitive   = true
-}
