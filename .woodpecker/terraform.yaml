@@ -55,7 +55,7 @@ steps:
         make terraform-$MODULE-plan
         # Apply only on the master push (post-merge). Pull-request runs are
         # plan-only — they verify changes before the merge is gated.
-        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+        if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
           make terraform-$MODULE-apply
         fi
     backend_options:

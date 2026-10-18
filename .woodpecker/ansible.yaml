@@ -74,7 +74,7 @@ steps:
         # Run the playbook only on master push (post-merge). PR runs stop at
         # lint — they validate changes before the merge is gated, without
         # mutating remote hosts.
-        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+        if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
           # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
           # sees the variables at runtime. Plain ${VAR} would be expanded at
           # YAML-compile time (to empty) before the shell ever runs.
@@ -129,7 +129,7 @@ steps:
         ansible-lint --offline
         # Run the playbook only on master push (post-merge). PR runs stop at
         # lint — see ansible-inlet step for rationale.
-        if [ "$CI_PIPELINE_EVENT" = "push" ]; then
+        if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
           ansible-playbook playbooks/k3s.yaml
         fi
     backend_options:
