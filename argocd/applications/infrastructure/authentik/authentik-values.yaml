@@ -4,9 +4,6 @@ authentik:
     enabled: false
 
 global:
-  # The chart's 2026.2 line stops at 2026.2.3; app patch releases continue. Drop on the next minor.
-  image:
-    tag: 2026.2.7
   env:
     - name: AUTHENTIK_DISABLE_UPDATE_CHECK
       value: "true"
