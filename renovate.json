@@ -10,6 +10,12 @@
       "automerge": true
     },
     {
+      "description": "k3s minors can remove Kubernetes APIs: review them, only automerge patches",
+      "matchPackageNames": ["k3s-io/k3s"],
+      "matchUpdateTypes": ["minor"],
+      "automerge": false
+    },
+    {
       "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",
       "matchPackageNames": ["go", "golang"],
       "groupName": "go toolchain"
