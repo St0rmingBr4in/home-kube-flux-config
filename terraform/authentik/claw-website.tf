@@ -11,8 +11,9 @@ resource "authentik_provider_oauth2" "claw_website" {
 
   allowed_redirect_uris = [
     {
-      matching_mode = "strict"
-      url           = "https://claw.${local.base_domain}/api/auth/callback/authentik"
+      matching_mode     = "strict"
+      redirect_uri_type = "authorization"
+      url               = "https://claw.${local.base_domain}/api/auth/callback/authentik"
     }
   ]
 
