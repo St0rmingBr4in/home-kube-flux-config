@@ -181,9 +181,11 @@ terraform-vault-init: ## Initialise Vault Terraform
 	terraform -chdir=$(TF_VAULT_DIR) init
 
 terraform-vault-plan: ## Plan Vault Terraform
+	TF_VAR_vault_token=$${TF_VAR_vault_token:-$$(vault print token)} \
 	terraform -chdir=$(TF_VAULT_DIR) plan
 
 terraform-vault-apply: ## Apply Vault Terraform
+	TF_VAR_vault_token=$${TF_VAR_vault_token:-$$(vault print token)} \
 	terraform -chdir=$(TF_VAULT_DIR) apply -auto-approve
 
 # ── Terraform: Woodpecker ─────────────────────────────────────────────────────

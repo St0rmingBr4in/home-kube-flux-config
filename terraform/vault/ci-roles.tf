@@ -7,7 +7,6 @@ locals {
     woodpecker-tf-datadog      = { read = ["ci/terraform-cloud", "ci/datadog"], write = [] }
     woodpecker-tf-digitalocean = { read = ["ci/terraform-cloud", "ci/digitalocean"], write = [] }
     woodpecker-tf-tailscale    = { read = ["ci/terraform-cloud", "ci/tailscale"], write = [] }
-    woodpecker-tf-vault        = { read = ["ci/terraform-cloud", "ci/vault"], write = [] }
     woodpecker-tf-woodpecker   = { read = ["ci/terraform-cloud", "ci/woodpecker-tf"], write = [] }
     woodpecker-ansible         = { read = ["ci/ansible", "ci/datadog", "ci/tailscale", "inlet/socks"], write = [] }
     woodpecker-image-build     = { read = ["ci/docker"], write = [] }

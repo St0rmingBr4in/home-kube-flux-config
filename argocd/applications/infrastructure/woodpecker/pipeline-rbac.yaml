@@ -44,12 +44,6 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: woodpecker-tf-vault
-  namespace: woodpecker
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
   name: woodpecker-tf-woodpecker
   namespace: woodpecker
 ---

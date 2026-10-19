@@ -1,6 +1,7 @@
 ---
 # Terraform CI pipeline. Triggered on master pushes that touch any terraform module.
 # Each step is skipped unless its specific module path changed (step-level when.path).
+# terraform/vault has no step: it manages Vault itself, so it's applied locally only.
 #
 # Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # In Woodpecker 3.x WOODPECKER_BACKEND_K8S_SERVICE_ACCOUNT was removed; the SA is set
@@ -117,20 +118,6 @@ steps:
     backend_options:
       kubernetes:
         serviceAccountName: woodpecker-tf-tailscale
-        annotations:
-          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
-
-  - name: terraform-vault
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
-    when:
-      - path: "terraform/vault/**"
-    environment:
-      MODULE: vault
-      VAULT_SECRET_PATH: secret/ci/vault
-    commands: *terraform_commands
-    backend_options:
-      kubernetes:
-        serviceAccountName: woodpecker-tf-vault
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
