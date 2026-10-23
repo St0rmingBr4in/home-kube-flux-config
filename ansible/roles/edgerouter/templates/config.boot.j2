@@ -18,21 +18,6 @@ firewall {
             }
         }
     }
-    name Allow {
-        default-action accept
-        enable-default-log
-        rule 1 {
-            action accept
-            log disable
-            protocol all
-            state {
-                established enable
-                invalid enable
-                new enable
-                related enable
-            }
-        }
-    }
     name LAN_OUT {
         default-action accept
         description "LAN to WAN - torrent blocking"
@@ -265,24 +250,6 @@ port-forward {
     lan-interface switch0.42
     lan-interface switch0.69
     lan-interface tailscale0
-    rule 1 {
-        description http
-        forward-to {
-            address 100.87.211.20
-            port 80
-        }
-        original-port 80
-        protocol tcp_udp
-    }
-    rule 2 {
-        description https
-        forward-to {
-            address 100.87.211.20
-            port 443
-        }
-        original-port 443
-        protocol tcp_udp
-    }
     rule 3 {
         description minecraft
         forward-to {
@@ -290,24 +257,6 @@ port-forward {
             port 25565
         }
         original-port 25565
-        protocol tcp_udp
-    }
-    rule 4 {
-        description "rcon minecraft"
-        forward-to {
-            address 192.168.62.18
-            port 25575
-        }
-        original-port 25575
-        protocol tcp_udp
-    }
-    rule 5 {
-        description "nas http"
-        forward-to {
-            address 192.168.42.42
-            port 5000
-        }
-        original-port 5000
         protocol tcp_udp
     }
     rule 6 {
@@ -344,15 +293,6 @@ port-forward {
             port 1194
         }
         original-port 1194
-        protocol tcp_udp
-    }
-    rule 10 {
-        description "nas https"
-        forward-to {
-            address 192.168.42.42
-            port 5001
-        }
-        original-port 5001
         protocol tcp_udp
     }
     rule 11 {
@@ -603,15 +543,6 @@ service {
         use-dnsmasq disable
     }
     dns {
-        dynamic {
-            interface eth5.832 {
-                service dyndns {
-                    host-name julien.likescandy.com
-                    login {{ dyndns_login }}
-                    password {{ dyndns_password }}
-                }
-            }
-        }
         forwarding {
             cache-size 150
             listen-on switch0
@@ -629,7 +560,7 @@ service {
         listen-address 192.168.42.1
         listen-address 192.168.52.1
         listen-address 192.168.62.1
-        older-ciphers enable
+        older-ciphers disable
     }
     nat {
         rule 5010 {
