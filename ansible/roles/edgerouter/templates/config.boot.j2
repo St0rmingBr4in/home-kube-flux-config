@@ -1,3 +1,4 @@
+{% set torrent_port_range = torrent_port ~ '-' ~ (torrent_port + 8) %}
 firewall {
     all-ping enable
     broadcast-ping disable
@@ -47,7 +48,7 @@ firewall {
             action drop
             description "Block classic BitTorrent ports (TCP)"
             destination {
-                port {{ torrent_port }}-{{ torrent_port + 8 }}
+                port {{ torrent_port_range }}
             }
             protocol tcp
         }
@@ -55,7 +56,7 @@ firewall {
             action drop
             description "Block classic BitTorrent ports (UDP)"
             destination {
-                port {{ torrent_port }}-{{ torrent_port + 8 }}
+                port {{ torrent_port_range }}
             }
             protocol udp
         }
@@ -97,6 +98,14 @@ firewall {
             state {
                 invalid enable
             }
+        }
+        rule 100 {
+            action drop
+            description "Silently drop stale torrent peers (qbittorrent egresses via inlet)"
+            destination {
+                port {{ torrent_port_range }}
+            }
+            protocol tcp_udp
         }
         rule 9000 {
             action drop
