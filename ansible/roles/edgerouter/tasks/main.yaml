@@ -34,6 +34,45 @@
   changed_when: false
   check_mode: false
 
+# /config survives firmware upgrades; the task-scheduler entry in config.boot points here,
+# so the script must be in place before the config commit.
+- name: Upload WAN watchdog script to router via SCP
+  ansible.builtin.command:
+    argv:
+      - scp
+      - -o
+      - StrictHostKeyChecking=no
+      - -o
+      - BatchMode=yes
+      - "{{ role_path }}/files/wan-watchdog.sh"
+      - "{{ ansible_user }}@{{ inventory_hostname }}:/tmp/wan-watchdog.sh.candidate"
+  delegate_to: localhost
+  environment:
+    SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+  changed_when: false
+  check_mode: false
+
+- name: Install WAN watchdog script
+  ansible.builtin.shell: |
+    ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
+        {{ ansible_user }}@{{ inventory_hostname }} bash -s << 'ROUTER_SCRIPT'
+    DEST=/config/scripts/wan-watchdog.sh
+    if sudo cmp -s /tmp/wan-watchdog.sh.candidate "$DEST"; then
+        printf 'No changes\n'
+    else
+        printf 'wan-watchdog.sh differs\n'
+        if {{ 'false' if ansible_check_mode else 'true' }}; then
+            sudo install -m 0755 /tmp/wan-watchdog.sh.candidate "$DEST" || exit 1
+        fi
+    fi
+    ROUTER_SCRIPT
+  delegate_to: localhost
+  environment:
+    SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+  register: watchdog_result
+  changed_when: "'No changes' not in watchdog_result.stdout"
+  check_mode: false
+
 - name: Apply config on router
   # Runs a self-contained bash script on the router over SSH.
   # ROUTER_SCRIPT is single-quoted so local bash passes $W/$diff verbatim to
@@ -64,7 +103,8 @@
   environment:
     SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
   register: config_result
-  changed_when: "'No changes' not in config_result.stdout"
+  # Anchored: a real commit also prints "No changes have been discarded".
+  changed_when: config_result.stdout is not search('^No changes$', multiline=True)
   check_mode: false
 
 - name: Show router config diff

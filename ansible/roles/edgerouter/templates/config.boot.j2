@@ -166,6 +166,7 @@ interfaces {
                 global-option "option rfc3118-auth code 90 = string;"
                 name-server update
             }
+            egress-qos "0:6 1:6 2:6 3:6 4:6 5:6 6:6 7:6"
             firewall {
                 in {
                     modify TAILSCALE_MARK
@@ -504,13 +505,13 @@ service {
                     ip-address 192.168.42.62
                     mac-address 78:9A:18:43:05:AD
                 }
-                static-mapping sw-cisco-52 {
-                    ip-address 192.168.42.52
-                    mac-address 00:1C:57:7A:5F:80
-                }
                 static-mapping sw-rb260gsp {
                     ip-address 192.168.42.54
                     mac-address f4:1e:57:d6:74:af
+                }
+                static-mapping sw-cisco-52 {
+                    ip-address 192.168.42.52
+                    mac-address 00:1C:57:7A:5F:80
                 }
             }
         }
@@ -718,6 +719,14 @@ system {
             facility all {
                 level debug
             }
+        }
+    }
+    task-scheduler {
+        task wan-watchdog {
+            executable {
+                path /config/scripts/wan-watchdog.sh
+            }
+            interval 1m
         }
     }
     time-zone UTC
