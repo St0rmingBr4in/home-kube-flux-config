@@ -100,10 +100,10 @@ agents:
     processAgent:
       resources:
         limits:
-          memory: 150Mi
+          memory: 256Mi
         requests:
           cpu: 50m
-          memory: 100Mi
+          memory: 160Mi
     traceAgent:
       resources:
         limits:
@@ -114,10 +114,10 @@ agents:
     systemProbe:
       resources:
         limits:
-          memory: 400Mi
+          memory: 768Mi # USM eBPF maps are memory-hungry on busy nodes
         requests:
           cpu: 100m
-          memory: 300Mi
+          memory: 512Mi
     initContainers:
       resources:
         limits:
