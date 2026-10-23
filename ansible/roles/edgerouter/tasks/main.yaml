@@ -34,9 +34,9 @@
   changed_when: false
   check_mode: false
 
-# /config survives firmware upgrades; the task-scheduler entry in config.boot points here,
-# so the script must be in place before the config commit.
-- name: Upload WAN watchdog script to router via SCP
+# /config survives firmware upgrades; the task-scheduler entries in config.boot point here,
+# so the scripts must be in place before the config commit.
+- name: Upload router scripts via SCP
   ansible.builtin.command:
     argv:
       - scp
@@ -44,33 +44,35 @@
       - StrictHostKeyChecking=no
       - -o
       - BatchMode=yes
-      - "{{ role_path }}/files/wan-watchdog.sh"
-      - "{{ ansible_user }}@{{ inventory_hostname }}:/tmp/wan-watchdog.sh.candidate"
+      - "{{ role_path }}/files/{{ item }}"
+      - "{{ ansible_user }}@{{ inventory_hostname }}:/tmp/{{ item }}.candidate"
+  loop: "{{ edgerouter_scripts }}"
   delegate_to: localhost
   environment:
     SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
   changed_when: false
   check_mode: false
 
-- name: Install WAN watchdog script
+- name: Install router scripts
   ansible.builtin.shell: |
     ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
         {{ ansible_user }}@{{ inventory_hostname }} bash -s << 'ROUTER_SCRIPT'
-    DEST=/config/scripts/wan-watchdog.sh
-    if sudo cmp -s /tmp/wan-watchdog.sh.candidate "$DEST"; then
+    DEST=/config/scripts/{{ item }}
+    if sudo cmp -s /tmp/{{ item }}.candidate "$DEST"; then
         printf 'No changes\n'
     else
-        printf 'wan-watchdog.sh differs\n'
+        printf '{{ item }} differs\n'
         if {{ 'false' if ansible_check_mode else 'true' }}; then
-            sudo install -m 0755 /tmp/wan-watchdog.sh.candidate "$DEST" || exit 1
+            sudo install -m 0755 /tmp/{{ item }}.candidate "$DEST" || exit 1
         fi
     fi
     ROUTER_SCRIPT
+  loop: "{{ edgerouter_scripts }}"
   delegate_to: localhost
   environment:
     SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
-  register: watchdog_result
-  changed_when: "'No changes' not in watchdog_result.stdout"
+  register: script_result
+  changed_when: "'No changes' not in script_result.stdout"
   check_mode: false
 
 - name: Apply config on router

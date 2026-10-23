@@ -662,6 +662,12 @@ system {
         }
     }
     task-scheduler {
+        task flow-observer {
+            executable {
+                path /config/scripts/flow-observer.sh
+            }
+            interval 1m
+        }
         task wan-watchdog {
             executable {
                 path /config/scripts/wan-watchdog.sh

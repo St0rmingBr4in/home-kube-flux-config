@@ -1,0 +1,4 @@
+---
+edgerouter_scripts:
+  - wan-watchdog.sh
+  - flow-observer.sh
