@@ -85,6 +85,9 @@ steps:
         fi
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "1"
         serviceAccountName: woodpecker-ansible
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
@@ -135,6 +138,9 @@ steps:
         fi
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "1"
         serviceAccountName: woodpecker-ansible
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
@@ -179,6 +185,9 @@ steps:
             "https://api.${DD_SITE}/api/v2/ci/pipeline"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "100m"
         serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'

@@ -61,6 +61,9 @@ steps:
         fi
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-tfe
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -75,6 +78,9 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-authentik
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -89,6 +95,9 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-datadog
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -103,6 +112,9 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-digitalocean
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -117,6 +129,9 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-tailscale
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -131,6 +146,9 @@ steps:
     commands: *terraform_commands
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
         serviceAccountName: woodpecker-tf-woodpecker
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
@@ -175,6 +193,9 @@ steps:
             "https://api.${DD_SITE}/api/v2/ci/pipeline"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "100m"
         serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'

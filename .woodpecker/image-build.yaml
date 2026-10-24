@@ -51,6 +51,9 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "2"
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
@@ -93,6 +96,9 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/ci-terraform:latest,docker.io/st0rmingbr4in/ci-terraform:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "2"
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
@@ -122,6 +128,7 @@ steps:
         # The memory-webhook's 512Mi default OOM-kills a full `go build -a`.
         resources:
           requests:
+            cpu: "4"
             memory: 512Mi
           limits:
             memory: 2Gi
@@ -162,6 +169,9 @@ steps:
           --output "type=image,\"name=docker.io/st0rmingbr4in/memory-webhook:latest,docker.io/st0rmingbr4in/memory-webhook:${CI_COMMIT_SHA}\",push=true"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "2"
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
@@ -213,6 +223,9 @@ steps:
         | xargs -I{} echo "Datadog CI API: {}"
     backend_options:
       kubernetes:
+        resources:
+          requests:
+            cpu: "100m"
         serviceAccountName: woodpecker-notify
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'

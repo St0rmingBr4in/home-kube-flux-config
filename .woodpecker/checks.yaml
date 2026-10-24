@@ -30,6 +30,11 @@ steps:
       GOMAXPROCS: "4"
     commands:
       - cd memory-webhook && go test ./...
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "4"
 
   - name: yamllint
     image: python:3-alpine
@@ -42,6 +47,11 @@ steps:
     commands:
       - pip install yamllint -q
       - yamllint -c .yamllint.yml .
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
 
   - name: tflint
     image: ghcr.io/terraform-linters/tflint
@@ -55,3 +65,8 @@ steps:
           echo "==> $dir"
           tflint --chdir="$dir" --minimum-failure-severity=error || exit 1
         done
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "500m"

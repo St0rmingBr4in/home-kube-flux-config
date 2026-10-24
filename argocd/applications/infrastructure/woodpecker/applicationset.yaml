@@ -86,8 +86,6 @@ spec:
                   # synology-csi does not support RWX; steps run sequentially.
                   WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
                   WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2G"
-                  # Steps on server1 (2 vCPU) starved the only CoreDNS replica: CI DNS timeouts.
-                  WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR: '{"kubernetes.io/hostname":"k3s-clusterv2-node1"}'
                   WOODPECKER_LOG_LEVEL: "info"
                   WOODPECKER_CONNECT_RETRY_COUNT: "1"
                 extraSecretNamesForEnvFrom:
