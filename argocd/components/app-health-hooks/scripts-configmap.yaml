@@ -56,11 +56,11 @@ data:
 
     while [ "${ELAPSED}" -lt "${TIMEOUT}" ]; do
       BATCH=$(curl -sf \
-        "${DD_BASE_URL}/api/v2/synthetics/ci/batch/${BATCH_ID}" \
+        "${DD_BASE_URL}/api/v1/synthetics/ci/batch/${BATCH_ID}" \
         -H "DD-API-KEY: ${DD_API_KEY}" \
         -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" 2>/dev/null || true)
 
-      STATUS=$(printf '%s' "${BATCH}" | jq -r '.data.attributes.status // "in_progress"')
+      STATUS=$(printf '%s' "${BATCH}" | jq -r '.data.status // "in_progress"')
       echo "  [${ELAPSED}s] batch status: ${STATUS}"
 
       case "${STATUS}" in
