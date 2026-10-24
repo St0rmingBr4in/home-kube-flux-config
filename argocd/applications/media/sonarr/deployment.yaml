@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: sonarr
     app.kubernetes.io/instance: sonarr
 spec:
-  replicas: 0
+  replicas: 1
   strategy:
     # RWO iSCSI config PVC: never mount it from two pods at once.
     type: Recreate
@@ -117,7 +117,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: sonarr-config
+            claimName: sonarr-data
         - name: media
           persistentVolumeClaim:
             claimName: media-library
