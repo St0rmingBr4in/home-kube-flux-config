@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - pv-cleanuparr.yaml
   - cleanuparr-config-pvc.yaml
+  - cleanuparr-data-pvc.yaml
+  - migrate-config-job.yaml
   - deployment.yaml
   - service.yaml
   - ingressroute.yaml
