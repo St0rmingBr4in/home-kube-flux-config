@@ -24,7 +24,7 @@ when:
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
     backend_options:
       kubernetes:
         resources:
@@ -33,7 +33,7 @@ clone:
 
 steps:
   - name: terraform-tfe
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/tfe/**"
     environment:
@@ -80,7 +80,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
   - name: terraform-authentik
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/authentik/**"
     environment:
@@ -97,7 +97,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
   - name: terraform-datadog
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/datadog/**"
     environment:
@@ -114,7 +114,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
   - name: terraform-digitalocean
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/digitalocean/**"
     environment:
@@ -131,7 +131,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
   - name: terraform-tailscale
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/tailscale/**"
     environment:
@@ -148,7 +148,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/terraform"]'
 
   - name: terraform-woodpecker
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     when:
       - path: "terraform/woodpecker/**"
     environment:

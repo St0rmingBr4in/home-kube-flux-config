@@ -82,7 +82,7 @@ spec:
               mountPath: /config
       containers:
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:5.2.0
+          image: lscr.io/linuxserver/qbittorrent:5.2.0@sha256:eeea9f8a8cdde23555186843d26e8ded1222421f31f98a5cc1b50c2882ebcf4e
           env:
             - name: PUID
               value: "1031"
