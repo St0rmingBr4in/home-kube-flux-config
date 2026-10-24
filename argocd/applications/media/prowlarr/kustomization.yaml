@@ -6,7 +6,6 @@ resources:
   - pv-prowlarr.yaml
   - prowlarr-config-pvc.yaml
   - prowlarr-data-pvc.yaml
-  - migrate-config-job.yaml
   - prowlarr-ingressroute.yaml
   - inlet-socks-egress.yaml
   - prowlarr-api-vault.yaml

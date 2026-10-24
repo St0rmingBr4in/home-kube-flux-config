@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: prowlarr
     app.kubernetes.io/instance: prowlarr
 spec:
-  replicas: 0
+  replicas: 1
   strategy:
     # RWO iSCSI config PVC: never mount it from two pods at once.
     type: Recreate
@@ -112,7 +112,7 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: prowlarr-config
+            claimName: prowlarr-data
         - name: custom-definitions
           secret:
             secretName: prowlarr-custom-definitions
