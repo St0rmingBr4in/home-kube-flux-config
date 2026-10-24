@@ -25,6 +25,8 @@ spec:
         pod.name: main
     spec:
       enableServiceLinks: false
+      # Explicit: server-side apply kept the deleted chart ServiceAccount otherwise.
+      serviceAccountName: default
       automountServiceAccountToken: false
       securityContext:
         runAsUser: 568
