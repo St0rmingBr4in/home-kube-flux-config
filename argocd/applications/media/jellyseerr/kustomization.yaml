@@ -6,4 +6,3 @@ resources:
   - pv-jellyseerr.yaml
   - jellyseerr-config-pvc.yaml
   - jellyseerr-data-pvc.yaml
-  - migrate-config-job.yaml
