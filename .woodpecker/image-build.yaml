@@ -16,6 +16,17 @@ when:
       - "memory-webhook/**"
       - "ansible/requirements.yml"
 
+# Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
+# later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
+clone:
+  - name: clone
+    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "4"
+
 steps:
   - name: build-ci-ansible
     image: moby/buildkit:v0.31.1@sha256:6b59b7df63a8cb9902736f9ddf7fcff8261613d3e7449b8ea8b7537fc399c03a
