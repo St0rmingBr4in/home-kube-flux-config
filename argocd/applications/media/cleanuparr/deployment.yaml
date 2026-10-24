@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: cleanuparr
     app.kubernetes.io/instance: cleanuparr
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: cleanuparr
