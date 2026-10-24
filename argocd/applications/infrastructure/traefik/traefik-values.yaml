@@ -12,11 +12,6 @@ providers:
     enabled: true
     allowExternalNameServices: true
 
-# Use the latest working Traefik version
-image:
-  repository: traefik
-  tag: "v3.4.3@sha256:f3de2b96ec6b1cc987619c4d1d65d7e8140862eb0bbfc5f0e2e563691e8787d8"
-
 deployment:
   replicas: 1
   resources:
@@ -28,8 +23,9 @@ deployment:
       memory: 256Mi
 
 service:
-  type: LoadBalancer
-  loadBalancerClass: tailscale
+  spec:
+    type: LoadBalancer
+    loadBalancerClass: tailscale
   annotations:
     tailscale.com/hostname: "traefik"
     tailscale.com/proxy-class: "proxy-resources"
@@ -54,12 +50,12 @@ ports:
     exposedPort: 443
     protocol: TCP
 
-logs:
-  general:
-    level: INFO
-  access:
-    enabled: true
-    format: json
+log:
+  level: INFO
+
+accessLog:
+  enabled: true
+  format: json
 
 metrics:
   prometheus:
