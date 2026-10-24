@@ -5,6 +5,8 @@ resources:
   - deployment.yaml
   - pv-sonarr.yaml
   - sonarr-config-pvc.yaml
+  - sonarr-data-pvc.yaml
+  - migrate-config-job.yaml
   - ingressroute.yaml
   - sonarr-api-vault.yaml
   - cronjob-missing-search.yaml
