@@ -46,7 +46,7 @@ steps:
           > /tmp/docker-config/config.json
         buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
-          --local context=ci/images/ci-ansible \
+          --local context=. \
           --local dockerfile=ci/images/ci-ansible \
           --output "type=image,\"name=docker.io/st0rmingbr4in/ci-ansible:latest,docker.io/st0rmingbr4in/ci-ansible:${CI_COMMIT_SHA}\",push=true"
     backend_options:

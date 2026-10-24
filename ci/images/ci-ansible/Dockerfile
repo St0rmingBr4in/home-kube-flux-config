@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.14-slim
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
       git openssh-client curl jq \
     && rm -rf /var/lib/apt/lists/*
