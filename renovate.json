@@ -5,40 +5,94 @@
   "minimumReleaseAge": "30 days",
   "packageRules": [
     {
+      "description": "Patches (and digest refreshes of the same tag) ship at once; minors and majors wait 30 days",
+      "matchUpdateTypes": [
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Auto-merge minor and patch updates when CI passes",
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
       "automerge": true
     },
     {
       "description": "k3s minors can remove Kubernetes APIs: review them, only automerge patches",
-      "matchPackageNames": ["k3s-io/k3s"],
-      "matchUpdateTypes": ["minor"],
+      "matchPackageNames": [
+        "k3s-io/k3s"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
       "automerge": false
     },
     {
       "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",
-      "matchPackageNames": ["go", "golang"],
+      "matchPackageNames": [
+        "go",
+        "golang"
+      ],
       "groupName": "go toolchain"
     },
     {
-      "description": "Group Vault image updates across workflow templates (vault-login in common.yaml and docker-creds in docker-build.yaml)",
-      "matchPackageNames": ["hashicorp/vault"],
-      "groupName": "hashicorp vault image"
+      "description": "Operator chart and the qbittorrent sidecar must stay on the same Tailscale release",
+      "matchPackageNames": [
+        "tailscale-operator",
+        "tailscale/tailscale"
+      ],
+      "groupName": "tailscale"
     },
     {
       "description": "Group alpine image updates across app-health-hook jobs",
-      "matchPackageNames": ["alpine"],
+      "matchPackageNames": [
+        "alpine"
+      ],
       "groupName": "alpine image"
+    },
+    {
+      "description": "A Postgres major changes the on-disk format: the new image cannot start on the old data",
+      "matchPackageNames": [
+        "postgres"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "prBodyNotes": [
+        "⚠️ Dump the database before merging and restore it into the new major: the data directory is not compatible."
+      ]
     }
   ],
   "argocd": {
-    "managerFilePatterns": ["/\\.yaml$/"]
+    "managerFilePatterns": [
+      "/\\.yaml$/"
+    ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^argocd\\/.+\\.yaml$/"
+    ]
+  },
+  "helm-values": {
+    "managerFilePatterns": [
+      "/-values\\.ya?ml$/"
+    ]
   },
   "customManagers": [
     {
       "customType": "regex",
       "description": "Update k3s version in Ansible vars",
-      "managerFilePatterns": ["/^ansible/inventory/group_vars/k3s_cluster/vars\\.yaml$/"],
+      "managerFilePatterns": [
+        "/^ansible/inventory/group_vars/k3s_cluster/vars\\.yaml$/"
+      ],
       "matchStrings": [
         "k3s_release_version: \"(?<currentValue>[^\"]+)\""
       ],
@@ -48,23 +102,14 @@
     },
     {
       "customType": "regex",
-      "description": "Update Helm chart versions in ArgoCD ApplicationSet list generators (HTTPS registries)",
-      "managerFilePatterns": ["/^argocd\\/applications\\/.+\\/applicationset\\.yaml$/"],
+      "description": "Update Helm chart versions in ArgoCD ApplicationSet list generators",
+      "managerFilePatterns": [
+        "/^argocd\\/applications\\/.+\\/applicationset\\.yaml$/"
+      ],
       "matchStrings": [
         "- name: [^\\n]+\\n\\s+chart: (?<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?<currentValue>[^\\s\\n]+)[\\s\\S]*?repoURL: (?<registryUrl>https?://[^\\s\\n]+)"
       ],
       "datasourceTemplate": "helm"
-    },
-    {
-      "customType": "regex",
-      "description": "Update TrueCharts OCI Helm chart versions in media ApplicationSets",
-      "managerFilePatterns": ["/^argocd\\/applications\\/media\\/.+\\/applicationset\\.yaml$/"],
-      "matchStrings": [
-        "- name: [^\\n]+\\n\\s+chart: (?<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?<currentValue>[^\\s\\n]+)"
-      ],
-      "datasourceTemplate": "docker",
-      "packageNameTemplate": "truecharts/{{depName}}",
-      "registryUrlTemplate": "https://oci.trueforge.org"
     }
   ]
 }

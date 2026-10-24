@@ -2,21 +2,22 @@
 roles:
   - name: xanmanning.k3s
     src: xanmanning.k3s
-  # Official Tailscale Ansible role — handles binary install, apt repo, service
+    version: v3.6.2
+  # Official Tailscale Ansible role: binary install, apt repo, service
   # management, and tailscale up idempotently. Used by the inlet role.
   - name: artis3n.tailscale
     src: artis3n.tailscale
-    version: ">=8.0.0"
+    version: v5.0.1
 
 collections:
   - name: community.general
-    version: ">=7.0.0"
+    version: 13.4.0
   - name: ansible.posix
-    version: ">=1.5.0"
+    version: 2.2.2
   - name: ansible.netcommon
-    version: ">=5.0.0"
+    version: 8.7.1
   - name: vyos.vyos
-    version: ">=4.0.0"
+    version: 6.0.0
   # RouterOS management for the crs310 role (CRS310-8G+2S+ "switch 2.5").
   - name: community.routeros
-    version: ">=3.0.0"
+    version: 3.22.0

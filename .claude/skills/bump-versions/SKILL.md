@@ -14,9 +14,12 @@ description: >
 
 ## Version policy
 
-- **Every update waits 30 days** after its release (`minimumReleaseAge: "30 days"` in
-  `renovate.json`; the `renovate/stability-days` check enforces it). Never pick a version
-  younger than that, even by hand.
+- **Majors and minors wait 30 days** after their release (`minimumReleaseAge: "30 days"`
+  in `renovate.json`; the `renovate/stability-days` check enforces it). Never pick a
+  major or minor younger than that, even by hand.
+- **Patches ship at once**: always run the latest patch of the chosen minor.
+- **Renovate owns every version.** Pin exact versions (no `latest`, no `>=` ranges) in a
+  place a Renovate manager scans, so nothing is bumped by hand only.
 - **Patches and minors automerge** once CI is green.
 - **Majors are reviewed PRs**: read the release notes, check breaking changes, then merge
   by hand.
@@ -35,6 +38,8 @@ wait plus reviewed majors is the rule.
 | Chart values (image overrides) | `argocd/applications/**/*-values.yaml` | `image.tag` and similar |
 | k3s | `ansible/inventory/group_vars/k3s_cluster/vars.yaml` | `k3s_release_version` |
 | Terraform providers | `terraform/<module>/main.tf` + `.terraform.lock.hcl` | `required_providers` |
+| Plain manifest images | `argocd/**/*.yaml` | `image:` |
+| Ansible Galaxy roles and collections | `ansible/requirements.yml` | `version` |
 | CI images | `.woodpecker/*.yaml` | `image:` |
 
 Renovate manages all of these through `renovate.json` (custom regex managers for the

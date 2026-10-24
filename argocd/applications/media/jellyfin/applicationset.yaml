@@ -29,9 +29,6 @@ spec:
           targetRevision: "{{chartVersion}}"
           helm:
             values: |
-              image:
-                # Pinned explicitly for reproducibility; matches chart 3.2.0 appVersion.
-                tag: "10.11.8"
               # RWO iSCSI config PVC — the new pod must not start until the old one
               # releases the volume, otherwise it deadlocks on a multi-attach error.
               deploymentStrategy:
