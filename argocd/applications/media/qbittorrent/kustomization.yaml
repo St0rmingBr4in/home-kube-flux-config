@@ -5,7 +5,6 @@ resources:
   - pv-qbittorrent.yaml
   - qbittorrent-config-pvc.yaml
   - qbittorrent-data-pvc.yaml
-  - migrate-config-job.yaml
   - tailscale-authkey-vault.yaml
   - tailscale-state-rbac.yaml
   - ingressroute.yaml
