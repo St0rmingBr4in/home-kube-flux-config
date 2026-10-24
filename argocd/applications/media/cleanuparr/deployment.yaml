@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: cleanuparr
     app.kubernetes.io/instance: cleanuparr
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: cleanuparr
@@ -67,4 +67,4 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: cleanuparr-config
+            claimName: cleanuparr-data
