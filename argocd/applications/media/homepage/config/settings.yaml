@@ -1,0 +1,14 @@
+title: St0rmingBr4in Home
+headerStyle: boxed
+statusStyle: dot
+theme: dark
+color: slate
+layout:
+  Media Services:
+    style: row
+    columns: 4
+  Infrastructure:
+    style: row
+    columns: 3
+hideVersion: true
+

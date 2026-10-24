@@ -2,4 +2,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - deployment.yaml
   - ingressroute.yaml
+# Hashed name rolls the pod when the config changes.
+configMapGenerator:
+  - name: homepage-config
+    namespace: prod-media
+    files:
+      - config/settings.yaml
+      - config/services.yaml
+      - config/widgets.yaml
+      - config/bookmarks.yaml

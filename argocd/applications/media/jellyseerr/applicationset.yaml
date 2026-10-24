@@ -9,8 +9,6 @@ spec:
     - list:
         elements:
           - name: jellyseerr
-            chart: jellyseerr
-            chartVersion: 14.0.1
             namespace: prod-media
             manifestPath: argocd/applications/media/jellyseerr
 
@@ -23,66 +21,10 @@ spec:
     spec:
       project: default
 
-      sources:
-        - repoURL: oci.trueforge.org/truecharts
-          chart: "{{chart}}"
-          targetRevision: "{{chartVersion}}"
-          helm:
-            values: |
-              operator:
-                verify:
-                  enabled: false
-                traefik:
-                  namespace: prod-infra
-              ingress:
-                main:
-                  integrations:
-                    traefik:
-                      enableFixedMiddlewares: false
-                      middlewares:
-                  enabled: true
-                  hosts:
-                    - host: jellyseerr.st0rmingbr4in.com
-                      paths:
-                        - path: /
-              resources:
-                limits:
-                  memory: 500Mi
-                requests:
-                  cpu: 500m
-                  memory: 500Mi
-              workload:
-                main:
-                  podSpec:
-                    containers:
-                      main:
-                        probes:
-                          liveness:
-                            enabled: true
-                            type: exec
-                            command:
-                              - sh
-                              - -c
-                              - touch /app/config/.liveness
-                            spec:
-                              initialDelaySeconds: 12
-                              periodSeconds: 15
-                              failureThreshold: 5
-                              timeoutSeconds: 5
-                          readiness:
-                            enabled: true
-                            type: http
-                            path: /
-                            spec:
-                              initialDelaySeconds: 15
-                              periodSeconds: 10
-              persistence:
-                config:
-                  enabled: true
-                  existingClaim: jellyseerr-config
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc

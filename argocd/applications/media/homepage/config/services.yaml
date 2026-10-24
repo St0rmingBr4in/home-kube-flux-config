@@ -1,0 +1,50 @@
+- Media Services:
+  - Jellyfin:
+      icon: jellyfin.png
+      href: https://jellyfin.st0rmingbr4in.com
+      description: Media Server
+      siteMonitor: https://jellyfin.st0rmingbr4in.com
+
+  - Jellyseerr:
+      icon: jellyseerr.png
+      href: https://jellyseerr.st0rmingbr4in.com
+      description: Media Requests
+      siteMonitor: https://jellyseerr.st0rmingbr4in.com
+
+  - Sonarr:
+      icon: sonarr.png
+      href: https://sonarr.st0rmingbr4in.com
+      description: TV Shows Manager
+      siteMonitor: https://sonarr.st0rmingbr4in.com
+
+  - Radarr:
+      icon: radarr.png
+      href: https://radarr.st0rmingbr4in.com
+      description: Movies Manager
+      siteMonitor: https://radarr.st0rmingbr4in.com
+
+  - Bazarr:
+      icon: bazarr.png
+      href: https://bazarr.st0rmingbr4in.com
+      description: Subtitles Manager
+      siteMonitor: https://bazarr.st0rmingbr4in.com
+
+  - Prowlarr:
+      icon: prowlarr.png
+      href: https://prowlarr.st0rmingbr4in.com
+      description: Indexer Manager
+      siteMonitor: https://prowlarr.st0rmingbr4in.com
+
+  - qBittorrent:
+      icon: qbittorrent.png
+      href: https://qbittorrent.st0rmingbr4in.com
+      description: Download Client
+      siteMonitor: https://qbittorrent.st0rmingbr4in.com
+
+- Infrastructure:
+  - Vault:
+      icon: vault.png
+      href: https://vault.st0rmingbr4in.com
+      description: Secrets Management
+      siteMonitor: https://vault.st0rmingbr4in.com
+

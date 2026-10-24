@@ -9,8 +9,6 @@ spec:
     - list:
         elements:
           - name: sonarr
-            chart: sonarr
-            chartVersion: 26.0.1
             namespace: prod-media
             manifestPath: argocd/applications/media/sonarr
 
@@ -23,78 +21,10 @@ spec:
     spec:
       project: default
 
-      sources:
-        - repoURL: oci.trueforge.org/truecharts
-          chart: "{{chart}}"
-          targetRevision: "{{chartVersion}}"
-          helm:
-            values: |
-              operator:
-                verify:
-                  enabled: false
-                traefik:
-                  namespace: prod-infra
-              ingress:
-                main:
-                  enabled: false
-              resources:
-                limits:
-                  cpu: "4"
-                  memory: 2Gi
-                requests:
-                  cpu: 100m
-                  memory: 2Gi
-              securityContext:
-                runAsUser: 1031
-                runAsGroup: 100
-              workload:
-                main:
-                  podSpec:
-                    containers:
-                      # exportarr otherwise inherits the app's top-level resources.
-                      exportarr:
-                        resources:
-                          requests:
-                            cpu: 10m
-                            memory: 32Mi
-                          limits:
-                            memory: 64Mi
-                      main:
-                        env:
-                          DOTNET_DbgEnableMiniDump: "0"
-                        probes:
-                          liveness:
-                            enabled: true
-                            type: http
-                            path: /ping
-                            spec:
-                              initialDelaySeconds: 12
-                              periodSeconds: 15
-                              failureThreshold: 5
-                              timeoutSeconds: 5
-                          readiness:
-                            enabled: true
-                            type: http
-                            path: /
-                            spec:
-                              initialDelaySeconds: 15
-                              periodSeconds: 10
-              persistence:
-                config:
-                  enabled: true
-                  existingClaim: sonarr-config
-                media:
-                  enabled: true
-                  existingClaim: media-library
-                  subPath: Series
-                  mountPath: /tv
-                downloads:
-                  enabled: true
-                  existingClaim: media-downloads
-                  mountPath: /downloads
-        - repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
-          targetRevision: HEAD
-          path: "{{manifestPath}}"
+      source:
+        repoURL: https://github.com/St0rmingBr4in/home-kube-flux-config
+        targetRevision: HEAD
+        path: "{{manifestPath}}"
 
       destination:
         server: https://kubernetes.default.svc

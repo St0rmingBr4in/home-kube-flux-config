@@ -1,0 +1,137 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/instance: prowlarr
+spec:
+  replicas: 1
+  strategy:
+    # RWO iSCSI config PVC: never mount it from two pods at once.
+    type: Recreate
+  selector:
+    # Same selector the TrueCharts chart created (selectors are immutable).
+    matchLabels:
+      app.kubernetes.io/name: prowlarr
+      app.kubernetes.io/instance: prowlarr
+      pod.name: main
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prowlarr
+        app.kubernetes.io/instance: prowlarr
+        pod.name: main
+      annotations:
+        ad.datadoghq.com/exportarr.checks: '{"openmetrics":{"instances":[{"openmetrics_endpoint":"http://%%host%%:9697/metrics","namespace":"prowlarr","metrics":[".*"]}]}}'
+    spec:
+      enableServiceLinks: false
+      # uid/gid 568 owns the existing config and media files (TrueCharts default).
+      securityContext:
+        runAsUser: 568
+        runAsGroup: 568
+        runAsNonRoot: true
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prowlarr
+          image: oci.trueforge.org/containerforge/prowlarr:2.6.3.5592@sha256:2612075ccc68e61e4d2ef0f302325c1a0da1d15705ccad0f98741ed3f2494db2
+          env:
+            - name: TZ
+              value: UTC
+            - name: UMASK
+              value: "0022"
+            - name: PROWLARR__AUTH__REQUIRED
+              value: DisabledForLocalAddresses
+            - name: PROWLARR__SERVER__PORT
+              value: "9696"
+          ports:
+            - name: http
+              containerPort: 9696
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: custom-definitions
+              mountPath: /config/Definitions/Custom
+              readOnly: true
+          # iSCSI stale-mount canary: fails if /config goes read-only.
+          livenessProbe:
+            exec:
+              command: [sh, -c, touch /config/.liveness]
+            initialDelaySeconds: 12
+            periodSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9696
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 512Mi
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.3.0@sha256:af535d94061cf97a52e1661945ffba78c03f9443eae7c0da1a80a5a4be56b520
+          args: [prowlarr]
+          env:
+            - name: CONFIG
+              value: /config/config.xml
+            - name: URL
+              value: http://localhost:9696
+            - name: PORT
+              value: "9697"
+          ports:
+            - name: metrics
+              containerPort: 9697
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
+        - name: custom-definitions
+          secret:
+            secretName: prowlarr-custom-definitions
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr
+  namespace: prod-media
+  labels:
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/instance: prowlarr
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prowlarr
+    app.kubernetes.io/instance: prowlarr
+    pod.name: main
+  ports:
+    - name: main
+      port: 9696
+      targetPort: 9696
