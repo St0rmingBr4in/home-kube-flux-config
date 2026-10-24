@@ -4,7 +4,7 @@
 #
 # Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # Vault secret layout (kv-v2):
-#   secret/ci/ansible   → vault_password, inlet_ssh_private_key, k3s_ssh_private_key
+#   secret/ci/ansible   → vault_password, ssh_private_key (dedicated CI key, authorised for root on inlet + k3s nodes)
 #   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only)
 #   secret/ci/datadog   → TF_VAR_datadog_api_key (inlet only)
 #   secret/inlet/socks  → password (inlet only — danted PAM auth)
@@ -47,8 +47,8 @@ steps:
         mkdir -p /root/.ssh && chmod 700 /root/.ssh
         curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
-          | jq -r '.data.data.inlet_ssh_private_key' > /root/.ssh/inlet_id_ed25519
-        chmod 600 /root/.ssh/inlet_id_ed25519
+          | jq -r '.data.data.ssh_private_key' > /root/.ssh/id_ed25519
+        chmod 600 /root/.ssh/id_ed25519
 
         export TAILSCALE_AUTHKEY=$(curl -sk \
           -H "X-Vault-Token: $VAULT_TOKEN" \
@@ -119,8 +119,8 @@ steps:
         mkdir -p /root/.ssh && chmod 700 /root/.ssh
         curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
-          | jq -r '.data.data.k3s_ssh_private_key' > /root/.ssh/k3s_id_ed25519
-        chmod 600 /root/.ssh/k3s_id_ed25519
+          | jq -r '.data.data.ssh_private_key' > /root/.ssh/id_ed25519
+        chmod 600 /root/.ssh/id_ed25519
 
         # See ansible-inlet step for why this chmod is required.
         chmod -R go-w .
@@ -130,7 +130,8 @@ steps:
         # Run the playbook only on master push (post-merge). PR runs stop at
         # lint — see ansible-inlet step for rationale.
         if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
-          ansible-playbook playbooks/k3s.yaml
+          # Pods reach the nodes directly; drop the workstation ProxyJump via the router.
+          ansible-playbook playbooks/k3s.yaml -e ansible_ssh_common_args=
         fi
     backend_options:
       kubernetes:
