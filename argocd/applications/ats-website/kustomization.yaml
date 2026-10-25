@@ -7,7 +7,6 @@ resources:
   - postgres-pv.yaml
   - postgres-pvc.yaml
   - postgres-data-pvc.yaml
-  - migrate-postgres-job.yaml
   - postgres-statefulset.yaml
   - backend-deployment.yaml
   - backend-service.yaml

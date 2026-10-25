@@ -6,7 +6,7 @@ metadata:
   namespace: prod-ats
 spec:
   serviceName: ats-postgres
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ats-postgres
@@ -55,7 +55,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: ats-postgres
+            claimName: ats-postgres-data
 ---
 apiVersion: v1
 kind: Service
