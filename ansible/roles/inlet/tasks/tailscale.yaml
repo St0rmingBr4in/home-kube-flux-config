@@ -5,16 +5,14 @@
 #
 # Pass tailscale_authkey at runtime (-e tailscale_authkey=<oauth-secret>) only
 # when registering a new device or re-authenticating an expired node.
-# The role omits --authkey gracefully when the variable is undefined.
 
 - name: Install and configure Tailscale via artis3n.tailscale role
   ansible.builtin.include_role:
     name: artis3n.tailscale
   vars:
-    tailscale_authkey: "{{ tailscale_authkey | default(omit) }}"
     tailscale_args: "{{ tailscale_extra_args }}"
-    # tailscale_up_skip: skip `tailscale up` if the node is already Running
-    # (the role handles this automatically via its own state checks)
+    # artis3n v5 demands a key for `tailscale up`; without one the node is already registered.
+    tailscale_up_skip: "{{ (tailscale_authkey | default('')) | length == 0 }}"
 
 # ── Post-connection assertions ────────────────────────────────────────────────
 # These verify inlet-specific invariants that the community role does not check.
