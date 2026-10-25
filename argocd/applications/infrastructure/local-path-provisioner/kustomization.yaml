@@ -1,0 +1,21 @@
+---
+# Node-local volumes for throwaway data (Woodpecker CI workspaces), so they
+# don't create an iSCSI LUN on the NAS for every pipeline. Deployed here rather
+# than k3s's bundled copy, which is disabled in the inventory.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - github.com/rancher/local-path-provisioner/deploy?ref=v0.0.37
+patches:
+  - target:
+      kind: Deployment
+      name: local-path-provisioner
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/command
+        value: [local-path-provisioner, start, --config, /etc/config/config.json]
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {memory: 64Mi}

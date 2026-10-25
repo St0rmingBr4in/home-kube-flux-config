@@ -26,3 +26,4 @@ resources:
 
   # CI Platform
   - woodpecker/applicationset.yaml
+  - local-path-provisioner/applicationset.yaml
