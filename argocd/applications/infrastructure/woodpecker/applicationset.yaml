@@ -88,6 +88,8 @@ spec:
                   WOODPECKER_CONNECT_RETRY_COUNT: "1"
                 extraSecretNamesForEnvFrom:
                   - woodpecker-secrets
+                # Holds agent.conf (the agent's ID). Synology iSCSI ignores fsGroup and the chart has no
+                # agent initContainers, so the volume root was chowned to 1000 once by hand (2026-10-25).
                 persistence:
                   enabled: true
                   size: 1Gi
