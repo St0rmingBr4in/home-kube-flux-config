@@ -5,4 +5,6 @@ kind: Kustomization
 resources:
   - postgres-pv.yaml
   - postgres-pvc.yaml
+  - postgres-data-pvc.yaml
+  - migrate-postgres-job.yaml
   - secret-vault.yaml
