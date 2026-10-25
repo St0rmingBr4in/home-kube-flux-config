@@ -19,6 +19,9 @@ all:
         # UniFi controller CT on asarim; the router reserves this address (config.boot.j2).
         unifi:
           ansible_host: 192.168.62.32
+          # Controller major upgrades (database migrations) are done by hand.
+          updates_hold:
+            - unifi
     inlet:
       hosts:
         inlet.st0rmingbr4in.com:
