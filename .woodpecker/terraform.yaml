@@ -21,6 +21,10 @@ when:
       - "ci/images/ci-terraform/**"
       - ".woodpecker/terraform.yaml"
 
+# Never plan or deploy a commit that fails the static checks.
+depends_on:
+  - checks
+
 # Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
 clone:
