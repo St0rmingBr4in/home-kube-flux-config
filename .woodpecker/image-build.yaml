@@ -1,6 +1,7 @@
 ---
 # Docker image build and push pipeline using BuildKit.
-# Triggered on master pushes touching CI image source directories.
+# Triggered on master pushes touching CI image source directories, or manually
+# (Woodpecker UI "Run pipeline" / API) to rebuild the CI images on demand.
 # Each step is skipped unless its specific image path changed.
 #
 # BuildKit runs with SYS_ADMIN + Unconfined seccomp (required for overlay mounts).
@@ -15,6 +16,7 @@ when:
       - "ci/images/**"
       - "memory-webhook/**"
       - "ansible/requirements.yml"
+  - event: manual
 
 # Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
@@ -36,6 +38,7 @@ steps:
         path:
           - "ci/images/ci-ansible/**"
           - "ansible/requirements.yml"
+      - event: manual
     environment:
       DOCKER_CONFIG: /tmp/docker-config
     commands:
@@ -81,6 +84,7 @@ steps:
       - event: push
         branch: master
         path: "ci/images/ci-terraform/**"
+      - event: manual
     environment:
       DOCKER_CONFIG: /tmp/docker-config
     commands:
