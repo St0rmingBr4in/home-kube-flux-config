@@ -5,6 +5,7 @@ provider "registry.terraform.io/kichiyaki/woodpecker" {
   version     = "0.5.0"
   constraints = "~> 0.5"
   hashes = [
+    "h1:HN6wksrRI22cRNLhJmtCSaM91UA/hYOI12H4oYntbkc=",
     "h1:QGp0OZpyOu8UCc3ql5dbDgt/+6wnBLOuYEP2TXU8uZ4=",
     "zh:1a617f23f66fead44c20abac32b17aea10403ef10be14ec323df4f7c5409275f",
     "zh:2bba07d632e5de682d53ff63ca4be205e2d792afdbb9e39839130fe1c9a0c7d1",

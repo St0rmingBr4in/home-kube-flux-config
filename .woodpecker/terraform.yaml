@@ -73,7 +73,10 @@ steps:
           "${VAULT_ADDR}/v1/$SECRETS_API_PATH" \
           | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
 
-        make terraform-$MODULE-init
+        # Parallel pipelines (merge queue + master) share TFC workspaces: wait for the lock.
+        export TF_CLI_ARGS_plan=-lock-timeout=10m TF_CLI_ARGS_apply=-lock-timeout=10m
+        # Retry once: provider downloads from releases.hashicorp.com sometimes reset.
+        make terraform-$MODULE-init || { sleep 10; make terraform-$MODULE-init; }
         make terraform-$MODULE-plan
         # Apply only on the master push (post-merge). Pull-request runs are
         # plan-only — they verify changes before the merge is gated.

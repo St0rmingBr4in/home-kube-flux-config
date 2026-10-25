@@ -78,7 +78,8 @@ postgresql:
         cpu: 100m
         memory: 256Mi
       limits:
-        memory: 512Mi
+        # 512Mi got a backend OOM-killed under Terraform's parallel API reads.
+        memory: 1Gi
 
 redis:
   enabled: true
