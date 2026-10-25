@@ -5,11 +5,13 @@ global:
 
 server:
   resources:
+    # At 150Mi the server sat at its limit; the `vault status` readiness probe then spent
+    # seconds in memory reclaim, exceeded its 3s timeout, and Traefik dropped Vault (503).
     requests:
-      memory: 150Mi
+      memory: 256Mi
       cpu: 100m
     limits:
-      memory: 150Mi
+      memory: 256Mi
 
   # Environment variables for TLS
   extraEnvironmentVars:
