@@ -1,0 +1,24 @@
+---
+# Merge queue: a PR labelled `automerge` (Renovate adds it to minor/patch/digest/pin updates)
+# enters the queue once CI is green on its own commit. Mergify then rebases it onto master,
+# waits for CI on that exact commit, and merges with rebase only if it is still green.
+queue_rules:
+  - name: default
+    queue_conditions:
+      - label=automerge
+      - check-success=ci/woodpecker/pr/checks
+      - "#check-failure=0"
+    merge_conditions:
+      - check-success=ci/woodpecker/pr/checks
+      - "#check-failure=0"
+      - "#check-pending=0"
+    update_method: rebase
+    merge_method: rebase
+
+pull_request_rules:
+  - name: Queue PRs labelled automerge
+    conditions:
+      - label=automerge
+    actions:
+      queue:
+        name: default

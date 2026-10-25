@@ -3,6 +3,7 @@
     "config:best-practices"
   ],
   "minimumReleaseAge": "30 days",
+  "rebaseWhen": "conflicted",
   "packageRules": [
     {
       "description": "Patches (and digest refreshes of the same tag) ship at once; minors and majors wait 30 days",
@@ -15,25 +16,28 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "Auto-merge minor and patch updates when CI passes",
+      "description": "Queue patch, digest and pin updates in Mergify's merge queue (.mergify.yml) once CI passes",
       "matchUpdateTypes": [
-        "minor",
         "patch",
         "digest",
         "pin",
         "pinDigest"
       ],
-      "automerge": true
+      "addLabels": [
+        "automerge"
+      ]
     },
     {
-      "description": "k3s minors can remove Kubernetes APIs: review them, only automerge patches",
-      "matchPackageNames": [
-        "k3s-io/k3s"
-      ],
+      "description": "Queue minor updates too, except k3s: its minors can remove Kubernetes APIs, so they are reviewed",
       "matchUpdateTypes": [
         "minor"
       ],
-      "automerge": false
+      "matchPackageNames": [
+        "!k3s-io/k3s"
+      ],
+      "addLabels": [
+        "automerge"
+      ]
     },
     {
       "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",

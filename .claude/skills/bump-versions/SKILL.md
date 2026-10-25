@@ -20,10 +20,12 @@ description: >
 - **Patches ship at once**: always run the latest patch of the chosen minor.
 - **Renovate owns every version.** Pin exact versions (no `latest`, no `>=` ranges) in a
   place a Renovate manager scans, so nothing is bumped by hand only.
-- **Patches and minors automerge** once CI is green.
+- **Patches and minors merge through the Mergify queue** (`.mergify.yml`): Renovate labels them
+  `automerge`; once CI is green Mergify rebases onto `master`, re-runs CI and merges only if
+  green. Label any other PR `automerge` to queue it the same way.
 - **Majors are reviewed PRs**: read the release notes, check breaking changes, then merge
   by hand.
-- **k3s: patches automerge, minors are reviewed.** A Kubernetes minor can remove APIs, and
+- **k3s: patches are queued, minors are reviewed.** A Kubernetes minor can remove APIs, and
   add-ons (Traefik, cert-manager, operators) declare which Kubernetes versions they support.
   Merging k3s minors by hand keeps the cluster around n-1.
 
