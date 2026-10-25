@@ -1,4 +1,4 @@
-# Manages HCP Terraform workspaces for the St0rmingBr4in homelab.
+# Manages HCP Terraform workspaces for the St0rmingBr4in homelab. (CI e2e test, never merged)
 #
 # Import commands (run once):
 #   terraform import tfe_workspace.tfe                    St0rmingBr4in/tfe
