@@ -301,9 +301,11 @@ ansible-inlet: ## Run inlet playbook (check+diff on PRs or CHECK_MODE=true)
 ansible-inlet-check: ## Run inlet playbook in check/diff mode (local dev)
 	CHECK_MODE=true $(MAKE) ansible-inlet
 
+# Under --check, xanmanning.k3s swaps in a dummy token, which always diffs and "restarts" k3s.
 ansible-k3s: ## Run k3s playbook (check+diff on PRs or CHECK_MODE=true)
 	@if [ "$${CHECK_MODE:-}" = "true" ] || [ "$${GITHUB_EVENT_NAME:-}" = "pull_request" ]; then \
-		cd ansible && ansible-playbook playbooks/k3s.yaml --check --diff $(ANSIBLE_FLAGS); \
+		cd ansible && ansible-playbook playbooks/k3s.yaml --check --diff \
+			-e 'k3s_control_token_content={{ vault_k3s_token }}' $(ANSIBLE_FLAGS); \
 	else \
 		cd ansible && ansible-playbook playbooks/k3s.yaml $(ANSIBLE_FLAGS); \
 	fi
