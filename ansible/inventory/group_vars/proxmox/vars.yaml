@@ -1,0 +1,3 @@
+---
+ansible_user: root
+updates_weekly_full: false

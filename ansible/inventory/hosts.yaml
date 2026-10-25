@@ -10,6 +10,15 @@ all:
     crs310:
       hosts:
         sw-crs310:
+    proxmox:
+      hosts:
+        asarim.hard.st0rmingbr4in.com:
+        pve-5.hard.st0rmingbr4in.com:
+    proxmox_guests:
+      hosts:
+        # UniFi controller CT on asarim; the router reserves this address (config.boot.j2).
+        unifi:
+          ansible_host: 192.168.62.32
     inlet:
       hosts:
         inlet.st0rmingbr4in.com:

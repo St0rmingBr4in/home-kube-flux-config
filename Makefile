@@ -11,7 +11,7 @@
         terraform-tailscale-init terraform-tailscale-plan terraform-tailscale-apply \
         terraform-vault-init terraform-vault-plan terraform-vault-apply \
         terraform-woodpecker-init terraform-woodpecker-plan terraform-woodpecker-apply \
-        ansible-install-inlet ansible-install-k3s \
+        ansible-install-inlet ansible-install-k3s ansible-updates ansible-updates-check \
         ansible-setup-ssh-inlet ansible-setup-ssh-k3s \
         ansible-install-edgerouter \
         ansible-setup-ssh-edgerouter \
@@ -310,6 +310,16 @@ ansible-k3s: ## Run k3s playbook (check+diff on PRs or CHECK_MODE=true)
 
 ansible-k3s-check: ## Run k3s playbook in check/diff mode (local dev)
 	CHECK_MODE=true $(MAKE) ansible-k3s
+
+ansible-updates: ## Configure automatic updates on every Debian and Ubuntu host (CHECK_MODE=true for --check/diff)
+	@if [ "$${CHECK_MODE:-}" = "true" ]; then \
+		cd ansible && ansible-playbook playbooks/updates.yaml --check --diff $(ANSIBLE_FLAGS); \
+	else \
+		cd ansible && ansible-playbook playbooks/updates.yaml $(ANSIBLE_FLAGS); \
+	fi
+
+ansible-updates-check: ## Run updates playbook in check/diff mode (local dev)
+	CHECK_MODE=true $(MAKE) ansible-updates
 
 # ── Memory Webhook ────────────────────────────────────────────────────────────
 

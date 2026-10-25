@@ -1,0 +1,57 @@
+---
+- name: Install unattended-upgrades
+  ansible.builtin.apt:
+    name: unattended-upgrades
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Run security updates daily
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+
+# Debian's stock origins also include the regular stable archive; the daily run is security only.
+- name: Limit the daily run to security updates and never reboot
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/52unattended-upgrades-homelab
+    mode: "0644"
+    content: |
+      #clear Unattended-Upgrade::Origins-Pattern;
+      Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+      };
+      Unattended-Upgrade::Automatic-Reboot "false";
+
+- name: Hold packages that must be upgraded by hand
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop: "{{ updates_hold }}"
+
+- name: Install the weekly full upgrade units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: "0644"
+  loop:
+    - homelab-weekly-upgrade.service
+    - homelab-weekly-upgrade.timer
+  when: updates_weekly_full
+  notify: Reload systemd
+
+- name: Flush handlers so systemd knows the units
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable the weekly full upgrade timer
+  ansible.builtin.systemd_service:
+    name: homelab-weekly-upgrade.timer
+    enabled: true
+    state: started
+  when: updates_weekly_full
+  # In check mode the unit file was never written, so systemd can't find it yet.
+  ignore_errors: "{{ ansible_check_mode }}"

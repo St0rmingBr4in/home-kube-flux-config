@@ -1,0 +1,7 @@
+---
+# Weekly full upgrade (Debian stable updates). Proxmox hosts set this false: Proxmox upgrades
+# need an interactive `apt dist-upgrade`, so they only get the daily security updates.
+updates_weekly_full: true
+updates_weekly_calendar: "Mon *-*-* 12:00:00 Europe/Paris"
+# Packages never upgraded automatically (held with dpkg).
+updates_hold: []

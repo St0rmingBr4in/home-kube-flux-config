@@ -1,0 +1,6 @@
+---
+- name: Configure automatic updates on every Debian and Ubuntu host
+  hosts: proxmox:proxmox_guests:k3s_cluster:inlet
+  become: false
+  roles:
+    - role: updates

@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: St0rmingBr4in
+  description: Daily security updates and an optional weekly full upgrade, never rebooting
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - all
+dependencies: []

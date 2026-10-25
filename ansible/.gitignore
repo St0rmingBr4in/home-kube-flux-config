@@ -3,3 +3,4 @@ roles/*
 !roles/edgerouter/
 !roles/rb260gsp/
 !roles/crs310/
+!roles/updates/

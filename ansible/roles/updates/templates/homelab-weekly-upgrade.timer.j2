@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly full apt upgrade
+
+[Timer]
+OnCalendar={{ updates_weekly_calendar }}
+# Catch up after downtime, and spread hosts out a little.
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

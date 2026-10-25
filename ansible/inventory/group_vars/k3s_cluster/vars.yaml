@@ -41,3 +41,6 @@ k3s_registries:
     "registry.vms.st0rmingbr4in.com:5000":
       tls:
         insecure_skip_verify: true
+# An open-iscsi upgrade restarts iscsid and drops every iSCSI session to the NAS: upgrade it by hand.
+updates_hold:
+  - open-iscsi

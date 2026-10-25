@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly full apt upgrade (held packages excluded, never reboots)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=DEBIAN_FRONTEND=noninteractive
+ExecStart=/usr/bin/apt-get -q update
+# `upgrade` (not dist-upgrade) never removes packages; keep local config files on conflicts.
+ExecStart=/usr/bin/apt-get -q -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold upgrade
