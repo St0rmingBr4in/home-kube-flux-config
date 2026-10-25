@@ -29,7 +29,6 @@ spec:
           targetRevision: "{{chartVersion}}"
           helm:
             values: |
-              replicaCount: 0
               # RWO iSCSI config PVC — the new pod must not start until the old one
               # releases the volume, otherwise it deadlocks on a multi-attach error.
               deploymentStrategy:
