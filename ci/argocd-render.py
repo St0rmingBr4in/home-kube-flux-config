@@ -3,8 +3,10 @@
 
 Usage: argocd-render.py <repo-root> <out-dir>
 Secret values are redacted so chart-generated passwords never reach CI logs.
+Charts are pulled once into $CHART_CACHE (default: a temp dir) and rendered from there.
 """
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -35,15 +37,26 @@ def run(cmd):
     return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
 
 
-def render(root, app, kube_version):
+def chart(s, cache):
+    # Chart versions are immutable, so a cached download stays valid.
+    d = cache / re.sub(r"\W", "_", s["repoURL"]) / s["chart"] / s["targetRevision"]
+    found = list(d.glob("*.tgz"))
+    if not found:
+        d.mkdir(parents=True, exist_ok=True)
+        run(["helm", "pull", s["chart"], "--repo", s["repoURL"], "--version", s["targetRevision"], "-d", str(d)])
+        found = list(d.glob("*.tgz"))
+    return str(found[0])
+
+
+def render(root, app, kube_version, cache):
     spec = app["spec"]
     sources = spec.get("sources") or [spec["source"]]
     refs = {s["ref"]: root for s in sources if "ref" in s}
     out = []
     for s in sources:
         if "chart" in s:
-            cmd = ["helm", "template", app["metadata"]["name"], s["chart"], "--repo", s["repoURL"],
-                   "--version", s["targetRevision"], "--namespace", spec["destination"]["namespace"],
+            cmd = ["helm", "template", app["metadata"]["name"], chart(s, cache),
+                   "--namespace", spec["destination"]["namespace"],
                    "--kube-version", kube_version, "--include-crds"]
             helm = s.get("helm", {})
             for vf in helm.get("valueFiles", []):
@@ -74,11 +87,12 @@ def main(root, out):
     out.mkdir(parents=True, exist_ok=True)
     k3s = yaml.safe_load((root / "ansible/inventory/group_vars/k3s_cluster/vars.yaml").read_text())
     kube_version = re.match(r"v?(\d+\.\d+\.\d+)", k3s["k3s_release_version"]).group(1)
+    cache = pathlib.Path(os.environ.get("CHART_CACHE") or tempfile.mkdtemp())
 
     def one(app):
         name = app["metadata"]["name"]
         try:
-            (out / f"{name}.yaml").write_text(redact(render(root, app, kube_version)))
+            (out / f"{name}.yaml").write_text(redact(render(root, app, kube_version, cache)))
             return None
         except subprocess.CalledProcessError as e:
             return f"{name}: {' '.join(e.cmd[:3])} failed\n{e.stderr}"

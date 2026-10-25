@@ -1,0 +1,16 @@
+---
+# Download/build caches for the checks pipeline (Go, Helm charts, Terraform providers), each
+# subdir wiped hourly by ci/cache-ttl.sh. local-path pins it to node1, where checks always
+# runs: its clone requests more CPU than server1 has.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: woodpecker-ci-cache
+  namespace: woodpecker
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path

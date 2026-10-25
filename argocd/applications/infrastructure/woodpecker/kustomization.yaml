@@ -5,5 +5,5 @@ resources:
   - ingressroute.yaml
   - woodpecker-secrets-vault.yaml
   - pipeline-rbac.yaml
-  - go-cache-pvc.yaml
+  - ci-cache-pvc.yaml
   - priorityclass.yaml

@@ -3,7 +3,7 @@ resource "woodpecker_repository" "home_kube_flux_config" {
 
   # Pipeline config is auto-discovered from .woodpecker/*.yaml — no override needed.
 
-  # The checks pipeline mounts the woodpecker-go-cache PVC.
+  # The checks pipeline mounts the woodpecker-ci-cache PVC.
   trusted = {
     volumes = true
   }

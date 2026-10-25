@@ -32,17 +32,12 @@ steps:
       # Limit parallelism to avoid OOM when compiling k8s.io dependencies on
       # a high-CPU node (default GOMAXPROCS equals the node's CPU count).
       GOMAXPROCS: "4"
-      GOMODCACHE: /go-cache/mod
-      GOCACHE: /go-cache/build
+      GOMODCACHE: /cache/go/mod
+      GOCACHE: /cache/go/build
     volumes:
-      - woodpecker-go-cache:/go-cache
+      - woodpecker-ci-cache:/cache
     commands:
-      # 1h TTL: start the cache over once it's older than an hour.
-      - |
-        if [ -z "$$(find /go-cache/.created -mmin -60 2>/dev/null)" ]; then
-          rm -rf /go-cache/mod /go-cache/build
-          touch /go-cache/.created
-        fi
+      - sh ci/cache-ttl.sh /cache/go
       - cd memory-webhook && go test ./...
     backend_options:
       kubernetes:
@@ -89,7 +84,12 @@ steps:
   - name: terraform-validate
     depends_on: []
     image: docker.io/st0rmingbr4in/ci-terraform:latest
+    environment:
+      TF_PLUGIN_CACHE_DIR: /cache/terraform
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/cache-ttl.sh /cache/terraform
       - |
         for dir in terraform/*/; do
           echo "==> $$dir"
@@ -131,7 +131,12 @@ steps:
   - name: argocd-render
     depends_on: []
     image: alpine/k8s:1.37.1
+    environment:
+      CHART_CACHE: /cache/helm
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/cache-ttl.sh /cache/helm
       - |
         set -e
         python3 ci/argocd-render.py . /tmp/render/head
@@ -146,6 +151,10 @@ steps:
         esac
         git config --global --add safe.directory '*'
         git fetch -q --depth=1 origin "$$BASE"
+        if git diff --quiet FETCH_HEAD HEAD -- argocd ci/argocd-render.py ansible/inventory/group_vars/k3s_cluster/vars.yaml; then
+          echo "No render inputs changed vs $$BASE; skipping render diff."
+          exit 0
+        fi
         mkdir -p /tmp/render/base-src
         git archive FETCH_HEAD | tar -x -C /tmp/render/base-src
         python3 ci/argocd-render.py /tmp/render/base-src /tmp/render/base \
