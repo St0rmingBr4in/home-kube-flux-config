@@ -12,7 +12,7 @@ when:
 # local-path workspace (and Go cache) every step then follows. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
     backend_options:
       kubernetes:
         resources:
@@ -50,7 +50,7 @@ steps:
 
   - name: yamllint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9936b271343da31f431ceb3dce1ea2ed0c46badabaab7f9ec83b2920a4900028
     commands:
       - yamllint -c .yamllint.yml .
     backend_options:
@@ -64,7 +64,7 @@ steps:
 
   - name: tflint
     depends_on: []
-    image: ghcr.io/terraform-linters/tflint
+    image: ghcr.io/terraform-linters/tflint@sha256:2788f4d4fc663c0e953b011b01bf443fe5bfce7587ee916e588e6057b85d6359
     commands:
       # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
       - |
@@ -83,7 +83,7 @@ steps:
 
   - name: terraform-validate
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:6948332413c7f7e114a754df1c23bd9684fc112286406429d2865e2fb99302dd
     environment:
       TF_PLUGIN_CACHE_DIR: /cache/terraform
     volumes:
@@ -107,7 +107,7 @@ steps:
 
   - name: ansible-lint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9936b271343da31f431ceb3dce1ea2ed0c46badabaab7f9ec83b2920a4900028
     environment:
       HOME: /root
       # Ansible rejects an empty vault password at startup; lint never decrypts, so no Vault needed.
@@ -130,7 +130,7 @@ steps:
   # changed, and checks that new images exist. Secret values are redacted by the render script.
   - name: argocd-render
     depends_on: []
-    image: alpine/k8s:1.37.1
+    image: alpine/k8s:1.37.1@sha256:712dc5385d1c1a3f83b747fa9e40f64d433a97f72ff42f9755ff7dd1f62846e4
     environment:
       CHART_CACHE: /cache/helm
       # renovate: datasource=github-releases depName=google/go-containerregistry
