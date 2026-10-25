@@ -50,6 +50,8 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          # Temporary: lets postgres be scaled to 0 by hand while its volume moves to CSI.
+          - RespectIgnoreDifferences=true
 
         retry:
           limit: 5
@@ -63,3 +65,8 @@ spec:
           kind: "Secret"
           jsonPointers:
             - /data
+        - group: apps
+          kind: StatefulSet
+          name: authentik-postgresql
+          jsonPointers:
+            - /spec/replicas
