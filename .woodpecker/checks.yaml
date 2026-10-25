@@ -1,12 +1,14 @@
 ---
-# Static checks pipeline: cheap, side-effect-free checks that run on every push and PR,
+# Static checks pipeline: cheap, side-effect-free checks that run on every master push and PR,
 # with no path filters, so a missed dependency can never skip them.
 # Steps run in parallel with 100m CPU requests: a low CPU weight, so under contention
 # workloads win and CI only soaks up idle CPU (see the woodpecker-ci PriorityClass).
 # Memory: 128Mi requests keep six parallel steps within node1's headroom; peaks were ~450Mi.
 
+# For pull_request, branch is the target: pushes to PR/queue branches would duplicate the PR run.
 when:
   - event: [push, pull_request]
+    branch: master
 
 # Explicit for its CPU request: more than server1 has, so the clone lands on node1, whose
 # local-path workspace (and Go cache) every step then follows. Same image as Woodpecker's default.
