@@ -7,4 +7,7 @@ resource "woodpecker_repository" "home_kube_flux_config" {
   trusted = {
     volumes = true
   }
+
+  # Never cancel master pushes: deploy steps are path-filtered, so a canceled apply is never retried.
+  cancel_previous_pipeline_events = ["pull_request"]
 }

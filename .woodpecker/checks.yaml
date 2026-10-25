@@ -1,12 +1,15 @@
 ---
 # Static checks pipeline: cheap, side-effect-free checks that run on every push and PR,
 # with no path filters, so a missed dependency can never skip them.
+# Steps run in parallel with 100m CPU requests: a low CPU weight, so under contention
+# workloads win and CI only soaks up idle CPU (see the woodpecker-ci PriorityClass).
+# Memory: 128Mi requests keep six parallel steps within node1's headroom; peaks were ~450Mi.
 
 when:
   - event: [push, pull_request]
 
-# Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
-# later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
+# Explicit for its CPU request: more than server1 has, so the clone lands on node1, whose
+# local-path workspace (and Go cache) every step then follows. Same image as Woodpecker's default.
 clone:
   - name: clone
     image: docker.io/woodpeckerci/plugin-git:2.9.1
@@ -18,6 +21,7 @@ clone:
 
 steps:
   - name: go-test
+    depends_on: []
     image: golang:1-alpine
     environment:
       # Single source of truth for the Go version is memory-webhook/go.mod.
@@ -28,15 +32,29 @@ steps:
       # Limit parallelism to avoid OOM when compiling k8s.io dependencies on
       # a high-CPU node (default GOMAXPROCS equals the node's CPU count).
       GOMAXPROCS: "4"
+      GOMODCACHE: /go-cache/mod
+      GOCACHE: /go-cache/build
+    volumes:
+      - woodpecker-go-cache:/go-cache
     commands:
+      # 1h TTL: start the cache over once it's older than an hour.
+      - |
+        if [ -z "$$(find /go-cache/.created -mmin -60 2>/dev/null)" ]; then
+          rm -rf /go-cache/mod /go-cache/build
+          touch /go-cache/.created
+        fi
       - cd memory-webhook && go test ./...
     backend_options:
       kubernetes:
         resources:
           requests:
-            cpu: "4"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
 
   - name: yamllint
+    depends_on: []
     image: docker.io/st0rmingbr4in/ci-ansible:latest
     commands:
       - yamllint -c .yamllint.yml .
@@ -44,9 +62,13 @@ steps:
       kubernetes:
         resources:
           requests:
-            cpu: "500m"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
 
   - name: tflint
+    depends_on: []
     image: ghcr.io/terraform-linters/tflint
     commands:
       # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
@@ -59,9 +81,13 @@ steps:
       kubernetes:
         resources:
           requests:
-            cpu: "500m"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
 
   - name: terraform-validate
+    depends_on: []
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     commands:
       - |
@@ -74,9 +100,13 @@ steps:
       kubernetes:
         resources:
           requests:
-            cpu: "500m"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
 
   - name: ansible-lint
+    depends_on: []
     image: docker.io/st0rmingbr4in/ci-ansible:latest
     environment:
       HOME: /root
@@ -90,12 +120,16 @@ steps:
       kubernetes:
         resources:
           requests:
-            cpu: "1"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
 
   # Renders every Argo CD app at this commit (fails on a broken chart or kustomization),
   # then at the base commit, and prints which apps' manifests changed. Secret values are
   # redacted by the render script.
   - name: argocd-render
+    depends_on: []
     image: alpine/k8s:1.37.1
     commands:
       - |
@@ -123,4 +157,7 @@ steps:
       kubernetes:
         resources:
           requests:
-            cpu: "1"
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 1Gi
