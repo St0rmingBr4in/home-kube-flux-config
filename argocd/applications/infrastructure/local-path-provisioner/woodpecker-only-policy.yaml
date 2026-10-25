@@ -1,0 +1,29 @@
+---
+# Node-local volumes vanish with the node: keep local-path for throwaway CI
+# workspaces only; everything else uses the Synology iSCSI default.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: local-path-woodpecker-only
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["persistentvolumeclaims"]
+  validations:
+    - expression: >-
+        !has(object.spec.storageClassName) ||
+        object.spec.storageClassName != 'local-path' ||
+        object.metadata.namespace == 'woodpecker'
+      message: "storageClassName local-path is reserved for Woodpecker CI workspaces (namespace woodpecker)"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: local-path-woodpecker-only
+spec:
+  policyName: local-path-woodpecker-only
+  validationActions: [Deny]
