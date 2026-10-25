@@ -19,6 +19,8 @@ import yaml
 OWN_REPO = "https://github.com/St0rmingBr4in/home-kube-flux-config"
 PLACEHOLDER = re.compile(r"\{\{\s*(\w+)\s*\}\}")
 # The Datadog chart stamps a fresh id/time on every render; pin them so diffs stay quiet.
+# LibYAML's C parser: the pure-Python one is ~8x slower, and CI nodes have slow vCPUs.
+LOADER, DUMPER = yaml.CSafeLoader, yaml.CSafeDumper
 NOISE = re.compile(r"^(\s*install_(?:id|time): ).*$", re.M)
 
 
@@ -73,13 +75,13 @@ def render(root, app, kube_version, cache):
 
 
 def redact(manifest):
-    docs = [d for d in yaml.safe_load_all(manifest) if d]
+    docs = [d for d in yaml.load_all(manifest, Loader=LOADER) if d]
     for d in docs:
         if d.get("kind") == "Secret":
             for field in ("data", "stringData"):
                 for k in d.get(field) or {}:
                     d[field][k] = "<redacted>"
-    return NOISE.sub(r"\1<render-time>", yaml.safe_dump_all(docs, sort_keys=False))
+    return NOISE.sub(r"\1<render-time>", yaml.dump_all(docs, Dumper=DUMPER, sort_keys=False))
 
 
 def main(root, out):
