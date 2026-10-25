@@ -6,8 +6,7 @@
 #
 # Rootless BuildKit with no process sandbox: k3s pods have a read-only cgroupfs, and the default
 # AppArmor profile blocks BuildKit's bind mounts, so seccomp and AppArmor are Unconfined.
-# Steps start as root only to install tools and write credentials, then build as `user`.
-# Docker Hub credentials fetched from Vault at runtime (secret/ci/docker).
+# Steps run as the image's unprivileged user; Docker Hub credentials are mounted from a Secret.
 #
 # For memory-webhook, a Go pre-build step compiles the binary before BuildKit runs
 # (the Dockerfile does a COPY of the pre-built binary rather than a full Go toolchain).
@@ -42,27 +41,11 @@ steps:
           - "ansible/requirements.yml"
       - event: manual
     environment:
-      DOCKER_CONFIG: /tmp/docker-config
+      DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
       - |
-        set -e
-        apk add --no-cache curl jq -q
-        VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
-          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
-          | jq -r '.auth.client_token')
-        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
-        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
-        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
-        mkdir -p /tmp/docker-config
-        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
-          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
-          > /tmp/docker-config/config.json
-        chown -R user /tmp/docker-config
-        su user -s /bin/sh -c 'exec buildctl-daemonless.sh "$$@"' sh build \
+        buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
           --local context=. \
           --local dockerfile=ci/images/ci-ansible \
@@ -78,9 +61,13 @@ steps:
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
+        # Docker Hub credentials, synced from Vault by VSO (woodpecker-docker-config).
+        secrets:
+          - name: woodpecker-docker-config
+            key: .dockerconfigjson
+            target:
+              file: /home/user/.docker/config.json
         securityContext:
-          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
-          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
@@ -94,27 +81,11 @@ steps:
         path: "ci/images/ci-terraform/**"
       - event: manual
     environment:
-      DOCKER_CONFIG: /tmp/docker-config
+      DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
       - |
-        set -e
-        apk add --no-cache curl jq -q
-        VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
-          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
-          | jq -r '.auth.client_token')
-        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
-        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
-        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
-        mkdir -p /tmp/docker-config
-        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
-          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
-          > /tmp/docker-config/config.json
-        chown -R user /tmp/docker-config
-        su user -s /bin/sh -c 'exec buildctl-daemonless.sh "$$@"' sh build \
+        buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
           --local context=ci/images/ci-terraform \
           --local dockerfile=ci/images/ci-terraform \
@@ -130,9 +101,13 @@ steps:
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
+        # Docker Hub credentials, synced from Vault by VSO (woodpecker-docker-config).
+        secrets:
+          - name: woodpecker-docker-config
+            key: .dockerconfigjson
+            target:
+              file: /home/user/.docker/config.json
         securityContext:
-          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
-          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
@@ -173,27 +148,11 @@ steps:
     depends_on:
       - go-build-memory-webhook
     environment:
-      DOCKER_CONFIG: /tmp/docker-config
+      DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
       - |
-        set -e
-        apk add --no-cache curl jq -q
-        VAULT_TOKEN=$(curl -sk \
-          --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-image-build\"}" \
-          "${VAULT_ADDR}/v1/auth/kubernetes/login" \
-          | jq -r '.auth.client_token')
-        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
-        DOCKER_USER=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.username')
-        DOCKER_PASS=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/docker" | jq -r '.data.data.password')
-        mkdir -p /tmp/docker-config
-        printf '{"auths":{"https://index.docker.io/v1/":{"auth":"%s"}}}' \
-          "$(printf '%s:%s' "$DOCKER_USER" "$DOCKER_PASS" | base64 | tr -d '\n')" \
-          > /tmp/docker-config/config.json
-        chown -R user /tmp/docker-config
-        su user -s /bin/sh -c 'exec buildctl-daemonless.sh "$$@"' sh build \
+        buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
           --local context=memory-webhook \
           --local dockerfile=memory-webhook \
@@ -209,9 +168,13 @@ steps:
         serviceAccountName: woodpecker-image-build
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
+        # Docker Hub credentials, synced from Vault by VSO (woodpecker-docker-config).
+        secrets:
+          - name: woodpecker-docker-config
+            key: .dockerconfigjson
+            target:
+              file: /home/user/.docker/config.json
         securityContext:
-          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
-          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
