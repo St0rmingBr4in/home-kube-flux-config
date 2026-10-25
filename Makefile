@@ -56,8 +56,10 @@ pre-commit: kustomize-validate terraform-fmt lint-shell ## Run all pre-commit ch
 
 kustomize-validate: ## Validate all kustomization files with kubectl kustomize
 	@echo "==> Validating kustomizations"
+	@# Git hooks export GIT_DIR & co; kustomize's own git (remote bases) must not inherit them.
 	@find argocd/applications -name "kustomization.yaml" | while read f; do \
-		kubectl kustomize "$$(dirname $$f)" > /dev/null \
+		env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE -u GIT_COMMON_DIR \
+			kubectl kustomize "$$(dirname $$f)" > /dev/null \
 			&& echo "  ✓ $$f" \
 			|| { echo "  ✗ $$f"; exit 1; }; \
 	done
