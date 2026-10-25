@@ -37,9 +37,8 @@ steps:
             cpu: "4"
 
   - name: yamllint
-    image: python:3-alpine
+    image: docker.io/st0rmingbr4in/ci-ansible:latest
     commands:
-      - pip install yamllint -q
       - yamllint -c .yamllint.yml .
     backend_options:
       kubernetes:
