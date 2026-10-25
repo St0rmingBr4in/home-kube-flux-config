@@ -4,3 +4,5 @@ kind: Kustomization
 resources:
   - pv-jellyfin.yaml
   - jellyfin-config-pvc.yaml
+  - jellyfin-data-pvc.yaml
+  - migrate-config-job.yaml
