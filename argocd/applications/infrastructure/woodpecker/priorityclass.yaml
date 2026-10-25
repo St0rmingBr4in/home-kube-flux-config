@@ -1,0 +1,10 @@
+---
+# CI pods rank below every workload (default 0): apps can evict them, they never evict anything.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: woodpecker-ci
+value: -100
+preemptionPolicy: Never
+globalDefault: false
+description: Woodpecker CI pipeline pods
