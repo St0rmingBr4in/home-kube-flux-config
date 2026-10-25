@@ -110,6 +110,16 @@
         "- name: [^\\n]+\\n\\s+chart: (?<depName>[^\\s\\n]+)\\n\\s+chartVersion: (?<currentValue>[^\\s\\n]+)[\\s\\S]*?repoURL: (?<registryUrl>https?://[^\\s\\n]+)"
       ],
       "datasourceTemplate": "helm"
+    },
+    {
+      "customType": "regex",
+      "description": "Versions pinned with a '# renovate:' comment in CI pipelines",
+      "managerFilePatterns": [
+        "/^\\.woodpecker/.+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>\\S+)"
+      ]
     }
   ]
 }

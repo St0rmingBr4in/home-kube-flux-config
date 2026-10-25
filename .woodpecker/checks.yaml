@@ -126,20 +126,29 @@ steps:
             memory: 1Gi
 
   # Renders every Argo CD app at this commit (fails on a broken chart or kustomization),
-  # then at the base commit, and prints which apps' manifests changed. Secret values are
-  # redacted by the render script.
+  # validates it with kubeconform, then renders the base commit, prints which apps' manifests
+  # changed, and checks that new images exist. Secret values are redacted by the render script.
   - name: argocd-render
     depends_on: []
     image: alpine/k8s:1.37.1
     environment:
       CHART_CACHE: /cache/helm
+      # renovate: datasource=github-releases depName=google/go-containerregistry
+      CRANE_VERSION: v0.22.1
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
       - sh ci/cache-ttl.sh /cache/helm
+      - sh ci/cache-ttl.sh /cache/kubeconform
       - |
         set -e
         python3 ci/argocd-render.py . /tmp/render/head
+        # Removed APIs and invalid fields. CRDs come from the community catalog; ones it lacks are skipped.
+        K8S=$$(sed -n 's/^k3s_release_version: "v\([0-9.]*\)+.*/\1/p' ansible/inventory/group_vars/k3s_cluster/vars.yaml)
+        kubeconform -strict -summary -kubernetes-version "$$K8S" -cache /cache/kubeconform -ignore-missing-schemas \
+          -schema-location default \
+          -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+          /tmp/render/head
         if [ "$CI_PIPELINE_EVENT" = "pull_request" ]; then
           # shortcut: diffs against the target branch tip, not the merge base; fine while PRs are rebased.
           BASE="$CI_COMMIT_TARGET_BRANCH"
@@ -147,7 +156,7 @@ steps:
           BASE="$CI_PREV_COMMIT_SHA"
         fi
         case "$$BASE" in
-          "" | 0000000*) echo "No base commit; skipping render diff."; exit 0 ;;
+          "" | 0000000*) echo "No base commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
         esac
         git config --global --add safe.directory '*'
         git fetch -q --depth=1 origin "$$BASE"
@@ -162,6 +171,7 @@ steps:
         CHANGED=$(diff -qrN /tmp/render/base /tmp/render/head | awk '{print $$2}' | xargs -rn1 basename | sed 's/\.yaml$$//' | tr '\n' ' ')
         echo "Apps with changed manifests vs $$BASE: $${CHANGED:-none}"
         diff -ruN /tmp/render/base /tmp/render/head || true
+        sh ci/check-images.sh /tmp/render/head /tmp/render/base
     backend_options:
       kubernetes:
         resources:
