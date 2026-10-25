@@ -15,7 +15,7 @@ images:
   # ghcr.io/yannkr/openrsvp once the verify fix ships upstream.
   - name: ghcr.io/yannkr/openrsvp
     newName: ghcr.io/st0rmingbr4in/openrsvp
-    newTag: 1.8.2-fix2
+    newTag: 1.8.2-fix2@sha256:be2fd5a4b029a16b25d4b6db3cb621df9ea08c4bb9d05607d17f1286760cf956
 
 labels:
   - pairs:

@@ -23,7 +23,7 @@ when:
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
     backend_options:
       kubernetes:
         resources:
