@@ -79,6 +79,8 @@ steps:
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
+          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
+          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
@@ -129,6 +131,8 @@ steps:
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
+          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
+          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
@@ -206,6 +210,8 @@ steps:
         annotations:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
         securityContext:
+          # The rootless image defaults to uid 1000; root is needed for apk and the credentials.
+          runAsUser: 0
           seccompProfile:
             type: Unconfined
           apparmorProfile:
