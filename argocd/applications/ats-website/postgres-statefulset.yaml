@@ -6,7 +6,7 @@ metadata:
   namespace: prod-ats
 spec:
   serviceName: ats-postgres
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: ats-postgres
