@@ -26,7 +26,7 @@ spec:
       # Chown /data to the image's openrsvp user (100:101) before it starts.
       initContainers:
         - name: chown-data
-          image: busybox:1.36
+          image: busybox:1.36@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
           command: ["sh", "-c", "chown 100:101 /data"]
           securityContext:
             runAsUser: 0
@@ -35,7 +35,7 @@ spec:
               mountPath: /data
       containers:
         - name: openrsvp
-          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix9
+          image: ghcr.io/st0rmingbr4in/openrsvp:1.8.2-fix9@sha256:e88da2115d7238fdb14ffc7663d6fa3e5e9960ad75f0b287e5199dd02ac06bf2
           ports:
             - containerPort: 8080
               name: http
