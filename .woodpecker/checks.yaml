@@ -1,16 +1,9 @@
 ---
-# Static checks pipeline: Go tests, yamllint, tflint.
-# Each step runs only when its relevant paths change.
+# Static checks pipeline: cheap, side-effect-free checks that run on every push and PR,
+# with no path filters, so a missed dependency can never skip them.
 
 when:
   - event: [push, pull_request]
-    path:
-      - "memory-webhook/**"
-      - "terraform/**"
-      - "**/*.yaml"
-      - "**/*.yml"
-      - ".yamllint.yml"
-      - ".woodpecker/checks.yaml"
 
 # Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
@@ -26,10 +19,6 @@ clone:
 steps:
   - name: go-test
     image: golang:1-alpine
-    when:
-      - path:
-          - "memory-webhook/**"
-          - ".woodpecker/checks.yaml"
     environment:
       # Single source of truth for the Go version is memory-webhook/go.mod.
       # GOTOOLCHAIN=auto lets Go download whatever toolchain go.mod requires,
@@ -49,12 +38,6 @@ steps:
 
   - name: yamllint
     image: python:3-alpine
-    when:
-      - path:
-          - "**/*.yaml"
-          - "**/*.yml"
-          - ".yamllint.yml"
-          - ".woodpecker/checks.yaml"
     commands:
       - pip install yamllint -q
       - yamllint -c .yamllint.yml .
@@ -66,18 +49,79 @@ steps:
 
   - name: tflint
     image: ghcr.io/terraform-linters/tflint
-    when:
-      - path:
-          - "terraform/**"
-          - ".woodpecker/checks.yaml"
     commands:
+      # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
       - |
         for dir in terraform/*/; do
-          echo "==> $dir"
-          tflint --chdir="$dir" --minimum-failure-severity=error || exit 1
+          echo "==> $$dir"
+          tflint --chdir="$$dir" --minimum-failure-severity=error || exit 1
         done
     backend_options:
       kubernetes:
         resources:
           requests:
             cpu: "500m"
+
+  - name: terraform-validate
+    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    commands:
+      - |
+        for dir in terraform/*/; do
+          echo "==> $$dir"
+          terraform -chdir="$$dir" init -backend=false -input=false >/dev/null || exit 1
+          terraform -chdir="$$dir" validate -no-color || exit 1
+        done
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "500m"
+
+  - name: ansible-lint
+    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    environment:
+      HOME: /root
+      # Ansible rejects an empty vault password at startup; lint never decrypts, so no Vault needed.
+      ANSIBLE_VAULT_PASSWORD: lint-only-dummy
+    commands:
+      # Ansible ignores ansible.cfg in a world-writable dir, and Woodpecker clones with 0777.
+      - chmod -R go-w .
+      - cd ansible && ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles ansible-lint --offline
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "1"
+
+  # Renders every Argo CD app at this commit (fails on a broken chart or kustomization),
+  # then at the base commit, and prints which apps' manifests changed. Secret values are
+  # redacted by the render script.
+  - name: argocd-render
+    image: alpine/k8s:1.37.1
+    commands:
+      - |
+        set -e
+        python3 ci/argocd-render.py . /tmp/render/head
+        if [ "$CI_PIPELINE_EVENT" = "pull_request" ]; then
+          # shortcut: diffs against the target branch tip, not the merge base; fine while PRs are rebased.
+          BASE="$CI_COMMIT_TARGET_BRANCH"
+        else
+          BASE="$CI_PREV_COMMIT_SHA"
+        fi
+        case "$$BASE" in
+          "" | 0000000*) echo "No base commit; skipping render diff."; exit 0 ;;
+        esac
+        git config --global --add safe.directory '*'
+        git fetch -q --depth=1 origin "$$BASE"
+        mkdir -p /tmp/render/base-src
+        git archive FETCH_HEAD | tar -x -C /tmp/render/base-src
+        python3 ci/argocd-render.py /tmp/render/base-src /tmp/render/base \
+          || echo "WARNING: base render had errors; the diff below may be incomplete."
+        CHANGED=$(diff -qrN /tmp/render/base /tmp/render/head | awk '{print $$2}' | xargs -rn1 basename | sed 's/\.yaml$$//' | tr '\n' ' ')
+        echo "Apps with changed manifests vs $$BASE: $${CHANGED:-none}"
+        diff -ruN /tmp/render/base /tmp/render/head || true
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "1"

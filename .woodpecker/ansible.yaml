@@ -1,6 +1,6 @@
 ---
-# Ansible CI pipeline. Triggered on master pushes that touch ansible files.
-# Each step is skipped unless its specific playbook paths changed.
+# Ansible CI pipeline: runs the playbooks on master pushes that touch their inputs.
+# Linting runs for every push and PR in checks.yaml.
 #
 # Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # Vault secret layout (kv-v2):
@@ -10,9 +10,11 @@
 #   secret/inlet/socks  → password (inlet only — danted PAM auth)
 
 when:
-  - event: [push, pull_request]
+  - event: push
+    branch: master
     path:
       - "ansible/**"
+      - "ci/images/ci-ansible/**"
       - ".woodpecker/ansible.yaml"
 
 # Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
@@ -35,9 +37,11 @@ steps:
           - "ansible/scripts/**"
           - "ansible/requirements.yml"
           - "ansible/inventory/hosts.yaml"
+          - "ansible/known_hosts"
           - "ansible/inventory/group_vars/inlet.yaml"
           - "ansible/roles/inlet/**"
           - "ansible/playbooks/inlet.yaml"
+          - "ci/images/ci-ansible/**"
           - ".woodpecker/ansible.yaml"
     environment:
       HOME: /root
@@ -81,19 +85,13 @@ steps:
         chmod -R go-w .
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
-        ansible-lint --offline
-        # Run the playbook only on master push (post-merge). PR runs stop at
-        # lint — they validate changes before the merge is gated, without
-        # mutating remote hosts.
-        if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
-          # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
-          # sees the variables at runtime. Plain ${VAR} would be expanded at
-          # YAML-compile time (to empty) before the shell ever runs.
-          EXTRA_VARS=""
-          [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
-          [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
-          ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
-        fi
+        # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
+        # sees the variables at runtime. Plain ${VAR} would be expanded at
+        # YAML-compile time (to empty) before the shell ever runs.
+        EXTRA_VARS=""
+        [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
+        [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
+        ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
     backend_options:
       kubernetes:
         resources:
@@ -112,7 +110,9 @@ steps:
           - "ansible/requirements.yml"
           - "ansible/inventory/hosts.yaml"
           - "ansible/inventory/group_vars/k3s_cluster/**"
+          - "ansible/roles/xanmanning.k3s/**"
           - "ansible/playbooks/k3s.yaml"
+          - "ci/images/ci-ansible/**"
           - ".woodpecker/ansible.yaml"
     environment:
       HOME: /root
@@ -140,13 +140,8 @@ steps:
         chmod -R go-w .
         cd ansible
         export ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles
-        ansible-lint --offline
-        # Run the playbook only on master push (post-merge). PR runs stop at
-        # lint — see ansible-inlet step for rationale.
-        if [ "$CI_PIPELINE_EVENT" = "push" ] && [ "$CI_COMMIT_BRANCH" = "master" ]; then
-          # Pods reach the nodes directly; drop the workstation ProxyJump via the router.
-          ansible-playbook playbooks/k3s.yaml -e ansible_ssh_common_args=
-        fi
+        # Pods reach the nodes directly; drop the workstation ProxyJump via the router.
+        ansible-playbook playbooks/k3s.yaml -e ansible_ssh_common_args=
     backend_options:
       kubernetes:
         resources:

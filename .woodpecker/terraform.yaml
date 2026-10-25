@@ -1,6 +1,6 @@
 ---
 # Terraform CI pipeline. Triggered on master pushes that touch any terraform module.
-# Each step is skipped unless its specific module path changed (step-level when.path).
+# Each step is skipped unless its module or shared CI inputs changed (step-level when.path).
 # terraform/vault has no step: it manages Vault itself, so it's applied locally only.
 #
 # Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
@@ -18,6 +18,7 @@ when:
     path:
       - "terraform/**"
       - "Makefile"
+      - "ci/images/ci-terraform/**"
       - ".woodpecker/terraform.yaml"
 
 # Explicit for its CPU request: the clone pod's node holds the RWO workspace for every
@@ -35,7 +36,11 @@ steps:
   - name: terraform-tfe
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/tfe/**"
+      - path:
+          - "terraform/tfe/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: tfe
       # tfe module only needs the TFC token — no module-specific secrets
@@ -82,7 +87,11 @@ steps:
   - name: terraform-authentik
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/authentik/**"
+      - path:
+          - "terraform/authentik/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: authentik
       VAULT_SECRET_PATH: secret/ci/authentik
@@ -99,7 +108,11 @@ steps:
   - name: terraform-datadog
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/datadog/**"
+      - path:
+          - "terraform/datadog/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: datadog
       VAULT_SECRET_PATH: secret/ci/datadog
@@ -116,7 +129,11 @@ steps:
   - name: terraform-digitalocean
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/digitalocean/**"
+      - path:
+          - "terraform/digitalocean/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: digitalocean
       VAULT_SECRET_PATH: secret/ci/digitalocean
@@ -133,7 +150,11 @@ steps:
   - name: terraform-tailscale
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/tailscale/**"
+      - path:
+          - "terraform/tailscale/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: tailscale
       VAULT_SECRET_PATH: secret/ci/tailscale
@@ -150,7 +171,11 @@ steps:
   - name: terraform-woodpecker
     image: docker.io/st0rmingbr4in/ci-terraform:latest
     when:
-      - path: "terraform/woodpecker/**"
+      - path:
+          - "terraform/woodpecker/**"
+          - "Makefile"
+          - "ci/images/ci-terraform/**"
+          - ".woodpecker/terraform.yaml"
     environment:
       MODULE: woodpecker
       VAULT_SECRET_PATH: secret/ci/woodpecker-tf
