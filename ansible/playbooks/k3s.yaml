@@ -57,9 +57,10 @@
         # = wait forever; this is what makes a NAS blip self-heal.
         - regexp: '^node\.session\.timeo\.replacement_timeout'
           line: 'node.session.timeo.replacement_timeout = -1'
-        # Auto-reconnect sessions at boot so a node reboot re-establishes them.
+        # Synology CSI logs in the sessions it needs; automatic made iscsid log into every
+        # target ever discovered (stale LUNs included) at each boot.
         - regexp: '^node\.startup'
-          line: 'node.startup = automatic'
+          line: 'node.startup = manual'
         # Send a NOP-Out keepalive every 5s to detect silent TCP drops.
         - regexp: '^node\.conn\.timeo\.noop_out_interval'
           line: 'node.conn.timeo.noop_out_interval = 5'
@@ -76,7 +77,7 @@
           --name={{ item.name }} --value={{ item.value }}
       loop:
         - { name: node.session.timeo.replacement_timeout, value: "-1" }
-        - { name: node.startup, value: automatic }
+        - { name: node.startup, value: manual }
       register: iscsiadm_result
       # rc=21 means no node records exist yet (iSCSI not yet logged in) — skip gracefully.
       # Any other non-zero exit code indicates a real failure and should be surfaced.
