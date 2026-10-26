@@ -185,3 +185,9 @@ steps:
             memory: 128Mi
           limits:
             memory: 1Gi
+        # Docker Hub credentials for check-images: anonymous lookups share the home IP's pull limit with the cluster.
+        secrets:
+          - name: woodpecker-docker-config
+            key: .dockerconfigjson
+            target:
+              file: /root/.docker/config.json
