@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: radarr
-          image: oci.trueforge.org/containerforge/radarr:6.1.2.10359@sha256:f53a013f42936d7dcde1fbcc4320ac79e6247136beca6f34e73658e981cd57a5
+          image: oci.trueforge.org/containerforge/radarr:6.1.2.10359@sha256:749b590b093e35f3047349f4eae4c92cf155a1ac3a1760f7f6a15aed10e852d4
           env:
             - name: TZ
               value: UTC
