@@ -24,7 +24,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: missing-search
-              image: curlimages/curl:8.12.1@sha256:94e9e444bcba979c2ea12e27ae39bee4cd10bc7041a472c4727a558e213744e6
+              image: curlimages/curl:8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
               command:
                 - /bin/sh
                 - -c
