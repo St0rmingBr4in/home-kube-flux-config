@@ -183,11 +183,13 @@ steps:
             origin "$CI_COMMIT_TARGET_BRANCH"
           BASE=$$(git merge-base FETCH_HEAD HEAD)
         else
-          BASE="$CI_PREV_COMMIT_SHA"
+          # The parent, not CI_PREV_COMMIT_SHA: Woodpecker files PR pipelines under their target branch,
+          # so the "previous pipeline" can be a PR head off an older master and pull in unrelated changes.
+          git fetch -q --depth=2 origin "$CI_COMMIT_SHA"
+          BASE=$$(git rev-parse -q --verify HEAD^ || true)
           case "$$BASE" in
-            "" | 0000000*) echo "No base commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
+            "") echo "No parent commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
           esac
-          git fetch -q --depth=1 origin "$$BASE"
         fi
         if git diff --quiet "$$BASE" HEAD -- argocd ci/argocd-render.py ansible/inventory/group_vars/k3s_cluster/vars.yaml; then
           echo "No render inputs changed vs $$BASE; skipping render diff."
