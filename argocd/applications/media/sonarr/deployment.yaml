@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: sonarr
-          image: oci.trueforge.org/containerforge/sonarr:4.0.17.2953@sha256:116d8a134f886619cec94c64a697bf9b6faeed319acbf5ed647ce494f889088f
+          image: oci.trueforge.org/containerforge/sonarr:4.0.17.2953@sha256:3cd8f1bbc015441cf7d92625f93775ad0b865e5bfc4795eb98fbeeec66167873
           env:
             - name: TZ
               value: UTC
