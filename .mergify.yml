@@ -29,6 +29,8 @@ queue_rules:
       - *image_build
     update_method: rebase
     merge_method: rebase
+    # Re-run failed draft CI once before dequeuing: a dequeued PR never comes back on its own.
+    max_checks_retries: 1
 
 pull_request_rules:
   - name: Queue PRs labelled automerge
