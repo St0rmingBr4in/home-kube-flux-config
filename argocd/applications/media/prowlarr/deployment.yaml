@@ -39,7 +39,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: prowlarr
-          image: oci.trueforge.org/containerforge/prowlarr:2.6.3.5592@sha256:2612075ccc68e61e4d2ef0f302325c1a0da1d15705ccad0f98741ed3f2494db2
+          image: oci.trueforge.org/containerforge/prowlarr:2.6.3.5592@sha256:78825c4cf2cbcbdd5d3056ef936f16776e29e0152e76ecc9be42c1110a49ed39
           env:
             - name: TZ
               value: UTC
