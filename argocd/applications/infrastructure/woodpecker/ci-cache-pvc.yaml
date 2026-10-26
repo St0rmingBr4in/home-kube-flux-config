@@ -1,6 +1,6 @@
 ---
-# Download/build caches for the checks pipeline (Go, Helm charts, Terraform providers), each
-# subdir wiped hourly by ci/cache-ttl.sh. local-path pins it to node1, where checks always
+# Download/build caches for CI (Go, Helm charts, Terraform providers), split into locked slots
+# that are emptied hourly by ci/cache-slot.sh. local-path pins it to node1, where CI always
 # runs: its clone requests more CPU than server1 has.
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -76,10 +76,9 @@ steps:
           "${VAULT_ADDR}/v1/$SECRETS_API_PATH" \
           | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
 
-        # One plugin cache per module: Terraform's cache is unsafe for concurrent inits, and steps run in parallel.
-        # shortcut: two pipelines planning the same module at once can still race; key by pipeline if init flakes.
-        export TF_PLUGIN_CACHE_DIR=/cache/terraform-$MODULE
-        sh ci/cache-ttl.sh "$TF_PLUGIN_CACHE_DIR"
+        # Per-module slots: modules' providers differ, and a slot is never shared by two running steps.
+        . ci/cache-slot.sh terraform-$MODULE
+        export TF_PLUGIN_CACHE_DIR=$CACHE_DIR
         # Parallel pipelines (merge queue + master) share TFC workspaces: wait for the lock.
         export TF_CLI_ARGS_plan=-lock-timeout=10m TF_CLI_ARGS_apply=-lock-timeout=10m
         # Retry once: provider downloads from releases.hashicorp.com sometimes reset.

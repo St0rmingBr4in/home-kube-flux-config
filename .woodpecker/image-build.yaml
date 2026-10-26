@@ -161,11 +161,12 @@ steps:
       # Single source of truth for the Go version is memory-webhook/go.mod.
       # See checks.yaml for the full rationale.
       GOTOOLCHAIN: auto
-      # Shared with go-test, which also expires it (ci/cache-ttl.sh).
-      GOMODCACHE: /cache/go/mod
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      # Same slots as go-test, so the module cache is shared without two steps writing one dir.
+      - . ci/cache-slot.sh go
+      - export GOMODCACHE=$$CACHE_DIR/mod
       - |
         cd memory-webhook
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \

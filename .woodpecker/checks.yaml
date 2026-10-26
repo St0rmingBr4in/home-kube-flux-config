@@ -34,12 +34,12 @@ steps:
       # Limit parallelism to avoid OOM when compiling k8s.io dependencies on
       # a high-CPU node (default GOMAXPROCS equals the node's CPU count).
       GOMAXPROCS: "4"
-      GOMODCACHE: /cache/go/mod
-      GOCACHE: /cache/go/build
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
-      - sh ci/cache-ttl.sh /cache/go
+      # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
+      - . ci/cache-slot.sh go
+      - export GOMODCACHE=$$CACHE_DIR/mod GOCACHE=$$CACHE_DIR/build
       - cd memory-webhook && go test ./...
     backend_options:
       kubernetes:
@@ -49,6 +49,22 @@ steps:
             memory: 128Mi
           limits:
             memory: 1Gi
+
+  - name: cache-slot-test
+    depends_on: []
+    image: alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+    volumes:
+      - woodpecker-ci-cache:/cache
+    commands:
+      - sh ci/cache-slot-test.sh
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "100m"
+            memory: 128Mi
+          limits:
+            memory: 128Mi
 
   - name: yamllint
     depends_on: []
@@ -86,12 +102,11 @@ steps:
   - name: terraform-validate
     depends_on: []
     image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
-    environment:
-      TF_PLUGIN_CACHE_DIR: /cache/terraform
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
-      - sh ci/cache-ttl.sh /cache/terraform
+      - . ci/cache-slot.sh terraform
+      - export TF_PLUGIN_CACHE_DIR=$$CACHE_DIR
       - |
         for dir in terraform/*/; do
           echo "==> $$dir"
@@ -134,20 +149,19 @@ steps:
     depends_on: []
     image: alpine/k8s:1.37.1@sha256:712dc5385d1c1a3f83b747fa9e40f64d433a97f72ff42f9755ff7dd1f62846e4
     environment:
-      CHART_CACHE: /cache/helm
       # renovate: datasource=github-releases depName=google/go-containerregistry
       CRANE_VERSION: v0.22.1
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
-      - sh ci/cache-ttl.sh /cache/helm
-      - sh ci/cache-ttl.sh /cache/kubeconform
+      - . ci/cache-slot.sh render
+      - export CHART_CACHE=$$CACHE_DIR/helm && mkdir -p $$CACHE_DIR/kubeconform
       - |
         set -e
         python3 ci/argocd-render.py . /tmp/render/head
         # Removed APIs and invalid fields. CRDs come from the community catalog; ones it lacks are skipped.
         K8S=$$(sed -n 's/^k3s_release_version: "v\([0-9.]*\)+.*/\1/p' ansible/inventory/group_vars/k3s_cluster/vars.yaml)
-        kubeconform -strict -summary -kubernetes-version "$$K8S" -cache /cache/kubeconform -ignore-missing-schemas \
+        kubeconform -strict -summary -kubernetes-version "$$K8S" -cache "$$CACHE_DIR/kubeconform" -ignore-missing-schemas \
           -schema-location default \
           -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
           /tmp/render/head
