@@ -48,8 +48,6 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
-          # Temporary: lets vault be scaled to 0 by hand while its volume moves to CSI.
-          - RespectIgnoreDifferences=true
 
         retry:
           limit: 5
@@ -57,10 +55,3 @@ spec:
             duration: 5s
             factor: 2
             maxDuration: 3m
-
-      ignoreDifferences:
-        - group: apps
-          kind: StatefulSet
-          name: vault
-          jsonPointers:
-            - /spec/replicas

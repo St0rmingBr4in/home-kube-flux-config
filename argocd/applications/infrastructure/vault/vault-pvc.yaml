@@ -1,4 +1,5 @@
 ---
+# Pre-created so the StatefulSet's data-vault-0 claim binds to the CSI volume its data was copied to.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -8,5 +9,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
-  volumeName: vault-0
+      storage: 1Gi
+  storageClassName: synology-csi-iscsi-retain
+  volumeName: pvc-f6a20220-b6af-4e06-8acb-3749e366cc46
