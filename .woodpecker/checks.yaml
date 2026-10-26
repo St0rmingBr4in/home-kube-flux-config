@@ -68,7 +68,7 @@ steps:
 
   - name: yamllint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9d7ad5c2ab03722ec318a6e2bf5ea66818602740534012851e969086efbf7acf
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:5ded9741d6fe7828e0c5fab1d9e57ea65aedd5007a6c38d363e8498eeec15a0c
     commands:
       - yamllint -c .yamllint.yml .
     backend_options:
@@ -124,7 +124,7 @@ steps:
 
   - name: ansible-lint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9d7ad5c2ab03722ec318a6e2bf5ea66818602740534012851e969086efbf7acf
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:5ded9741d6fe7828e0c5fab1d9e57ea65aedd5007a6c38d363e8498eeec15a0c
     environment:
       HOME: /root
       # Ansible rejects an empty vault password at startup; lint never decrypts, so no Vault needed.
