@@ -37,6 +37,7 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/step-timeout.sh 600
       # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
       - . ci/cache-slot.sh go
       - export GOMODCACHE=$$CACHE_DIR/mod GOCACHE=$$CACHE_DIR/build
@@ -56,8 +57,10 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/step-timeout.sh 180
       - sh ci/cache-slot-test.sh
       - sh ci/check-images-test.sh
+      - sh ci/step-timeout-test.sh
     backend_options:
       kubernetes:
         resources:
@@ -71,6 +74,7 @@ steps:
     depends_on: []
     image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:4d4fc3430b087d80979150a9cfa4ac53acab7c433bd8bfe3b9b2a10003d3253d
     commands:
+      - sh ci/step-timeout.sh 300
       - yamllint -c .yamllint.yml .
     backend_options:
       kubernetes:
@@ -85,6 +89,7 @@ steps:
     depends_on: []
     image: ghcr.io/terraform-linters/tflint@sha256:2788f4d4fc663c0e953b011b01bf443fe5bfce7587ee916e588e6057b85d6359
     commands:
+      - sh ci/step-timeout.sh 300
       # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
       - |
         for dir in terraform/*/; do
@@ -106,6 +111,7 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/step-timeout.sh 600
       - . ci/cache-slot.sh terraform
       # Modules validate in parallel (134s -> 44s cold), each with its own plugin cache dir:
       # concurrent inits into one dir rewrite provider binaries in use. Logs print on failure.
@@ -142,6 +148,7 @@ steps:
       # Ansible rejects an empty vault password at startup; lint never decrypts, so no Vault needed.
       ANSIBLE_VAULT_PASSWORD: lint-only-dummy
     commands:
+      - sh ci/step-timeout.sh 600
       # Ansible ignores ansible.cfg in a world-writable dir, and Woodpecker clones with 0777.
       - chmod -R go-w .
       - cd ansible && ANSIBLE_ROLES_PATH=$(pwd)/roles:/root/.ansible/roles ansible-lint --offline
@@ -164,6 +171,7 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/step-timeout.sh 1200
       - . ci/cache-slot.sh render
       - export CHART_CACHE=$$CACHE_DIR/helm && mkdir -p $$CACHE_DIR/kubeconform
       - |

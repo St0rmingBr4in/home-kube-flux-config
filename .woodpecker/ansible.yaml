@@ -49,6 +49,7 @@ steps:
     environment:
       HOME: /root
     commands:
+      - sh ci/step-timeout.sh 900
       - |
         set -e
         # Retries: a fresh step pod sometimes can't reach Vault yet, which failed the whole step silently.
@@ -118,6 +119,7 @@ steps:
     environment:
       HOME: /root
     commands:
+      - sh ci/step-timeout.sh 1800
       - |
         set -e
         VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
@@ -159,6 +161,7 @@ steps:
           - success
           - failure
     commands:
+      - sh ci/step-timeout.sh 180
       - |
         set -e
         apk add --no-cache curl jq -q

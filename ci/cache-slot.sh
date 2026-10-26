@@ -2,6 +2,7 @@
 # Usage: . ci/cache-slot.sh <name>. Sourced, so its lock (fd 9) lives as long as the step's shell.
 # Sets CACHE_DIR to a slot of /cache/<name> that no other running step uses: parallel pipelines
 # sharing one dir deleted it under each other on expiry and rewrote Terraform providers in use.
+: "${1:?cache name missing: dash does not pass arguments to a sourced file, use a busybox/bash image}"
 CACHE_DIR=
 for slot in 0 1 2 3; do  # one per WOODPECKER_MAX_WORKFLOWS
   mkdir -p "/cache/$1/$slot"

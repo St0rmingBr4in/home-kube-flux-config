@@ -54,6 +54,7 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands: &terraform_commands
+      - sh ci/step-timeout.sh 1200
       - |
         set -e
         # Retries: a fresh step pod sometimes can't reach Vault yet, which failed the whole step silently.
@@ -258,6 +259,7 @@ steps:
           - success
           - failure
     commands:
+      - sh ci/step-timeout.sh 180
       - |
         set -e
         apk add --no-cache curl jq -q

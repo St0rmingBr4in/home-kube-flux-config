@@ -44,6 +44,7 @@ steps:
       DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
+      - sh ci/step-timeout.sh 2400
       - |
         buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
@@ -84,6 +85,7 @@ steps:
       DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
+      - sh ci/step-timeout.sh 1200
       - |
         buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
@@ -124,6 +126,7 @@ steps:
       DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
+      - sh ci/step-timeout.sh 1800
       - |
         buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
@@ -164,6 +167,7 @@ steps:
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
+      - sh ci/step-timeout.sh 600
       # Same slots as go-test, so the module cache is shared without two steps writing one dir.
       - . ci/cache-slot.sh go
       - export GOMODCACHE=$$CACHE_DIR/mod
@@ -196,6 +200,7 @@ steps:
       DOCKER_CONFIG: /home/user/.docker
       BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
     commands:
+      - sh ci/step-timeout.sh 1200
       - |
         buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
@@ -232,6 +237,7 @@ steps:
           - success
           - failure
     commands:
+      - sh ci/step-timeout.sh 180
       - |
         set -e
         apk add --no-cache curl jq -q
