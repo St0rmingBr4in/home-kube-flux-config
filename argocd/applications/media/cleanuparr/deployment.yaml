@@ -25,7 +25,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: cleanuparr
-          image: ghcr.io/cleanuparr/cleanuparr:2.9.16
+          image: ghcr.io/cleanuparr/cleanuparr:2.9.16@sha256:efd08729a33223a6a5bae267afcbeffe4bd2876b3f03144a025968adb8e3cc7e
           imagePullPolicy: IfNotPresent
           env:
             - name: PUID
