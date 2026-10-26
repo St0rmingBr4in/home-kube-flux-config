@@ -4,6 +4,10 @@
 
 # Application Controller (main workload) - actual usage: 307m CPU, 670Mi memory
 controller:
+  # Datadog's Argo CD check: per-app sync and health status, for the OutOfSync/unhealthy monitor.
+  podAnnotations:
+    ad.datadoghq.com/application-controller.checks: |
+      {"argocd": {"init_config": {}, "instances": [{"app_controller_endpoint": "http://%%host%%:8082/metrics"}]}}
   resources:
     limits:
       memory: 1Gi # Increased from 512Mi after OOMKills
