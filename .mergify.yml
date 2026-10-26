@@ -4,18 +4,19 @@
 # waits for CI on that exact commit, and merges with rebase only if it is still green.
 queue_rules:
   - name: default
-    # Only CI and Renovate checks count: after a dequeue Mergify's own rule check stays "cancelled",
-    # and counting it as a failure kept the PR out of the queue for good.
+    # Only CI and Renovate checks count here: after a dequeue Mergify's own rule check stays
+    # "cancelled", and counting it as a failure kept the PR out of the queue for good.
     queue_conditions:
       - label=automerge
       - check-success=ci/woodpecker/pr/checks
-      - &no_failure -check-failure~=^(ci/woodpecker|renovate)/
-      # Merge conditions run on Mergify's draft, which never carries renovate/stability-days.
-      - &no_pending -check-pending~=^(ci/woodpecker|renovate)/
+      - -check-failure~=^(ci/woodpecker|renovate)/
+      - -check-pending~=^(ci/woodpecker|renovate)/
+    # Checked on Mergify's draft, which carries CI statuses only. Mergify waits on "#check-pending=0";
+    # a negated pending match is just false while CI runs, and dequeued every draft at once.
     merge_conditions:
       - check-success=ci/woodpecker/pr/checks
-      - *no_failure
-      - *no_pending
+      - "#check-failure=0"
+      - "#check-pending=0"
     update_method: rebase
     merge_method: rebase
 
