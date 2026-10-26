@@ -113,6 +113,46 @@ steps:
           apparmorProfile:
             type: Unconfined
 
+  - name: build-ci-k8s
+    image: moby/buildkit:v0.31.1-rootless@sha256:946cf909534b789c9b84af75e6d4f8cb23c3b9cb387daec5ba0f4878a3e4647c
+    when:
+      - event: push
+        branch: master
+        path: "ci/images/ci-k8s/**"
+      - event: manual
+    environment:
+      DOCKER_CONFIG: /home/user/.docker
+      BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+    commands:
+      - |
+        buildctl-daemonless.sh build \
+          --frontend=dockerfile.v0 \
+          --local context=ci/images/ci-k8s \
+          --local dockerfile=ci/images/ci-k8s \
+          --output "type=image,\"name=docker.io/st0rmingbr4in/ci-k8s:latest,docker.io/st0rmingbr4in/ci-k8s:${CI_COMMIT_SHA}\",push=true"
+    backend_options:
+      kubernetes:
+        resources:
+          requests:
+            cpu: "2"
+            memory: 256Mi
+          limits:
+            memory: 2Gi
+        serviceAccountName: woodpecker-image-build
+        annotations:
+          ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/image-build"]'
+        # Docker Hub credentials, synced from Vault by VSO (woodpecker-docker-config).
+        secrets:
+          - name: woodpecker-docker-config
+            key: .dockerconfigjson
+            target:
+              file: /home/user/.docker/config.json
+        securityContext:
+          seccompProfile:
+            type: Unconfined
+          apparmorProfile:
+            type: Unconfined
+
   - name: go-build-memory-webhook
     image: golang:1-alpine
     when:

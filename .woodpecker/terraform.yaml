@@ -51,6 +51,8 @@ steps:
       MODULE: tfe
       # tfe module only needs the TFC token — no module-specific secrets
       VAULT_SECRET_PATH: secret/ci/terraform-cloud
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: &terraform_commands
       - |
         set -e
@@ -74,6 +76,10 @@ steps:
           "${VAULT_ADDR}/v1/$SECRETS_API_PATH" \
           | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
 
+        # One plugin cache per module: Terraform's cache is unsafe for concurrent inits, and steps run in parallel.
+        # shortcut: two pipelines planning the same module at once can still race; key by pipeline if init flakes.
+        export TF_PLUGIN_CACHE_DIR=/cache/terraform-$MODULE
+        sh ci/cache-ttl.sh "$TF_PLUGIN_CACHE_DIR"
         # Parallel pipelines (merge queue + master) share TFC workspaces: wait for the lock.
         export TF_CLI_ARGS_plan=-lock-timeout=10m TF_CLI_ARGS_apply=-lock-timeout=10m
         # Retry once: provider downloads from releases.hashicorp.com sometimes reset.
@@ -108,6 +114,8 @@ steps:
     environment:
       MODULE: authentik
       VAULT_SECRET_PATH: secret/ci/authentik
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: *terraform_commands
     backend_options:
       kubernetes:
@@ -133,6 +141,8 @@ steps:
     environment:
       MODULE: datadog
       VAULT_SECRET_PATH: secret/ci/datadog
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: *terraform_commands
     backend_options:
       kubernetes:
@@ -158,6 +168,8 @@ steps:
     environment:
       MODULE: digitalocean
       VAULT_SECRET_PATH: secret/ci/digitalocean
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: *terraform_commands
     backend_options:
       kubernetes:
@@ -183,6 +195,8 @@ steps:
     environment:
       MODULE: tailscale
       VAULT_SECRET_PATH: secret/ci/tailscale
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: *terraform_commands
     backend_options:
       kubernetes:
@@ -208,6 +222,8 @@ steps:
     environment:
       MODULE: woodpecker
       VAULT_SECRET_PATH: secret/ci/woodpecker-tf
+    volumes:
+      - woodpecker-ci-cache:/cache
     commands: *terraform_commands
     backend_options:
       kubernetes:
