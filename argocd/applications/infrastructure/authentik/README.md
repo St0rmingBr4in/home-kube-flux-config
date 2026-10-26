@@ -10,8 +10,8 @@ This directory contains the Authentik identity provider configuration for the cl
   - ArgoCD Proxy Provider (forward auth mode)
   - ArgoCD Application
   - Outpost assignment (see Known Limitations below)
-- **kustomization.yaml**: Kustomize resources including PV, PVC, secrets, and blueprints
-- **postgres-pv.yaml** / **postgres-pvc.yaml**: PostgreSQL persistent storage
+- **kustomization.yaml**: Kustomize resources including the PostgreSQL PVC, secrets, and blueprints
+- **postgres-data-pvc.yaml**: PostgreSQL storage on `synology-csi-iscsi-retain`
 - **secret-vault.yaml**: Vault secret reference for credentials
 
 ## Blueprints

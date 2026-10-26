@@ -4,8 +4,6 @@ kind: Kustomization
 
 resources:
   - secret-vault.yaml
-  - postgres-pv.yaml
-  - postgres-pvc.yaml
   - postgres-data-pvc.yaml
   - postgres-statefulset.yaml
   - backend-deployment.yaml

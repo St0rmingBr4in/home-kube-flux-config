@@ -44,8 +44,9 @@ spec:
 ```
 
 Don't create LUNs by hand in DSM or write static `PersistentVolume` manifests
-with an `iscsi:` block for new apps. Some older apps (ats-website, authentik,
-bazarr) still use that manual pattern; don't copy it.
+with an `iscsi:` block: after any kubelet restart, the kubelet no longer
+recognizes in-use static iSCSI volumes and logs them out, so running pods get
+I/O errors. Every app moved off that pattern in October 2026.
 
 ## Adding a new Terraform module
 
