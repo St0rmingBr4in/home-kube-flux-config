@@ -117,9 +117,10 @@
     },
     {
       "customType": "regex",
-      "description": "Versions pinned with a '# renovate:' comment in CI pipelines",
+      "description": "Versions pinned with a '# renovate:' comment in CI pipelines and ApplicationSet values",
       "managerFilePatterns": [
-        "/^\\.woodpecker/.+\\.ya?ml$/"
+        "/^\\.woodpecker/.+\\.ya?ml$/",
+        "/^argocd/applications/.+/applicationset\\.yaml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>\\S+)"

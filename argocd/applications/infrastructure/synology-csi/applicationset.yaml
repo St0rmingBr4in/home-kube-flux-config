@@ -30,6 +30,11 @@ spec:
           targetRevision: "{{chartVersion}}"
           helm:
             values: |
+              images:
+                plugin:
+                  # Chart 0.11.4 defaults to driver v1.4.0, which was never published on Docker Hub.
+                  # renovate: datasource=docker depName=synology/synology-csi
+                  tag: v1.3.0
               clientInfoSecret:
                 name: client-info
               storageClasses:
