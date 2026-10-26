@@ -1,14 +1,14 @@
 ---
 # Install Tailscale and bring up the exit node using the official community role.
-# The artis3n.tailscale role handles: apt repo setup, binary install, service
+# The artis3n.tailscale collection's machine role handles: apt repo setup, binary install, service
 # management, and tailscale up flags — idempotently and with version tracking.
 #
 # Pass tailscale_authkey at runtime (-e tailscale_authkey=<oauth-secret>) only
 # when registering a new device or re-authenticating an expired node.
 
-- name: Install and configure Tailscale via artis3n.tailscale role
+- name: Install and configure Tailscale via artis3n.tailscale.machine
   ansible.builtin.include_role:
-    name: artis3n.tailscale
+    name: artis3n.tailscale.machine
   vars:
     tailscale_args: "{{ tailscale_extra_args }}"
     # artis3n v5 refuses tags in tailscale_args and requires them here with an OAuth key.
