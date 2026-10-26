@@ -17,10 +17,27 @@ if [ ! -s /tmp/images.check ]; then
   exit 0
 fi
 
+# A digest-pinned ref is immutable: one that resolved once stays valid, so it is remembered.
+seen="${CACHE_DIR:-/tmp}/images-ok"
+touch "$seen"
+
+# Registries (lscr.io, Docker Hub) rate-limit anonymous lookups: retry those only, with backoff.
+check() {
+  for wait in 15 30 60 0; do
+    crane digest --platform linux/amd64 "$1" >/dev/null 2>/tmp/crane.err && return 0
+    grep -q TOOMANYREQUESTS /tmp/crane.err && [ "$wait" -gt 0 ] || return 1
+    echo "rate-limited on $1, retrying in ${wait}s" >&2
+    sleep "$wait"
+  done
+}
+
 missing=0
 while read -r img; do
-  if crane digest --platform linux/amd64 "$img" >/dev/null 2>/tmp/crane.err; then
+  if grep -qxF "$img" "$seen"; then
+    echo "ok       $img (cached)"
+  elif check "$img"; then
     echo "ok       $img"
+    case "$img" in *@sha256:*) echo "$img" >> "$seen" ;; esac
   else
     echo "MISSING  $img: $(tail -1 /tmp/crane.err)"
     missing=1

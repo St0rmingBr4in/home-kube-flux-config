@@ -50,13 +50,14 @@ steps:
           limits:
             memory: 1Gi
 
-  - name: cache-slot-test
+  - name: ci-script-tests
     depends_on: []
     image: alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
       - sh ci/cache-slot-test.sh
+      - sh ci/check-images-test.sh
     backend_options:
       kubernetes:
         resources:
