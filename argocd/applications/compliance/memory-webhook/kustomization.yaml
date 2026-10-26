@@ -13,7 +13,7 @@ resources:
 images:
   - name: memory-webhook
     newName: st0rmingbr4in/memory-webhook
-    newTag: latest@sha256:da036469f04e47e3645cc15b62864265a68f25d7455d3c24d765e43c52cceac5
+    newTag: latest@sha256:35df01c4c409cfcdd0cbe246b3b910e56077a75b0ed58ff852124a2aaa468f40
 
 # Common labels
 labels:
