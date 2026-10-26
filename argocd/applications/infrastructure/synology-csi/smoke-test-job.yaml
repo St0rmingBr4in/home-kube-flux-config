@@ -1,0 +1,40 @@
+---
+# After each sync, provision and mount a real volume: a driver that can't talk to DSM (2026-10-26,
+# v1.3.1 TLS check) only fails at that point. A failed Job fails the sync and stays for debugging.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: synology-csi-smoke-test
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  activeDeadlineSeconds: 300
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: probe
+          image: alpine:3.21
+          command: ["sh", "-c", "echo ok > /data/probe && grep -q ok /data/probe"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        # Ephemeral PVC is deleted with the pod, and the Delete class removes its LUN.
+        - name: data
+          ephemeral:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                storageClassName: synology-csi-iscsi-delete
+                resources:
+                  requests:
+                    storage: 1Gi

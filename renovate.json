@@ -16,7 +16,7 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "Queue patch, digest and pin updates in Mergify's merge queue (.mergify.yml) once CI passes",
+      "description": "Queue patch, digest and pin updates in Mergify's merge queue (.mergify.yml) once CI passes, except the Synology CSI driver: it backs every volume, so its updates are reviewed",
       "matchUpdateTypes": [
         "patch",
         "digest",
@@ -25,15 +25,21 @@
       ],
       "addLabels": [
         "automerge"
+      ],
+      "matchPackageNames": [
+        "!synology-csi",
+        "!synology/synology-csi"
       ]
     },
     {
-      "description": "Queue minor updates too, except k3s: its minors can remove Kubernetes APIs, so they are reviewed",
+      "description": "Queue minor updates too, except k3s (its minors can remove Kubernetes APIs) and the Synology CSI driver: both are reviewed",
       "matchUpdateTypes": [
         "minor"
       ],
       "matchPackageNames": [
-        "!k3s-io/k3s"
+        "!k3s-io/k3s",
+        "!synology-csi",
+        "!synology/synology-csi"
       ],
       "addLabels": [
         "automerge"
