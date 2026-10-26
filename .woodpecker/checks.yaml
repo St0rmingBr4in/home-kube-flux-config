@@ -106,13 +106,24 @@ steps:
       - woodpecker-ci-cache:/cache
     commands:
       - . ci/cache-slot.sh terraform
-      - export TF_PLUGIN_CACHE_DIR=$$CACHE_DIR
+      # Modules validate in parallel (134s -> 44s cold), each with its own plugin cache dir:
+      # concurrent inits into one dir rewrite provider binaries in use. Logs print on failure.
       - |
+        pids=""
         for dir in terraform/*/; do
-          echo "==> $$dir"
-          terraform -chdir="$$dir" init -backend=false -input=false >/dev/null || exit 1
-          terraform -chdir="$$dir" validate -no-color || exit 1
+          m=$$(basename "$$dir")
+          ( export TF_PLUGIN_CACHE_DIR="$$CACHE_DIR/$$m" && mkdir -p "$$TF_PLUGIN_CACHE_DIR" &&
+            { terraform -chdir="$$dir" init -backend=false -input=false ||  # provider downloads sometimes reset
+              terraform -chdir="$$dir" init -backend=false -input=false; } &&
+            terraform -chdir="$$dir" validate -no-color ) > "/tmp/tf-$$m.log" 2>&1 &
+          pids="$$pids $$!:$$m"
         done
+        fail=0
+        for pm in $$pids; do
+          m=$${pm#*:}
+          if wait "$${pm%%:*}"; then echo "==> $$m: valid"; else echo "==> $$m: FAILED"; cat "/tmp/tf-$$m.log"; fail=1; fi
+        done
+        exit $$fail
     backend_options:
       kubernetes:
         resources:
