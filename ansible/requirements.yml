@@ -2,7 +2,7 @@
 roles:
   - name: xanmanning.k3s
     src: xanmanning.k3s
-    version: v3.6.2
+    version: v3.6.4
   # Official Tailscale Ansible role: binary install, apt repo, service
   # management, and tailscale up idempotently. Used by the inlet role.
   - name: artis3n.tailscale
