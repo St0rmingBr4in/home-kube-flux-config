@@ -51,28 +51,29 @@ steps:
     commands:
       - |
         set -e
-        VAULT_TOKEN=$(curl -sk \
+        # Retries: a fresh step pod sometimes can't reach Vault yet, which failed the whole step silently.
+        VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ansible\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
 
-        export ANSIBLE_VAULT_PASSWORD=$(curl -sk \
+        export ANSIBLE_VAULT_PASSWORD=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
           | jq -r '.data.data.vault_password')
 
         mkdir -p /root/.ssh && chmod 700 /root/.ssh
-        curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+        curl -sSk --retry 5 --retry-all-errors --retry-delay 2 -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
           | jq -r '.data.data.ssh_private_key' > /root/.ssh/id_ed25519
         chmod 600 /root/.ssh/id_ed25519
 
-        export DATADOG_API_KEY=$(curl -sk \
+        export DATADOG_API_KEY=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
           | jq -r '.data.data.TF_VAR_datadog_api_key')
-        export SOCKS_PASSWORD=$(curl -sk \
+        export SOCKS_PASSWORD=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/inlet/socks" \
           | jq -r '.data.data.password')
@@ -119,19 +120,19 @@ steps:
     commands:
       - |
         set -e
-        VAULT_TOKEN=$(curl -sk \
+        VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-ansible\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed"; exit 1; }
 
-        export ANSIBLE_VAULT_PASSWORD=$(curl -sk \
+        export ANSIBLE_VAULT_PASSWORD=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
           | jq -r '.data.data.vault_password')
 
         mkdir -p /root/.ssh && chmod 700 /root/.ssh
-        curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+        curl -sSk --retry 5 --retry-all-errors --retry-delay 2 -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/ansible" \
           | jq -r '.data.data.ssh_private_key' > /root/.ssh/id_ed25519
         chmod 600 /root/.ssh/id_ed25519
@@ -161,12 +162,12 @@ steps:
       - |
         set -e
         apk add --no-cache curl jq -q
-        VAULT_TOKEN=$(curl -sk \
+        VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-notify\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
-        DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+        DD_API_KEY=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
           | jq -r '.data.data.TF_VAR_datadog_api_key')
         STATUS="$CI_PIPELINE_STATUS"

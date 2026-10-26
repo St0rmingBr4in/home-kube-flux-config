@@ -56,7 +56,8 @@ steps:
     commands: &terraform_commands
       - |
         set -e
-        VAULT_TOKEN=$(curl -sk \
+        # Retries: a fresh step pod sometimes can't reach Vault yet, which failed the whole step silently.
+        VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-tf-$MODULE\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
@@ -64,14 +65,14 @@ steps:
         # make and the Vault provider read VAULT_TOKEN from the environment.
         export VAULT_TOKEN
 
-        export TF_TOKEN_APP_TERRAFORM_IO=$(curl -sk \
+        export TF_TOKEN_APP_TERRAFORM_IO=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/terraform-cloud" \
           | jq -r '.data.data.token')
         export TFE_TOKEN="$TF_TOKEN_APP_TERRAFORM_IO"
 
         SECRETS_API_PATH=$(echo "$VAULT_SECRET_PATH" | sed 's|^secret/|secret/data/|')
-        eval "$(curl -sk \
+        eval "$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/$SECRETS_API_PATH" \
           | jq -r '.data.data | to_entries[] | "export " + .key + "=" + (.value | @sh)' 2>/dev/null || true)"
@@ -260,12 +261,12 @@ steps:
       - |
         set -e
         apk add --no-cache curl jq -q
-        VAULT_TOKEN=$(curl -sk \
+        VAULT_TOKEN=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 \
           --data "{\"jwt\":\"$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\",\"role\":\"woodpecker-notify\"}" \
           "${VAULT_ADDR}/v1/auth/kubernetes/login" \
           | jq -r '.auth.client_token')
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "Vault login failed — skipping DD notify"; exit 0; }
-        DD_API_KEY=$(curl -sk -H "X-Vault-Token: $VAULT_TOKEN" \
+        DD_API_KEY=$(curl -sSk --retry 5 --retry-all-errors --retry-delay 2 -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
           | jq -r '.data.data.TF_VAR_datadog_api_key')
         STATUS="$CI_PIPELINE_STATUS"
