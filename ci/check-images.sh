@@ -17,12 +17,9 @@ if [ ! -s /tmp/images.check ]; then
   exit 0
 fi
 
-curl -sSfL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION:?}/go-containerregistry_Linux_x86_64.tar.gz" \
-  | tar -xz -C /tmp crane
-
 missing=0
 while read -r img; do
-  if /tmp/crane digest --platform linux/amd64 "$img" >/dev/null 2>/tmp/crane.err; then
+  if crane digest --platform linux/amd64 "$img" >/dev/null 2>/tmp/crane.err; then
     echo "ok       $img"
   else
     echo "MISSING  $img: $(tail -1 /tmp/crane.err)"

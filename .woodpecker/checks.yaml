@@ -147,10 +147,8 @@ steps:
   # changed, and checks that new images exist. Secret values are redacted by the render script.
   - name: argocd-render
     depends_on: []
-    image: alpine/k8s:1.37.1@sha256:712dc5385d1c1a3f83b747fa9e40f64d433a97f72ff42f9755ff7dd1f62846e4
-    environment:
-      # renovate: datasource=github-releases depName=google/go-containerregistry
-      CRANE_VERSION: v0.22.1
+    # alpine/k8s plus crane (ci/images/ci-k8s), so check-images needs no download.
+    image: docker.io/st0rmingbr4in/ci-k8s:latest@sha256:4126f94ff6219a67661eaf0107298c58091adf34d62e2af71924d1d7ed8ddf4a
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
