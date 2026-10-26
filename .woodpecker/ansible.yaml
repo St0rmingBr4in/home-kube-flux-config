@@ -25,7 +25,7 @@ depends_on:
 # later step, so it requests the heaviest step's CPU. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
     backend_options:
       kubernetes:
         resources:
@@ -34,7 +34,7 @@ clone:
 
 steps:
   - name: ansible-inlet
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9d7ad5c2ab03722ec318a6e2bf5ea66818602740534012851e969086efbf7acf
     when:
       - path:
           - "ansible/ansible.cfg"
@@ -106,7 +106,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
   - name: ansible-k3s
-    image: docker.io/st0rmingbr4in/ci-ansible:latest
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:9d7ad5c2ab03722ec318a6e2bf5ea66818602740534012851e969086efbf7acf
     when:
       - path:
           - "ansible/ansible.cfg"

@@ -30,7 +30,7 @@ depends_on:
 # workspace every step then follows. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1
+    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
     backend_options:
       kubernetes:
         resources:
@@ -40,7 +40,7 @@ clone:
 steps:
   - name: terraform-tfe
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/tfe/**"
@@ -104,7 +104,7 @@ steps:
 
   - name: terraform-authentik
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/authentik/**"
@@ -131,7 +131,7 @@ steps:
 
   - name: terraform-datadog
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/datadog/**"
@@ -158,7 +158,7 @@ steps:
 
   - name: terraform-digitalocean
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/digitalocean/**"
@@ -185,7 +185,7 @@ steps:
 
   - name: terraform-tailscale
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/tailscale/**"
@@ -212,7 +212,7 @@ steps:
 
   - name: terraform-woodpecker
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21f18dc5a616bf300ce1d5d2606ae27a6af0ff37bc08beef7482ddadfc6b3175
     when:
       - path:
           - "terraform/woodpecker/**"
