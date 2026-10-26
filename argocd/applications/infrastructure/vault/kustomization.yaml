@@ -5,6 +5,7 @@ resources:
   - pv-vault-0.yaml
   - vault-pvc.yaml
   - vault-data-pvc.yaml
+  - migrate-data-job.yaml
   - vault-internal-ca-issuer.yaml
   - vault-internal-tls-cert.yaml
   - vault-backend-transport.yaml
