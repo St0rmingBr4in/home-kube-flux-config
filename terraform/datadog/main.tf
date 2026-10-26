@@ -19,3 +19,7 @@ provider "datadog" {
   app_key = var.datadog_app_key
   api_url = var.datadog_api_url
 }
+
+locals {
+  notify = "@julien.doche@gmail.com"
+}

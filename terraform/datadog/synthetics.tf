@@ -1,27 +1,17 @@
 # API synthetic tests for all homelab applications.
 # Each test is tagged argocd_app:<name> so PostSync hooks can discover them by app.
 #
-# Import existing tests:
-#   terraform import 'datadog_synthetics_test.apps["sonarr"]'      ech-uc2-d4x
-#   terraform import 'datadog_synthetics_test.apps["qbittorrent"]' zg8-czm-guh
-#
-# Unmanaged browser tests (too complex to codify):
-#   9ib-2m2-u44  Jellyfin invalid login
-#   gxv-8ut-xdz  Jellyfin play movie
-#   23n-tay-497  Home
-#
-# Deleted (paused, no longer needed):
-#   s6c-n6n-5d6  Test on palworld.st0rmingbr4in.com
-#   vxe-m89-trv  qbittorrent auth (browser)
+# Kept in the UI on purpose: gxv-8ut-xdz "Jellyfin play movie" (browser test recorded in Datadog, holds
+# a secure password Terraform can't read back, so an import would wipe it on the next apply).
 
 locals {
   # Expected final HTTP status code after redirect resolution. All proxy-protected
   # apps return 200 because follow_redirects=true resolves the Authentik redirect inline.
   synthetic_expected_status = "200"
 
-  # Maximum acceptable response time in milliseconds. 5000 ms is conservative
-  # enough for a homelab connection going through Tailscale/Traefik.
-  synthetic_response_time_ms = 5000
+  # Maximum acceptable response time in milliseconds. The Authentik redirect chain through
+  # inlet/Tailscale regularly takes 5-6 s, so 5000 ms flapped on argocd and bazarr.
+  synthetic_response_time_ms = 10000
 
   # How often each synthetic test runs (seconds). 300 s = 5 minutes, the
   # minimum interval on the Datadog free/pro tier for API tests.
@@ -84,6 +74,7 @@ resource "datadog_synthetics_test" "apps" {
   for_each = local.synthetics
 
   name    = each.value.name
+  message = "${each.value.url} is down or slower than ${local.synthetic_response_time_ms} ms. ${local.notify}"
   type    = "api"
   subtype = "http"
   status  = "live"
