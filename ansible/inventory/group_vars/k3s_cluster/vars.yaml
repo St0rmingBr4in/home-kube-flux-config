@@ -21,6 +21,9 @@ k3s_server:
     - eviction-max-pod-grace-period=60
     - system-reserved=memory=500Mi,cpu=100m
     - kube-reserved=memory=500Mi,cpu=100m
+    # Start image GC well before the 20% imagefs soft-eviction threshold, not at the default 85% used.
+    - image-gc-high-threshold=70
+    - image-gc-low-threshold=60
 
 k3s_agent:
   kubelet-arg:
@@ -31,6 +34,8 @@ k3s_agent:
     - eviction-minimum-reclaim=memory.available=256Mi,nodefs.available=1Gi,imagefs.available=1Gi
     - system-reserved=cpu=100m,memory=1Gi,ephemeral-storage=1Gi
     - kube-reserved=cpu=100m,memory=1Gi,ephemeral-storage=1Gi
+    - image-gc-high-threshold=70
+    - image-gc-low-threshold=60
 
 k3s_registries:
   mirrors:
