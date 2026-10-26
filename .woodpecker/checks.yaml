@@ -151,23 +151,26 @@ steps:
           -schema-location default \
           -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
           /tmp/render/head
+        git config --global --add safe.directory '*'
         if [ "$CI_PIPELINE_EVENT" = "pull_request" ]; then
-          # shortcut: diffs against the target branch tip, not the merge base; fine while PRs are rebased.
-          BASE="$CI_COMMIT_TARGET_BRANCH"
+          # Diff against the merge base, not the target tip, or master's newer commits show up reversed.
+          # The clone is shallow and merge-base needs the shared history; blobs are fetched on demand.
+          git fetch -q --filter=blob:none $$([ -f "$$(git rev-parse --git-dir)/shallow" ] && echo --unshallow) \
+            origin "$CI_COMMIT_TARGET_BRANCH"
+          BASE=$$(git merge-base FETCH_HEAD HEAD)
         else
           BASE="$CI_PREV_COMMIT_SHA"
+          case "$$BASE" in
+            "" | 0000000*) echo "No base commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
+          esac
+          git fetch -q --depth=1 origin "$$BASE"
         fi
-        case "$$BASE" in
-          "" | 0000000*) echo "No base commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
-        esac
-        git config --global --add safe.directory '*'
-        git fetch -q --depth=1 origin "$$BASE"
-        if git diff --quiet FETCH_HEAD HEAD -- argocd ci/argocd-render.py ansible/inventory/group_vars/k3s_cluster/vars.yaml; then
+        if git diff --quiet "$$BASE" HEAD -- argocd ci/argocd-render.py ansible/inventory/group_vars/k3s_cluster/vars.yaml; then
           echo "No render inputs changed vs $$BASE; skipping render diff."
           exit 0
         fi
         mkdir -p /tmp/render/base-src
-        git archive FETCH_HEAD | tar -x -C /tmp/render/base-src
+        git archive "$$BASE" | tar -x -C /tmp/render/base-src
         python3 ci/argocd-render.py /tmp/render/base-src /tmp/render/base \
           || echo "WARNING: base render had errors; the diff below may be incomplete."
         CHANGED=$(diff -qrN /tmp/render/base /tmp/render/head | awk '{print $$2}' | xargs -rn1 basename | sed 's/\.yaml$$//' | tr '\n' ' ')
