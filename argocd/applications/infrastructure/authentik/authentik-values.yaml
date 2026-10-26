@@ -62,7 +62,7 @@ postgresql:
   primary:
     persistence:
       enabled: true
-      existingClaim: "authentik-postgres"
+      existingClaim: "authentik-postgres-data"
     customLivenessProbe:
       exec:
         command:

@@ -7,4 +7,3 @@ resources:
   - postgres-pvc.yaml
   - secret-vault.yaml
   - postgres-data-pvc.yaml
-  - migrate-postgres-job.yaml
