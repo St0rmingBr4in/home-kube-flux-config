@@ -11,6 +11,11 @@
     name: artis3n.tailscale
   vars:
     tailscale_args: "{{ tailscale_extra_args }}"
+    # artis3n v5 refuses tags in tailscale_args and requires them here with an OAuth key.
+    tailscale_tags: [servers]
+    # Its OAuth defaults would re-register inlet as ephemeral (deleted when offline) and unapproved.
+    tailscale_oauth_ephemeral: false
+    tailscale_oauth_preauthorized: true
     # artis3n v5 demands a key for `tailscale up`; without one the node is already registered.
     tailscale_up_skip: "{{ (tailscale_authkey | default('')) | length == 0 }}"
 
