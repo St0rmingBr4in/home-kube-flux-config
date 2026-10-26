@@ -1,0 +1,13 @@
+---
+# Temporary claim that provisions the CSI volume; it is rebound to data-vault-0 after the copy.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: synology-csi-iscsi-retain
