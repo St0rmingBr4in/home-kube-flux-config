@@ -155,8 +155,8 @@ steps:
             memory: 1Gi
 
   # Renders every Argo CD app at this commit (fails on a broken chart or kustomization),
-  # validates it with kubeconform, then renders the base commit, prints which apps' manifests
-  # changed, and checks that new images exist. Secret values are redacted by the render script.
+  # validates it with kubeconform; on PRs it also renders the merge base, prints which apps'
+  # manifests changed, and checks that new images exist. Secret values are redacted by the render script.
   - name: argocd-render
     depends_on: []
     # alpine/k8s plus crane (ci/images/ci-k8s), so check-images needs no download.
@@ -175,22 +175,15 @@ steps:
           -schema-location default \
           -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
           /tmp/render/head
+        # On master, rendering and kubeconform (above) are enough: the diff and the image check run on
+        # PRs, including Mergify's queue draft, which tests exactly what gets merged.
+        [ "$CI_PIPELINE_EVENT" = "pull_request" ] || exit 0
         git config --global --add safe.directory '*'
-        if [ "$CI_PIPELINE_EVENT" = "pull_request" ]; then
-          # Diff against the merge base, not the target tip, or master's newer commits show up reversed.
-          # The clone is shallow and merge-base needs the shared history; blobs are fetched on demand.
-          git fetch -q --filter=blob:none $$([ -f "$$(git rev-parse --git-dir)/shallow" ] && echo --unshallow) \
-            origin "$CI_COMMIT_TARGET_BRANCH"
-          BASE=$$(git merge-base FETCH_HEAD HEAD)
-        else
-          # The parent, not CI_PREV_COMMIT_SHA: Woodpecker files PR pipelines under their target branch,
-          # so the "previous pipeline" can be a PR head off an older master and pull in unrelated changes.
-          git fetch -q --depth=2 origin "$CI_COMMIT_SHA"
-          BASE=$$(git rev-parse -q --verify HEAD^ || true)
-          case "$$BASE" in
-            "") echo "No parent commit; skipping render diff."; exec sh ci/check-images.sh /tmp/render/head ;;
-          esac
-        fi
+        # Diff against the merge base, not the target tip, or master's newer commits show up reversed.
+        # The clone is shallow and merge-base needs the shared history; blobs are fetched on demand.
+        git fetch -q --filter=blob:none $$([ -f "$$(git rev-parse --git-dir)/shallow" ] && echo --unshallow) \
+          origin "$CI_COMMIT_TARGET_BRANCH"
+        BASE=$$(git merge-base FETCH_HEAD HEAD)
         if git diff --quiet "$$BASE" HEAD -- argocd ci/argocd-render.py ansible/inventory/group_vars/k3s_cluster/vars.yaml; then
           echo "No render inputs changed vs $$BASE; skipping render diff."
           exit 0
