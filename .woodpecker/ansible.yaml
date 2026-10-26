@@ -5,7 +5,6 @@
 # Vault auth: Kubernetes service account JWT, one SA + same-named role per step group (terraform/vault/ci-roles.tf).
 # Vault secret layout (kv-v2):
 #   secret/ci/ansible   → vault_password, ssh_private_key (dedicated CI key, authorised for root on inlet + k3s nodes)
-#   secret/ci/tailscale → TF_VAR_tailscale_oauth_client_secret (inlet only)
 #   secret/ci/datadog   → TF_VAR_datadog_api_key (inlet only)
 #   secret/inlet/socks  → password (inlet only — danted PAM auth)
 
@@ -69,10 +68,6 @@ steps:
           | jq -r '.data.data.ssh_private_key' > /root/.ssh/id_ed25519
         chmod 600 /root/.ssh/id_ed25519
 
-        export TAILSCALE_AUTHKEY=$(curl -sk \
-          -H "X-Vault-Token: $VAULT_TOKEN" \
-          "${VAULT_ADDR}/v1/secret/data/ci/tailscale" \
-          | jq -r '.data.data.TF_VAR_tailscale_oauth_client_secret')
         export DATADOG_API_KEY=$(curl -sk \
           -H "X-Vault-Token: $VAULT_TOKEN" \
           "${VAULT_ADDR}/v1/secret/data/ci/datadog" \
@@ -92,8 +87,9 @@ steps:
         # NOTE: $$ escapes Woodpecker's own ${VAR} substitution so the shell
         # sees the variables at runtime. Plain ${VAR} would be expanded at
         # YAML-compile time (to empty) before the shell ever runs.
+        # No tailscale_authkey: inlet is registered, so the role skips `tailscale up`. A key is
+        # only for re-registering it, passed by hand (CLAUDE.md, "Re-provisioning the inlet VPS").
         EXTRA_VARS=""
-        [ -n "$${TAILSCALE_AUTHKEY:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e tailscale_authkey=$${TAILSCALE_AUTHKEY}"
         [ -n "$${SOCKS_PASSWORD:-}" ] && EXTRA_VARS="$$EXTRA_VARS -e socks_password=$${SOCKS_PASSWORD}"
         ansible-playbook playbooks/inlet.yaml $${EXTRA_VARS}
     backend_options:
