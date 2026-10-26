@@ -2,6 +2,10 @@
 # Merge queue: a PR labelled `automerge` (Renovate adds it to minor/patch/digest/pin updates)
 # enters the queue once CI is green on its own commit. Mergify then rebases it onto master,
 # waits for CI on that exact commit, and merges with rebase only if it is still green.
+merge_queue:
+  # Comments at every queue step notified the PR author each time; keep only the final result.
+  status_comments: outcomes
+
 queue_rules:
   - name: default
     # Named checks only: Mergify waits on check-success, but #check-pending never settled on its drafts.
