@@ -167,7 +167,7 @@ steps:
   - name: argocd-render
     depends_on: []
     # alpine/k8s plus crane (ci/images/ci-k8s), so check-images needs no download.
-    image: docker.io/st0rmingbr4in/ci-k8s:latest@sha256:4126f94ff6219a67661eaf0107298c58091adf34d62e2af71924d1d7ed8ddf4a
+    image: docker.io/st0rmingbr4in/ci-k8s:latest@sha256:98aecfa38e6db3797c0d850e17a15b5a9fadd1ebea56de3693f71d3548b934aa
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
