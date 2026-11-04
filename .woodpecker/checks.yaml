@@ -14,7 +14,7 @@ when:
 # local-path workspace (and Go cache) every step then follows. Same image as Woodpecker's default.
 clone:
   - name: clone
-    image: docker.io/woodpeckerci/plugin-git:2.9.1@sha256:8995e4745cf57dcee659db94d43598fd181b1b370671db2c9ccf7b0b2a8f31c8
+    image: docker.io/woodpeckerci/plugin-git:2.10.1@sha256:550075c844fcec0af41d9d28f9860aa5d8c43e1e9419be4b9266dc02c2f29804
     backend_options:
       kubernetes:
         resources:
