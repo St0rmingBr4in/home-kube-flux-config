@@ -81,9 +81,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 300Mi
+              memory: 512Mi
             limits:
-              memory: 300Mi
+              # idles near 300Mi: a 300Mi limit got it OOMKilled on every spike
+              memory: 1Gi
         - name: exportarr
           image: ghcr.io/onedr0p/exportarr:v2.3.0@sha256:af535d94061cf97a52e1661945ffba78c03f9443eae7c0da1a80a5a4be56b520
           args: [radarr]
