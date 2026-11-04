@@ -46,14 +46,21 @@
       ]
     },
     {
-      "description": "ats images are private on GHCR (Renovate has no token for them) and deployed as :latest by their own repo",
+      "description": "ats and claw images are private on GHCR (Renovate has no token for them) and deployed as :latest by their own repos",
       "matchPackageNames": [
-        "ats-frontend",
-        "ats-backend",
-        "ghcr.io/st0rmingbr4in/ats-frontend",
-        "ghcr.io/st0rmingbr4in/ats-backend"
+        "ats-*",
+        "claw-*",
+        "ghcr.io/st0rmingbr4in/ats-*",
+        "ghcr.io/st0rmingbr4in/claw-*"
       ],
       "enabled": false
+    },
+    {
+      "description": "The synology-csi tag lives in a '# renovate:' Helm value: the regex manager can bump the tag but cannot append a digest to it",
+      "matchPackageNames": [
+        "synology/synology-csi"
+      ],
+      "pinDigests": false
     },
     {
       "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",
@@ -139,7 +146,7 @@
         "/^argocd/applications/.+/applicationset\\.yaml$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>\\S+)"
       ]
     }
   ]
