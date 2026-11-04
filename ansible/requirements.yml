@@ -6,7 +6,7 @@ roles:
 
 collections:
   - name: community.general
-    version: 13.4.0
+    version: 13.5.0
   - name: ansible.posix
     version: 2.2.2
   - name: ansible.netcommon
