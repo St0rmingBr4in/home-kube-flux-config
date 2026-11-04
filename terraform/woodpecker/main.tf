@@ -8,7 +8,7 @@ terraform {
   required_providers {
     woodpecker = {
       source  = "Kichiyaki/woodpecker"
-      version = "~> 0.5"
+      version = "~> 0.6"
     }
   }
 }
