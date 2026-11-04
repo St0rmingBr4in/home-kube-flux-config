@@ -46,6 +46,16 @@
       ]
     },
     {
+      "description": "ats images are private on GHCR (Renovate has no token for them) and deployed as :latest by their own repo",
+      "matchPackageNames": [
+        "ats-frontend",
+        "ats-backend",
+        "ghcr.io/st0rmingbr4in/ats-frontend",
+        "ghcr.io/st0rmingbr4in/ats-backend"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Group Go toolchain updates: go.mod directive and golang container images must move together",
       "matchPackageNames": [
         "go",
@@ -129,7 +139,7 @@
         "/^argocd/applications/.+/applicationset\\.yaml$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>\\S+)"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+: (?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
       ]
     }
   ]
