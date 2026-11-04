@@ -1,0 +1,54 @@
+---
+# ExternalName, not an EndpointSlice: Argo CD excludes Endpoints/EndpointSlices by default.
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-service-prod-infra
+spec:
+  type: ExternalName
+  externalName: nasse.hard.st0rmingbr4in.com
+  ports:
+    - name: nas-photos
+      port: 80
+    - name: nas-ui
+      port: 5000
+    - name: minio
+      port: 9001
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: external-service-prod-infra
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: nas.st0rmingbr4in.com
+      http:
+        paths: &nas
+          - path: /photo
+            pathType: Prefix
+            backend:
+              service:
+                name: external-service-prod-infra
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: external-service-prod-infra
+                port:
+                  number: 5000
+    - host: nas-ui.st0rmingbr4in.com
+      http:
+        paths: *nas
+    - host: minio.st0rmingbr4in.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: external-service-prod-infra
+                port:
+                  number: 9001
