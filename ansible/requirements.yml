@@ -12,7 +12,7 @@ collections:
   - name: ansible.netcommon
     version: 8.7.1
   - name: vyos.vyos
-    version: 6.0.0
+    version: 6.1.0
   # RouterOS management for the crs310 role (CRS310-8G+2S+ "switch 2.5").
   - name: community.routeros
     version: 3.22.0
