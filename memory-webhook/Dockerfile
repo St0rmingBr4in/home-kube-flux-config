@@ -1,7 +1,7 @@
 # Packages a binary compiled by the host (local) or a go-build workflow step (CI).
 # Go compilation is intentionally kept out of this Dockerfile — see Makefile and
 # the ci-docker-build WorkflowTemplate for where the binary is produced.
-FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
+FROM alpine:3.24@sha256:3f4d6b32e26703c6082839234f43769d5046b3ac7c910033911d1e71d8cd630a
 
 RUN apk --no-cache add ca-certificates wget
 
