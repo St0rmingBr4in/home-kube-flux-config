@@ -87,7 +87,7 @@ steps:
 
   - name: tflint
     depends_on: []
-    image: ghcr.io/terraform-linters/tflint@sha256:2788f4d4fc663c0e953b011b01bf443fe5bfce7587ee916e588e6057b85d6359
+    image: ghcr.io/terraform-linters/tflint@sha256:65b9944a9274c4989492c1d79998c2801664bf8a55fddb4bd3a9e6d73a006ddc
     commands:
       - sh ci/step-timeout.sh 300
       # $$ defers expansion to the shell; Woodpecker substitutes $VAR at compile time.
