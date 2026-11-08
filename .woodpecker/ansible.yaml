@@ -33,7 +33,7 @@ clone:
 
 steps:
   - name: ansible-inlet
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:dd3526cbf1530363a03eeb8ef5ca104e6fbff407ccb42954e905def61b7ab91d
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:123b98de519d83f03a7d3240ed0363e706e1d549d914159a5cce8e0f82c4b8ef
     when:
       - path:
           - "ansible/ansible.cfg"
@@ -104,7 +104,7 @@ steps:
           ad.datadoghq.com/tags: '["git.commit.sha:${CI_COMMIT_SHA}","ci.pipeline.name:ci/ansible"]'
 
   - name: ansible-k3s
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:dd3526cbf1530363a03eeb8ef5ca104e6fbff407ccb42954e905def61b7ab91d
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:123b98de519d83f03a7d3240ed0363e706e1d549d914159a5cce8e0f82c4b8ef
     when:
       - path:
           - "ansible/ansible.cfg"
