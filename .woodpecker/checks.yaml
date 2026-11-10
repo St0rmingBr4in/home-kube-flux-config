@@ -24,7 +24,7 @@ clone:
 steps:
   - name: go-test
     depends_on: []
-    image: golang:1-alpine@sha256:fa3d596898d9f126af7c01d14ee7597bab3f39cccf392ef36b69fe77cd681f18
+    image: golang:1-alpine@sha256:eb61c3873c97416fff0116553fff65d67a3549f72e11d9758849a689cdd8b523
     environment:
       # Single source of truth for the Go version is memory-webhook/go.mod.
       # GOTOOLCHAIN=auto lets Go download whatever toolchain go.mod requires,
