@@ -107,7 +107,7 @@ steps:
 
   - name: terraform-validate
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:21630b65579de692e7396c1c17cb7628b1257dfb636c9079ad34ce848f13f92a
+    image: docker.io/st0rmingbr4in/ci-terraform:latest@sha256:884013888b8c7c5946f24f2073270c34589d5c42e7b7da38349bb90e8a07a2dd
     volumes:
       - woodpecker-ci-cache:/cache
     commands:
