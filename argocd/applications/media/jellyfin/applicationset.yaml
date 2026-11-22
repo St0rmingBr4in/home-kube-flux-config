@@ -10,7 +10,7 @@ spec:
         elements:
           - name: jellyfin
             chart: jellyfin
-            chartVersion: 3.4.0
+            chartVersion: 3.5.0
             namespace: prod-media
             manifestPath: argocd/applications/media/jellyfin
 
