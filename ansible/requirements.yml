@@ -15,7 +15,7 @@ collections:
     version: 6.1.0
   # RouterOS management for the crs310 role (CRS310-8G+2S+ "switch 2.5").
   - name: community.routeros
-    version: 3.22.0
+    version: 3.23.0
   # Tailscale install, apt repo and `tailscale up` for the inlet role (machine role).
   - name: artis3n.tailscale
     version: 1.2.1
