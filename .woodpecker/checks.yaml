@@ -72,7 +72,7 @@ steps:
 
   - name: yamllint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:72cff85309b0d0fc3f19817c377b4ce224f82bc61a56513f5f3e7488e5a1eef6
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:5b2c6522e56a11601d43198acafb2c9e7c04fd4d1bddc027ce8d36b3fd06a44f
     commands:
       - sh ci/step-timeout.sh 300
       - yamllint -c .yamllint.yml .
@@ -142,7 +142,7 @@ steps:
 
   - name: ansible-lint
     depends_on: []
-    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:72cff85309b0d0fc3f19817c377b4ce224f82bc61a56513f5f3e7488e5a1eef6
+    image: docker.io/st0rmingbr4in/ci-ansible:latest@sha256:5b2c6522e56a11601d43198acafb2c9e7c04fd4d1bddc027ce8d36b3fd06a44f
     environment:
       HOME: /root
       # Ansible rejects an empty vault password at startup; lint never decrypts, so no Vault needed.
