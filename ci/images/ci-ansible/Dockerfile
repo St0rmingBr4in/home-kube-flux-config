@@ -1,4 +1,4 @@
-FROM python:3.14-slim@sha256:22eafb370920ad8b429e0aec3fff433e0669968519f5d60469d83729c138b28b
+FROM python:3.14-slim@sha256:f57c4c23b985d95deea5bc5249e2f9c8a512b4cc9d5d3fd31900cbd2f5f0a604
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
       git openssh-client curl jq \
     && rm -rf /var/lib/apt/lists/*
